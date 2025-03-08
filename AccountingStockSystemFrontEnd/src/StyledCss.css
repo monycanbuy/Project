@@ -1,0 +1,67 @@
+/* Dashboard.css */
+
+.dashboard-container {
+  position: relative; /* Needed for absolute positioning of children */
+  min-height: 100vh; /* min-h-screen */
+  background: linear-gradient(
+    to bottom right,
+    rgba(17, 24, 39, 1),
+    rgba(3, 74, 23, 1),
+    rgba(2, 61, 42, 1)
+  ); /* bg-gradient-to-br from-gray-900 via-green-900 to-emerald-900 */
+  display: flex; /* flex */
+  align-items: center; /* items-center */
+  justify-content: center; /* justify-center */
+  overflow: hidden; /* overflow-hidden */
+  /*  Remove width and height if you want the container to size based on its children */
+  /* width: 100%;  */
+  /* height: 100vh; */
+}
+
+.floating-shape {
+  position: absolute;
+  border-radius: 50%;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+.shape-1 {
+  width: 16rem; /* w-64 */
+  height: 16rem; /* h-64 */
+  background-color: rgba(34, 197, 94, 1); /* bg-green-500 */
+  top: -5%;
+  left: 10%;
+  animation: floatAnimation 10s infinite;
+  animation-delay: 0s;
+}
+
+.shape-2 {
+  width: 12rem; /* w-48 */
+  height: 12rem; /* h-48 */
+  background-color: rgba(5, 150, 105, 1); /* bg-emerald-500 */
+  top: 70%;
+  left: 80%;
+  animation: floatAnimation 15s infinite;
+  animation-delay: 5s;
+}
+
+.shape-3 {
+  width: 8rem; /* w-32 */
+  height: 8rem; /* h-32 */
+  background-color: rgba(190, 242, 100, 1); /* bg-lime-500 */
+  top: 40%;
+  left: -10%;
+  animation: floatAnimation 12s infinite;
+  animation-delay: 2s;
+}
+@keyframes floatAnimation {
+  0% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(10px, 20px); /* Example movement - adjust as desired */
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}

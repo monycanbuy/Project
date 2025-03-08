@@ -1,0 +1,18 @@
+/* Products.css */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .printable-data-grid,
+  .printable-data-grid * {
+    visibility: visible;
+  }
+  .printable-data-grid {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-width: 1000px; /* Adjust the max-width as needed */
+  }
+}

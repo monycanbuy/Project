@@ -1,0 +1,110 @@
+/* main content top */
+.main-content-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+.sidebar-toggler {
+  display: flex;
+  align-items: center;
+  margin-right: 12px;
+}
+.sidebar-toggler img {
+  width: 20px;
+}
+.content-top-title {
+  color: var(--clr-white);
+  font-size: 20px;
+  font-weight: 600;
+}
+.content-top-btn {
+  margin-left: 18px;
+}
+.content-top-btn img {
+  width: 24px;
+}
+.content-top-btn img:hover {
+  filter: brightness(0) invert(1);
+}
+.content-top-left {
+  display: flex;
+  align-items: center;
+}
+
+/* Existing styles */
+
+.notification-container {
+  position: relative; /* Important for positioning the dropdown */
+  display: inline-block; /* Or block, depending on your layout */
+}
+
+.notification-btn-dot {
+  position: absolute;
+  top: -5px; /* Adjust as needed */
+  right: -5px; /* Adjust as needed */
+  background-color: #fe6c00;
+  color: #fcfcfc;
+  border-radius: 50%; /* Make it a circle */
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+.notification-btn.active {
+  /* Style for when the dropdown is open (optional) */
+  background-color: #1e1611; /* Example: light gray background */
+}
+
+.notification-dropdown {
+  position: absolute;
+  top: 100%; /* Position below the button */
+  right: 0; /* Align to the right edge of the button */
+  width: 400px; /* Adjust width as needed */
+  max-height: 300px; /* Limit height and add scroll if needed*/
+  overflow-y: auto;
+  background-color: rgb(184, 186, 188);
+  border: 1px solid #ccc;
+  color: #302924;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 10; /* Ensure it's above other content */
+  padding: 10px;
+}
+
+.notification-item {
+  padding: 6px; /* Reduced padding */
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  font-size: 0.85rem; /* Reduce font size */
+}
+
+.notification-item:last-child {
+  border-bottom: none; /* Remove border from the last item */
+}
+
+.notification-item.unread {
+  font-weight: bold; /* Make unread messages bold */
+  /*  background-color: #f8f8f8;  Optional: light background for unread */
+}
+
+.notification-message {
+  margin: 0; /* Remove default margin */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Add ellipsis for long messages */
+}
+
+.see-all-link {
+  display: block; /* Make the link take up the full width */
+  text-align: center;
+  padding: 8px;
+  margin-top: 5px;
+  color: #fe1e00; /* Or your preferred link color */
+  text-decoration: none;
+}
+.see-all-link:hover {
+  text-decoration: underline;
+}

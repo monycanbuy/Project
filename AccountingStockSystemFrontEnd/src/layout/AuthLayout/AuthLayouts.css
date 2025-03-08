@@ -1,0 +1,110 @@
+.auth-container {
+  position: relative;
+  min-height: 100vh; /* Or height: 100vh; if you want exactly viewport height */
+  background: linear-gradient(
+    to bottom right,
+    rgba(57, 53, 51),
+    rgba(66, 59, 55),
+    rgba(59, 43, 30)
+  ); /* Single Gradient */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.floating-shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.2;
+  filter: blur(80px);
+  /* Don't set animation properties here */
+}
+
+.shape-1 {
+  width: 256px;
+  height: 256px;
+  background-color: #fe6c00;
+  top: -5%;
+  left: 10%;
+  /* Move animation properties here: */
+  animation-name: floatAnimation1;
+  animation-duration: 20s;
+  animation-delay: 0s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+.shape-2 {
+  width: 192px;
+  height: 192px;
+  background-color: #fec80a;
+  top: 70%;
+  left: 80%;
+  /* Move animation properties here: */
+  animation-name: floatAnimation2;
+  animation-duration: 15s;
+  animation-delay: 5s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+.shape-3 {
+  width: 128px;
+  height: 128px;
+  background-color: #fff;
+  top: 40%;
+  left: -10%;
+  /* Move animation properties here: */
+  animation-name: floatAnimation3;
+  animation-duration: 18s;
+  animation-delay: 2s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+/* Keyframes for each shape's animation (more control) */
+@keyframes floatAnimation1 {
+  0% {
+    transform: translate(0%, 0%) rotate(0deg);
+  }
+  33% {
+    transform: translate(10%, -20%) rotate(120deg);
+  }
+  66% {
+    transform: translate(5%, -10%) rotate(240deg);
+  }
+  100% {
+    transform: translate(0%, 0%) rotate(360deg);
+  }
+}
+
+@keyframes floatAnimation2 {
+  0% {
+    transform: translate(0%, 0%) rotate(0deg);
+  }
+  33% {
+    transform: translate(-15%, 25%) rotate(-120deg);
+  }
+  66% {
+    transform: translate(-7.5%, 12.5%) rotate(-240deg);
+  }
+  100% {
+    transform: translate(0%, 0%) rotate(-360deg);
+  }
+}
+
+@keyframes floatAnimation3 {
+  0% {
+    transform: translate(0%, 0%) rotate(0deg);
+  }
+  33% {
+    transform: translate(-20%, 30%) rotate(120deg);
+  }
+  66% {
+    transform: translate(-10%, 15%) rotate(240deg);
+  }
+  100% {
+    transform: translate(0%, 0%) rotate(360deg);
+  }
+}

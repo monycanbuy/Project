@@ -1,0 +1,30 @@
+/* .input-group.otp-group input {
+  height: 45px;
+  width: 42px;
+  border-radius: 6px;
+  padding: 5px;
+  /* outline: none; */
+/* font-size: 1.125rem;
+  text-align: center;
+  border: 1px solid #ddd;
+  margin: 0.2rem;
+  color: #000000; /* Set text color to black for visibility */
+/* background-color: #ffffff; /* Explicitly set background to white */
+/* -moz-appearance: textfield;
+}  */
+
+/* .input-group.otp-group input::-webkit-outer-spin-button,
+.input-group.otp-group input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.success-message {
+  color: green;
+  margin-top: 10px;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+} */

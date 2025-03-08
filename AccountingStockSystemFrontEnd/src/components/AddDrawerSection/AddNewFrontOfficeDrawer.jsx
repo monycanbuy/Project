@@ -1,0 +1,256 @@
+import React, { useState, useEffect } from "react";
+import {
+  Button,
+  Drawer,
+  Box,
+  TextField,
+  IconButton,
+  CircularProgress,
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import CloseIcon from "@mui/icons-material/Close";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  createFrontOfficeSale,
+  fetchFrontOfficeSaleById,
+  updateFrontOfficeSale,
+  fetchFrontOfficeSales,
+} from "../../redux/slices/frontOfficeSlice";
+import { Toaster, toast } from "react-hot-toast";
+
+const StyledDrawer = styled(Drawer)(({ theme }) => ({
+  "& .MuiDrawer-paper": {
+    width: "30%",
+    height: "100vh",
+    top: "0px",
+    bottom: "50px",
+    boxSizing: "border-box",
+  },
+}));
+
+const AddNewFrontOfficeDrawer = ({
+  open,
+  onClose,
+  editMode = false,
+  initialData = {},
+}) => {
+  const dispatch = useDispatch();
+  const { isLoading } = useSelector((state) => state.frontOffice);
+
+  const [formData, setFormData] = useState({
+    date: "",
+    amount: "",
+    notes: "",
+  });
+
+  // Update formData when editMode or initialData changes
+  useEffect(() => {
+    console.log("Edit Mode:", editMode);
+    console.log("Initial Data:", initialData);
+    const formattedDate = initialData.date
+      ? new Date(initialData.date).toISOString().slice(0, 16)
+      : "";
+    if (editMode && initialData) {
+      setFormData({
+        date: formattedDate,
+        amount: initialData.amount || "",
+        notes: initialData.notes || "",
+      });
+      console.log("Updated Form Data:", formData);
+    } else {
+      // Reset form data for creating a new front office sale
+      console.log("Resetting Form Data");
+      setFormData({
+        date: formattedDate,
+        amount: initialData.amount || "",
+        notes: initialData.notes || "",
+      });
+    }
+  }, [editMode, initialData]);
+
+  const [errors, setErrors] = useState({});
+
+  const validateField = (name, value) => {
+    let error = {};
+    switch (name) {
+      case "date":
+        if (!value) error.date = "Date is required";
+        break;
+      case "amount":
+        if (!value) error.amount = "Amount is required";
+        else if (isNaN(Number(value))) error.amount = "Amount must be a number";
+        break;
+      default:
+        break;
+    }
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      ...error,
+    }));
+  };
+
+  const handleChange = (field) => (event) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: event.target.value,
+    }));
+  };
+
+  const handleBlur = (field) => (event) => {
+    const { value } = event.target;
+    validateField(field, value);
+  };
+
+  const resetForm = () => {
+    setFormData({
+      date: "",
+      amount: "",
+      notes: "",
+    });
+    setErrors({});
+  };
+
+  const handleSave = () => {
+    Object.keys(formData).forEach((field) =>
+      validateField(field, formData[field])
+    );
+
+    if (Object.values(errors).some((error) => error)) {
+      return;
+    }
+
+    if (editMode) {
+      const saleData = {
+        date: formData.date,
+        amount: formData.amount,
+        notes: formData.notes,
+      };
+
+      dispatch(updateFrontOfficeSale({ id: initialData._id, saleData }))
+        .then((response) => {
+          if (response.meta.requestStatus === "fulfilled") {
+            toast.success("Sale updated successfully!", { duration: 5000 });
+            resetForm();
+            onClose();
+            dispatch(fetchFrontOfficeSales());
+          } else {
+            toast.error("Failed to update sale: " + response.payload, {
+              duration: 5000,
+            });
+          }
+        })
+        .catch((error) => {
+          toast.error(
+            "Error updating sale: " +
+              (error.response?.data?.message || error.message)
+          );
+        });
+    } else {
+      dispatch(createFrontOfficeSale(formData))
+        .then(() => {
+          toast.success("Sale created successfully!", { duration: 5000 });
+          resetForm();
+          onClose();
+          dispatch(fetchFrontOfficeSales());
+        })
+        .catch((error) => {
+          toast.error(
+            "Error creating sale: " +
+              (error.response?.data?.message || error.message),
+            { duration: 7000 }
+          );
+        });
+    }
+  };
+
+  const handleCancel = () => {
+    resetForm();
+    onClose();
+  };
+
+  return (
+    <>
+      <StyledDrawer anchor="right" open={open} onClose={onClose}>
+        <Box sx={{ p: 2, width: "100%", height: "100%", overflow: "auto" }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 2,
+            }}
+          >
+            <h2>{editMode ? "Edit Sale" : "Add New Sale"}</h2>
+            <IconButton onClick={handleCancel}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+
+          <TextField
+            label="Date"
+            type="datetime-local"
+            fullWidth
+            margin="normal"
+            value={formData.date}
+            onChange={handleChange("date")}
+            onBlur={handleBlur("date")}
+            error={!!errors.date}
+            helperText={errors.date}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+          <TextField
+            label="Amount"
+            type="number"
+            fullWidth
+            margin="normal"
+            value={formData.amount}
+            onChange={handleChange("amount")}
+            onBlur={handleBlur("amount")}
+            error={!!errors.amount}
+            helperText={errors.amount}
+          />
+          <TextField
+            label="Notes"
+            fullWidth
+            multiline
+            rows={4}
+            margin="normal"
+            value={formData.notes}
+            onChange={handleChange("notes")}
+          />
+
+          <Box
+            sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 3 }}
+          >
+            <Button
+              variant="outlined"
+              onClick={handleCancel}
+              sx={{ width: "120px", borderRadius: "12px" }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleSave}
+              sx={{
+                width: "120px",
+                borderRadius: "12px",
+                backgroundColor: "green",
+                color: "white",
+                "&:hover": { backgroundColor: "darkgreen" },
+              }}
+              disabled={isLoading}
+            >
+              {isLoading ? <CircularProgress size={24} /> : "Save"}
+            </Button>
+          </Box>
+        </Box>
+      </StyledDrawer>
+      <Toaster />
+    </>
+  );
+};
+
+export default AddNewFrontOfficeDrawer;

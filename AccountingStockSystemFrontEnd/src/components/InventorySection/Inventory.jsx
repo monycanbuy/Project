@@ -1,0 +1,947 @@
+// import React, { useEffect, useState } from "react";
+// import MUIDataTable from "mui-datatables";
+// import { createTheme, ThemeProvider } from "@mui/material/styles";
+// import {
+//   Button,
+//   CircularProgress,
+//   Box,
+//   Dialog,
+//   DialogTitle,
+//   DialogContent,
+//   DialogContentText,
+//   DialogActions,
+//   IconButton,
+//   Tooltip,
+//   TableCell,
+//   Avatar,
+//   Tab,
+// } from "@mui/material";
+// import { format, isBefore, addDays } from "date-fns";
+// import "boxicons";
+// import { useDispatch, useSelector } from "react-redux";
+// import {
+//   fetchInventories,
+//   deleteInventory,
+// } from "../../redux/slices/inventoriesSlice";
+// import AddNewInventoryDrawer from "../AddDrawerSection/AddNewInventoryDrawer";
+// import { styled } from "@mui/material/styles";
+// import { TabContext, TabList, TabPanel } from "@mui/lab";
+// import InventoryDashboard from "./Reports/InventoryDashboard";
+
+// const Inventory = () => {
+//   const dispatch = useDispatch();
+//   const { inventories, isLoading, error } = useSelector(
+//     (state) => state.inventories
+//   );
+//   const { categories } = useSelector((state) => state.categories);
+//   const { suppliers } = useSelector((state) => state.suppliers);
+//   const { locations } = useSelector((state) => state.locations);
+//   const { users } = useSelector((state) => state.auth);
+
+//   const [data, setData] = useState();
+//   const [drawerOpen, setDrawerOpen] = useState(false);
+//   const [editData, setEditData] = useState(null);
+
+//   // State for managing the delete confirmation dialog
+//   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+//   const [inventoryToDelete, setInventoryToDelete] = useState(null);
+//   const [value, setValue] = useState("0");
+
+//   useEffect(() => {
+//     console.log("Fetching inventories...");
+//     dispatch(fetchInventories());
+//   }, [dispatch]);
+
+//   useEffect(() => {
+//     console.log("Inventories from state:", inventories);
+//     console.log("Categories from state:", categories); // Log categories for debugging
+
+//     //   if (inventories && Array.isArray(inventories) && inventories.length > 0) {
+//     //     const formattedData = inventories.map((inventory) => {
+//     //       // Find the category name from the categories array using the category ID
+//     //       const categoryName =
+//     //         categories.find((cat) => cat._id === inventory.category)?.name ||
+//     //         "N/A";
+//     //       const supplierName =
+//     //         suppliers.find((sup) => sup._id === inventory.supplier)
+//     //           ?.contactPerson || "N/A";
+//     //       const locationName =
+//     //         locations.find((loc) => loc._id === inventory.locationName)?.name ||
+//     //         "N/A";
+//     //       const stockKeeperName =
+//     //         users.find((user) => user._id === inventory.stockKeeper)?.fullName ||
+//     //         "N/A";
+
+//     //       return [
+//     //         inventory.name || "N/A",
+//     //         inventory.description || "N/A",
+//     //         inventory.price !== undefined
+//     //           ? `₦${parseFloat(inventory.price).toFixed(2)}`
+//     //           : "N/A",
+//     //         inventory.category.name, // Use the found category name here
+//     //         inventory.stockQuantity !== undefined
+//     //           ? inventory.stockQuantity
+//     //           : "N/A",
+//     //         inventory.supplier.contactPerson,
+//     //         inventory.expiryDate &&
+//     //         typeof inventory.expiryDate === "string" &&
+//     //         inventory.expiryDate.trim() !== ""
+//     //           ? format(new Date(inventory.expiryDate), "yyyy-MM-dd HH:mm:ss")
+//     //           : "N/A",
+//     //         inventory.imageUrl || "N/A",
+//     //         inventory.reorderLevel !== undefined ? inventory.reorderLevel : "N/A",
+//     //         inventory.reorderQuantity !== undefined
+//     //           ? inventory.reorderQuantity
+//     //           : "N/A",
+//     //         inventory.locationName.name,
+//     //         inventory.unit || "N/A",
+//     //         inventory.isPerishable ? "Yes" : "No",
+//     //         inventory.lastRestocked
+//     //           ? format(new Date(inventory.lastRestocked), "yyyy-MM-dd HH:mm:ss")
+//     //           : "N/A",
+//     //         format(new Date(inventory.createdAt), "yyyy-MM-dd HH:mm:ss") || "N/A",
+//     //         inventory.stockKeeper.fullName,
+//     //         inventory._id || "N/A",
+//     //       ];
+//     //     });
+//     //     console.log("Formatted Data:", formattedData);
+//     //     setData(formattedData);
+//     //   } else {
+//     //     console.log(
+//     //       "No inventories data available or data is not in expected format"
+//     //     );
+//     //   }
+//     // }, [inventories, categories]);
+
+//     if (inventories && Array.isArray(inventories) && inventories.length > 0) {
+//       const formattedData = inventories.map((inventory) => {
+//         // Find the category name from the categories array using the category ID
+//         const categoryName =
+//           categories.find((cat) => cat._id === inventory.category?._id)?.name ||
+//           "N/A";
+//         const supplierName =
+//           suppliers.find((sup) => sup._id === inventory.supplier?._id)
+//             ?.contactPerson || "N/A";
+//         const locationName =
+//           locations.find((loc) => loc._id === inventory.locationName?._id)
+//             ?.name || "N/A";
+//         const stockKeeperName = inventory.stockKeeper
+//           ? users.find((user) => user._id === inventory.stockKeeper?._id)
+//               ?.fullName || "N/A"
+//           : "N/A";
+
+//         return [
+//           inventory.name || "N/A",
+//           inventory.description || "N/A",
+//           inventory.price !== undefined
+//             ? `₦${parseFloat(inventory.price).toFixed(2)}`
+//             : "N/A",
+//           categoryName, // Use the found category name here
+//           inventory.stockQuantity !== undefined
+//             ? inventory.stockQuantity
+//             : "N/A",
+//           supplierName,
+//           inventory.expiryDate &&
+//           typeof inventory.expiryDate === "string" &&
+//           inventory.expiryDate.trim() !== ""
+//             ? format(new Date(inventory.expiryDate), "yyyy-MM-dd HH:mm:ss")
+//             : "N/A",
+//           inventory.imageUrl || "N/A",
+//           inventory.reorderLevel !== undefined ? inventory.reorderLevel : "N/A",
+//           inventory.reorderQuantity !== undefined
+//             ? inventory.reorderQuantity
+//             : "N/A",
+//           locationName,
+//           inventory.unit || "N/A",
+//           inventory.isPerishable ? "Yes" : "No",
+//           inventory.lastRestocked
+//             ? format(new Date(inventory.lastRestocked), "yyyy-MM-dd HH:mm:ss")
+//             : "N/A",
+//           format(new Date(inventory.createdAt), "yyyy-MM-dd HH:mm:ss") || "N/A",
+//           stockKeeperName,
+//           inventory._id || "N/A",
+//         ];
+//       });
+//       console.log("Formatted Data:", formattedData);
+//       setData(formattedData);
+//     } else {
+//       console.log(
+//         "No inventories data available or data is not in expected format"
+//       );
+//     }
+//   }, [inventories, categories, suppliers, locations, users]);
+
+//   const handleEditClick = (inventory) => {
+//     if (!inventory || inventory.length < 16) {
+//       console.error("Invalid inventory data:", inventory);
+//       return;
+//     }
+//     const categoryObject = categories.find((cat) => cat._id === inventory[3]);
+//     const supplierObject = suppliers.find(
+//       (sup) => sup.contactPerson === inventory[5]
+//     );
+//     const locationObject = locations.find((loc) => loc.name === inventory[10]);
+//     const category = categories.find((cat) => cat.name === inventory[3]);
+//     const inventoryData = {
+//       _id: inventory[16],
+//       name: inventory[0],
+//       description: inventory[1],
+//       price: inventory[2].replace(/[^0-9.-]+/g, ""),
+//       category: category
+//         ? { _id: category._id, name: category.name }
+//         : { _id: "", name: "" },
+//       stockQuantity: inventory[4],
+//       supplier: supplierObject ? supplierObject._id : "",
+//       expiryDate: inventory[6],
+//       imageUrl: inventory[7],
+//       reorderLevel: inventory[8],
+//       reorderQuantity: inventory[9],
+//       locationName: locationObject ? locationObject._id : "",
+//       unit: inventory[11],
+//       isPerishable: inventory[12] === "Yes",
+//       lastRestocked: inventory[13],
+//     };
+//     setEditData(inventoryData);
+//     setDrawerOpen(true);
+//   };
+
+//   const handleDeleteClick = (inventory) => {
+//     const inventoryId = inventory[inventory.length - 1]; // Extract the _id from the array
+//     setInventoryToDelete(inventoryId);
+//     setDeleteDialogOpen(true);
+//   };
+
+//   const confirmDelete = () => {
+//     if (inventoryToDelete) {
+//       dispatch(deleteInventory(inventoryToDelete))
+//         .then(() => {
+//           console.log("Inventory deleted successfully");
+//           dispatch(fetchInventories()); // Refresh the list
+//         })
+//         .catch((error) => {
+//           console.error("Error deleting inventory:", error);
+//         });
+//     }
+//     setDeleteDialogOpen(false);
+//     setInventoryToDelete(null);
+//   };
+
+//   const cancelDelete = () => {
+//     setDeleteDialogOpen(false);
+//     setInventoryToDelete(null);
+//   };
+
+//   const handleChange = (event, newValue) => {
+//     setValue(newValue);
+//   };
+
+//   const StyledTableCell = styled(TableCell)(({ theme, isDanger }) => ({
+//     color: isDanger ? "red" : "inherit", // Change text color to red if isDanger is true
+//     fontWeight: isDanger ? "bold" : "normal",
+//   }));
+
+//   const DangerButton = styled(Button)(({ theme }) => ({
+//     backgroundColor: "red",
+//     color: "white",
+//     "&:hover": {
+//       backgroundColor: "darkred",
+//     },
+//   }));
+
+//   const columns = [
+//     { name: "Name", options: { filter: true, sort: true } },
+//     { name: "Description", options: { filter: true, sort: true } },
+//     { name: "Price", options: { filter: true, sort: true } },
+//     { name: "Category", options: { filter: true, sort: true } },
+//     { name: "Stock Quantity", options: { filter: true, sort: true } },
+//     { name: "Supplier", options: { filter: true, sort: true } },
+//     { name: "Expiry Date", options: { filter: true, sort: true } },
+//     {
+//       name: "Image", // Changed column name
+//       options: {
+//         filter: false,
+//         sort: false,
+//         customBodyRender: (value, tableMeta) => {
+//           return (
+//             <Avatar src={value} alt="Inventory Image" variant="rounded" /> // Use Avatar
+//           );
+//         },
+//       },
+//     },
+//     //{ name: "Reorder Level", options: { filter: true, sort: true } },
+//     {
+//       name: "Reorder Level",
+//       options: {
+//         filter: true,
+//         sort: true,
+//         customBodyRender: (value, tableMeta) => {
+//           const inventory = tableMeta.rowData;
+//           const isDanger = inventory.stockQuantity <= inventory.reorderLevel; // Check if stock is below reorder level
+
+//           return <StyledTableCell isDanger={isDanger}>{value}</StyledTableCell>;
+//         },
+//       },
+//     },
+//     { name: "Reorder Quantity", options: { filter: true, sort: true } },
+//     { name: "Location Name", options: { filter: true, sort: true } },
+//     { name: "Unit", options: { filter: true, sort: true } },
+//     { name: "Perishable", options: { filter: true, sort: true } },
+//     { name: "Last Restocked", options: { filter: true, sort: true } },
+//     {
+//       name: "Created At",
+//       options: {
+//         filter: true,
+//         sort: true,
+//         customBodyRender: (value) => {
+//           const dateObj = new Date(value); // Create a Date object from the value
+//           return isNaN(dateObj.getTime()) // Check if the Date object is valid
+//             ? "N/A" // If not valid, display "N/A"
+//             : format(dateObj, "yyyy-MM-dd HH:mm:ss"); // If valid, format the date
+//         },
+//       },
+//     },
+//     { name: "Stock Keeper", options: { filter: true, sort: true } },
+//     {
+//       name: "Action",
+//       options: {
+//         filter: false,
+//         sort: false,
+//         customBodyRender: (value, tableMeta) => {
+//           const inventory = tableMeta.rowData;
+//           return (
+//             <>
+//               <i
+//                 className="bx bx-pencil"
+//                 style={{
+//                   color: "#fe6c00",
+//                   cursor: "pointer",
+//                   marginRight: "12px",
+//                 }}
+//                 onClick={() => handleEditClick(inventory)}
+//               ></i>
+//               <i
+//                 className="bx bx-trash"
+//                 style={{ color: "#fe1e00", cursor: "pointer" }}
+//                 onClick={() => handleDeleteClick(inventory)}
+//               ></i>
+//             </>
+//           );
+//         },
+//       },
+//     },
+//   ];
+
+//   const theme = createTheme({
+//     components: {
+//       MUIDataTable: {
+//         styleOverrides: {
+//           root: {
+//             "& .MuiPaper-root": { backgroundColor: "#f0f0f0" },
+//             "& .MuiTableRow-root": {
+//               backgroundColor: "#29221d",
+//               "&:hover": {
+//                 backgroundColor: "#1e1611",
+//                 "& .MuiTableCell-root": { color: "#bdbabb" },
+//               },
+//             },
+//             "& .MuiTableCell-root": { color: "#fff", fontSize: "18px" },
+//             "& .MuiTableRow-head": {
+//               backgroundColor: "#e0e0e0",
+//               "& .MuiTableCell-root": {
+//                 color: "#000",
+//                 fontSize: "18px",
+//                 fontWeight: "bold",
+//               },
+//             },
+//             "& .MuiToolbar-root": {
+//               backgroundColor: "#d0d0d0",
+//               "& .MuiTypography-root": { fontSize: "18px" },
+//               "& .MuiIconButton-root": { color: "#3f51b5" },
+//             },
+//           },
+//         },
+//       },
+//       MuiTab: {
+//         styleOverrides: {
+//           root: {
+//             color: "#fff", // Default color when not selected
+//             "&.Mui-selected": {
+//               color: "#fe6c00", // Color when selected
+//             },
+//             "&:hover": {
+//               color: "#fe6c00", // Color on hover
+//             },
+//           },
+//         },
+//       },
+//       MuiTabs: {
+//         styleOverrides: {
+//           indicator: {
+//             backgroundColor: "#fe6c00", // Color of the indicator when selected
+//           },
+//         },
+//       },
+//     },
+//   });
+
+//   const options = {
+//     filterType: "checkbox",
+//     rowsPerPage: 10,
+//     customToolbar: () => (
+//       <Button
+//         variant="contained"
+//         size="small"
+//         onClick={() => {
+//           setEditData(null);
+//           setDrawerOpen(true);
+//         }}
+//         sx={{
+//           backgroundColor: "#fe6c00",
+//           color: "#fff",
+//           "&:hover": {
+//             backgroundColor: "#fec80a",
+//             color: "#bdbabb",
+//           },
+//         }}
+//       >
+//         Add New Inventory
+//       </Button>
+//     ),
+//   };
+
+//   const loadingData = [
+//     [
+//       <Box
+//         key="loading"
+//         sx={{
+//           display: "flex",
+//           justifyContent: "center",
+//           alignItems: "center",
+//           height: "200px",
+//           width: "100%",
+//         }}
+//       >
+//         <CircularProgress color="inherit" sx={{ color: "#fe6c00" }} />
+//       </Box>,
+//     ],
+//   ];
+
+//   return (
+//     <ThemeProvider theme={theme}>
+//       <TabContext value={value}>
+//         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+//           <TabList onChange={handleChange} aria-label="hall tabs">
+//             <Tab label="Inventory Table" value="0" />
+//             <Tab label="Reports" value="1" />
+//           </TabList>
+//         </Box>
+//         <TabPanel value="0">
+//           {error ? (
+//             <div>Error: {error.message || "An error occurred."}</div>
+//           ) : (
+//             <>
+//               <MUIDataTable
+//                 title={"Inventories"}
+//                 data={isLoading ? loadingData : data}
+//                 columns={columns}
+//                 options={options}
+//               />
+//               <AddNewInventoryDrawer
+//                 open={drawerOpen}
+//                 onClose={() => {
+//                   setDrawerOpen(false);
+//                   setEditData(null);
+//                 }}
+//                 editMode={!!editData}
+//                 initialData={editData || {}}
+//               />
+//               <Dialog
+//                 open={deleteDialogOpen}
+//                 onClose={cancelDelete}
+//                 aria-labelledby="alert-dialog-title"
+//                 aria-describedby="alert-dialog-description"
+//               >
+//                 <DialogTitle id="alert-dialog-title">
+//                   {"Delete Confirmation"}
+//                 </DialogTitle>
+//                 <DialogContent>
+//                   <DialogContentText id="alert-dialog-description">
+//                     Are you sure you want to delete this inventory?
+//                   </DialogContentText>
+//                 </DialogContent>
+//                 <DialogActions>
+//                   <Button onClick={cancelDelete} color="primary">
+//                     Cancel
+//                   </Button>
+//                   <Button onClick={confirmDelete} color="secondary" autoFocus>
+//                     Delete
+//                   </Button>
+//                 </DialogActions>
+//               </Dialog>
+//             </>
+//           )}
+//         </TabPanel>
+//         <TabPanel value="1">
+//           <InventoryDashboard />
+//         </TabPanel>
+//       </TabContext>
+//       {/* <div>
+
+//       </div> */}
+//     </ThemeProvider>
+//   );
+// };
+
+// export default Inventory;
+
+import React, { useEffect, useState } from "react";
+import MUIDataTable from "mui-datatables";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import {
+  Button,
+  CircularProgress,
+  Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Avatar,
+  Tab,
+  TableCell,
+} from "@mui/material";
+import { format } from "date-fns";
+import "boxicons";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchInventories,
+  deleteInventory,
+} from "../../redux/slices/inventoriesSlice";
+import AddNewInventoryDrawer from "../AddDrawerSection/AddNewInventoryDrawer";
+import { styled } from "@mui/material/styles";
+import { TabContext, TabList, TabPanel } from "@mui/lab";
+import InventoryDashboard from "./Reports/InventoryDashboard";
+
+const Inventory = () => {
+  const dispatch = useDispatch();
+  const { inventories, isLoading, error } = useSelector(
+    (state) => state.inventories
+  );
+  const { categories } = useSelector((state) => state.categories);
+  const { suppliers } = useSelector((state) => state.suppliers);
+  const { locations } = useSelector((state) => state.locations);
+  const { users } = useSelector((state) => state.auth);
+
+  const [data, setData] = useState([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [editData, setEditData] = useState(null);
+
+  // State for managing the delete confirmation dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [inventoryToDelete, setInventoryToDelete] = useState(null);
+  const [value, setValue] = useState("0");
+
+  useEffect(() => {
+    console.log("Fetching inventories...");
+    dispatch(fetchInventories());
+  }, [dispatch]);
+
+  useEffect(() => {
+    console.log("Inventories from state:", inventories);
+    console.log("Categories from state:", categories); // Log categories for debugging
+
+    if (inventories && Array.isArray(inventories) && inventories.length > 0) {
+      const formattedData = inventories.map((inventory) => {
+        // Find the category name from the categories array using the category ID
+        const categoryName =
+          categories.find((cat) => cat._id === inventory.category?._id)?.name ||
+          "N/A";
+        const supplierName =
+          suppliers.find((sup) => sup._id === inventory.supplier?._id)
+            ?.contactPerson || "N/A";
+        const locationName =
+          locations.find((loc) => loc._id === inventory.locationName?._id)
+            ?.name || "N/A";
+        const stockKeeperName = inventory.stockKeeper
+          ? users.find((user) => user._id === inventory.stockKeeper?._id)
+              ?.fullName || "N/A"
+          : "N/A";
+
+        return [
+          inventory.name || "N/A",
+          inventory.description || "N/A",
+          inventory.costPrice !== undefined
+            ? `₦${parseFloat(inventory.costPrice).toFixed(2)}`
+            : "N/A",
+          inventory.sellingPrice !== undefined
+            ? `₦${parseFloat(inventory.sellingPrice).toFixed(2)}`
+            : "N/A",
+          categoryName, // Use the found category name here
+          inventory.stockQuantity !== undefined
+            ? inventory.stockQuantity
+            : "N/A",
+          supplierName,
+          inventory.batches.map((batch) => batch.batchNumber).join(", ") ||
+            "N/A",
+          inventory.batches.map((batch) => batch.quantity).join(", ") || "N/A",
+          inventory.batches
+            .map((batch) =>
+              batch.expiryDate
+                ? format(new Date(batch.expiryDate), "yyyy-MM-dd")
+                : "N/A"
+            )
+            .join(", "),
+          inventory.imageUrl || "N/A",
+          inventory.reorderLevel !== undefined ? inventory.reorderLevel : "N/A",
+          inventory.reorderQuantity !== undefined
+            ? inventory.reorderQuantity
+            : "N/A",
+          locationName,
+          inventory.unit || "N/A",
+          inventory.isPerishable ? "Yes" : "No",
+          inventory.lastRestocked
+            ? format(new Date(inventory.lastRestocked), "yyyy-MM-dd HH:mm:ss")
+            : "N/A",
+          format(new Date(inventory.createdAt), "yyyy-MM-dd HH:mm:ss") || "N/A",
+          stockKeeperName,
+          inventory.isActive ? "Active" : "Inactive",
+          inventory._id || "N/A",
+        ];
+      });
+      console.log("Formatted Data:", formattedData);
+      setData(formattedData);
+    } else {
+      console.log(
+        "No inventories data available or data is not in expected format"
+      );
+    }
+  }, [inventories, categories, suppliers, locations, users]);
+
+  const handleEditClick = (inventory) => {
+    if (!inventory || inventory.length < 21) {
+      console.error("Invalid inventory data:", inventory);
+      return;
+    }
+    const categoryObject = categories.find((cat) => cat._id === inventory[4]);
+    const supplierObject = suppliers.find(
+      (sup) => sup.contactPerson === inventory[6]
+    );
+    const locationObject = locations.find((loc) => loc.name === inventory[13]);
+    const category = categories.find((cat) => cat.name === inventory[4]);
+    const inventoryData = {
+      _id: inventory[20],
+      name: inventory[0],
+      description: inventory[1],
+      costPrice: inventory[2].replace(/[^0-9.-]+/g, ""),
+      sellingPrice: inventory[3].replace(/[^0-9.-]+/g, ""),
+      category: category
+        ? { _id: category._id, name: category.name }
+        : { _id: "", name: "" },
+      stockQuantity: inventory[5],
+      supplier: supplierObject ? supplierObject._id : "",
+      batches: inventory[7].split(", ").map((batchNumber, index) => ({
+        batchNumber,
+        quantity: parseInt(inventory[8].split(", ")[index], 10),
+        expiryDate: inventory[9].split(", ")[index],
+      })),
+      imageUrl: inventory[10],
+      reorderLevel: inventory[11],
+      reorderQuantity: inventory[12],
+      locationName: locationObject ? locationObject._id : "",
+      unit: inventory[14],
+      isPerishable: inventory[15] === "Yes",
+      lastRestocked: inventory[16],
+      isActive: inventory[19] === "Active",
+    };
+    setEditData(inventoryData);
+    setDrawerOpen(true);
+  };
+
+  const handleDeleteClick = (inventory) => {
+    const inventoryId = inventory[inventory.length - 1]; // Extract the _id from the array
+    setInventoryToDelete(inventoryId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (inventoryToDelete) {
+      dispatch(deleteInventory(inventoryToDelete))
+        .then(() => {
+          console.log("Inventory deleted successfully");
+          dispatch(fetchInventories()); // Refresh the list
+        })
+        .catch((error) => {
+          console.error("Error deleting inventory:", error);
+        });
+    }
+    setDeleteDialogOpen(false);
+    setInventoryToDelete(null);
+  };
+
+  const cancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setInventoryToDelete(null);
+  };
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
+  const StyledTableCell = styled(TableCell)(({ theme, isDanger }) => ({
+    color: isDanger ? "red" : "inherit", // Change text color to red if isDanger is true
+    fontWeight: isDanger ? "bold" : "normal",
+  }));
+
+  const DangerButton = styled(Button)(({ theme }) => ({
+    backgroundColor: "red",
+    color: "white",
+    "&:hover": {
+      backgroundColor: "darkred",
+    },
+  }));
+
+  const columns = [
+    { name: "Name", options: { filter: true, sort: true } },
+    { name: "Description", options: { filter: true, sort: true } },
+    { name: "Cost Price", options: { filter: true, sort: true } },
+    { name: "Selling Price", options: { filter: true, sort: true } },
+    { name: "Category", options: { filter: true, sort: true } },
+    { name: "Stock Quantity", options: { filter: true, sort: true } },
+    { name: "Supplier", options: { filter: true, sort: true } },
+    { name: "Batch Numbers", options: { filter: true, sort: true } },
+    { name: "Batch Quantities", options: { filter: true, sort: true } },
+    { name: "Batch Expiry Dates", options: { filter: true, sort: true } },
+    {
+      name: "Image", // Changed column name
+      options: {
+        filter: false,
+        sort: false,
+        customBodyRender: (value) => {
+          return (
+            <Avatar src={value} alt="Inventory Image" variant="rounded" /> // Use Avatar
+          );
+        },
+      },
+    },
+    {
+      name: "Reorder Level",
+      options: {
+        filter: true,
+        sort: true,
+        customBodyRender: (value, tableMeta) => {
+          const inventory = tableMeta.rowData;
+          const isDanger = inventory[5] <= inventory[11]; // Check if stock is below reorder level
+
+          return <StyledTableCell isDanger={isDanger}>{value}</StyledTableCell>;
+        },
+      },
+    },
+    { name: "Reorder Quantity", options: { filter: true, sort: true } },
+    { name: "Location Name", options: { filter: true, sort: true } },
+    { name: "Unit", options: { filter: true, sort: true } },
+    { name: "Perishable", options: { filter: true, sort: true } },
+    { name: "Last Restocked", options: { filter: true, sort: true } },
+    {
+      name: "Created At",
+      options: {
+        filter: true,
+        sort: true,
+        customBodyRender: (value) => {
+          const dateObj = new Date(value); // Create a Date object from the value
+          return isNaN(dateObj.getTime()) // Check if the Date object is valid
+            ? "N/A" // If not valid, display "N/A"
+            : format(dateObj, "yyyy-MM-dd HH:mm:ss"); // If valid, format the date
+        },
+      },
+    },
+    { name: "Stock Keeper", options: { filter: true, sort: true } },
+    { name: "Status", options: { filter: true, sort: true } },
+    {
+      name: "Action",
+      options: {
+        filter: false,
+        sort: false,
+        customBodyRender: (value, tableMeta) => {
+          const inventory = tableMeta.rowData;
+          return (
+            <>
+              <i
+                className="bx bx-pencil"
+                style={{
+                  color: "#fe6c00",
+                  cursor: "pointer",
+                  marginRight: "12px",
+                }}
+                onClick={() => handleEditClick(inventory)}
+              ></i>
+              <i
+                className="bx bx-trash"
+                style={{ color: "#fe1e00", cursor: "pointer" }}
+                onClick={() => handleDeleteClick(inventory)}
+              ></i>
+            </>
+          );
+        },
+      },
+    },
+  ];
+
+  const theme = createTheme({
+    components: {
+      MUIDataTable: {
+        styleOverrides: {
+          root: {
+            "& .MuiPaper-root": { backgroundColor: "#f0f0f0" },
+            "& .MuiTableRow-root": {
+              backgroundColor: "#29221d",
+              "&:hover": {
+                backgroundColor: "#1e1611",
+                "& .MuiTableCell-root": { color: "#bdbabb" },
+              },
+            },
+            "& .MuiTableCell-root": { color: "#fff", fontSize: "18px" },
+            "& .MuiTableRow-head": {
+              backgroundColor: "#e0e0e0",
+              "& .MuiTableCell-root": {
+                color: "#000",
+                fontSize: "18px",
+                fontWeight: "bold",
+              },
+            },
+            "& .MuiToolbar-root": {
+              backgroundColor: "#d0d0d0",
+              "& .MuiTypography-root": { fontSize: "18px" },
+              "& .MuiIconButton-root": { color: "#3f51b5" },
+            },
+          },
+        },
+      },
+      MuiTab: {
+        styleOverrides: {
+          root: {
+            color: "#fff", // Default color when not selected
+            "&.Mui-selected": {
+              color: "#fe6c00", // Color when selected
+            },
+            "&:hover": {
+              color: "#fe6c00", // Color on hover
+            },
+          },
+        },
+      },
+      MuiTabs: {
+        styleOverrides: {
+          indicator: {
+            backgroundColor: "#fe6c00", // Color of the indicator when selected
+          },
+        },
+      },
+    },
+  });
+
+  const options = {
+    filterType: "checkbox",
+    rowsPerPage: 10,
+    customToolbar: () => (
+      <Button
+        variant="contained"
+        size="small"
+        onClick={() => {
+          setEditData(null);
+          setDrawerOpen(true);
+        }}
+        sx={{
+          backgroundColor: "#fe6c00",
+          color: "#fff",
+          "&:hover": {
+            backgroundColor: "#fec80a",
+            color: "#bdbabb",
+          },
+        }}
+      >
+        Add New Inventory
+      </Button>
+    ),
+  };
+
+  const loadingData = [
+    [
+      <Box
+        key="loading"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "200px",
+          width: "100%",
+        }}
+      >
+        <CircularProgress color="inherit" sx={{ color: "#fe6c00" }} />
+      </Box>,
+    ],
+  ];
+
+  return (
+    <ThemeProvider theme={theme}>
+      <TabContext value={value}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <TabList onChange={handleChange} aria-label="hall tabs">
+            <Tab label="Inventory Table" value="0" />
+            <Tab label="Reports" value="1" />
+          </TabList>
+        </Box>
+        <TabPanel value="0">
+          {error ? (
+            <div>Error: {error.message || "An error occurred."}</div>
+          ) : (
+            <>
+              <MUIDataTable
+                title={"Inventories"}
+                data={isLoading ? loadingData : data}
+                columns={columns}
+                options={options}
+              />
+              <AddNewInventoryDrawer
+                open={drawerOpen}
+                onClose={() => {
+                  setDrawerOpen(false);
+                  setEditData(null);
+                }}
+                editMode={!!editData}
+                initialData={editData || {}}
+              />
+              <Dialog
+                open={deleteDialogOpen}
+                onClose={cancelDelete}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+              >
+                <DialogTitle id="alert-dialog-title">
+                  {"Delete Confirmation"}
+                </DialogTitle>
+                <DialogContent>
+                  <DialogContentText id="alert-dialog-description">
+                    Are you sure you want to delete this inventory?
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={cancelDelete} color="primary">
+                    Cancel
+                  </Button>
+                  <Button onClick={confirmDelete} color="secondary" autoFocus>
+                    Delete
+                  </Button>
+                </DialogActions>
+              </Dialog>
+            </>
+          )}
+        </TabPanel>
+        <TabPanel value="1">
+          <InventoryDashboard />
+        </TabPanel>
+      </TabContext>
+    </ThemeProvider>
+  );
+};
+
+export default Inventory;
