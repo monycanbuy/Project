@@ -86,7 +86,7 @@ cloudinary.config({
 const allowedOrigins =
   process.env.NODE_ENV === "production"
     ? [
-        "https://my-mern-app.vercel.app", // Replace with your Vercel URL
+        "https://accounting-stock-system-front-end.onrender.com", // Replace with your Vercel URL
         "https://accounting-stock-system-backend.onrender.com", // Replace with your Render URL
       ]
     : [
