@@ -276,8 +276,311 @@
 
 // export default OrderItems;
 
+// import React, { useEffect, useState } from "react";
+// import MUIDataTable from "mui-datatables";
+// import { createTheme, ThemeProvider } from "@mui/material/styles";
+// import { Toaster, toast } from "react-hot-toast";
+// import {
+//   Button,
+//   CircularProgress,
+//   Box,
+//   Dialog,
+//   DialogActions,
+//   DialogContent,
+//   DialogContentText,
+//   DialogTitle,
+// } from "@mui/material";
+// import "boxicons";
+// import { useDispatch, useSelector } from "react-redux";
+// import {
+//   fetchOrderItems,
+//   deleteOrderItem,
+// } from "../../redux/slices/orderItemSlice";
+// import { hasPermission } from "../../utils/authUtils";
+// import AddNewOrderItemDrawer from "../AddDrawerSection/AddNewOrderItemDrawer";
+
+// const OrderItems = () => {
+//   const dispatch = useDispatch();
+//   const { items, isLoading, error } = useSelector((state) => state.orderItems);
+//   const { user } = useSelector((state) => state.auth);
+//   const [data, setData] = useState([]);
+//   const [drawerOpen, setDrawerOpen] = useState(false);
+//   const [editData, setEditData] = useState(null);
+//   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+//   const [itemToDelete, setItemToDelete] = useState(null);
+
+//   useEffect(() => {
+//     dispatch(fetchOrderItems());
+//   }, [dispatch]);
+
+//   useEffect(() => {
+//     if (items && Array.isArray(items) && items.length > 0) {
+//       const formattedData = items.map((item) => [
+//         item.itemName || "N/A",
+//         item.unitPrice !== undefined ? `₦${item.unitPrice.toFixed(2)}` : "N/A",
+//         // Format the date *here*
+//         item.createdAt ? new Date(item.createdAt).toLocaleString() : "N/A",
+//         item._id || "N/A",
+//       ]);
+//       setData(formattedData);
+//     } else {
+//       setData([]); // Set to empty array if no data
+//     }
+//   }, [items]);
+
+//   const handleEditClick = (item) => {
+//     // Simplified data extraction, directly use the item from `items`
+//     if (!item) {
+//       console.error("Invalid item data:", item);
+//       return;
+//     }
+//     setEditData(item); // Pass the whole item object, much cleaner
+//     setDrawerOpen(true);
+//   };
+
+//   const handleDeleteClick = (itemId) => {
+//     setItemToDelete(itemId);
+//     setDeleteDialogOpen(true);
+//   };
+
+//   const handleConfirmDelete = () => {
+//     if (itemToDelete) {
+//       dispatch(deleteOrderItem(itemToDelete))
+//         .then(() => {
+//           dispatch(fetchOrderItems());
+//           toast.success("Order item deleted successfully!", { duration: 5000 });
+//         })
+//         .catch((error) => {
+//           toast.error(
+//             "Error deleting order item: " +
+//               (error.response?.data?.message || error.message)
+//           );
+//         });
+//     }
+//     setDeleteDialogOpen(false);
+//     setItemToDelete(null);
+//   };
+
+//   const handleCloseDialog = () => {
+//     setDeleteDialogOpen(false);
+//     setItemToDelete(null);
+//   };
+
+//   const columns = [
+//     { name: "Item Name", options: { filter: true, sort: true } },
+//     { name: "Unit Price", options: { filter: true, sort: true } },
+//     {
+//       name: "Created At",
+//       options: {
+//         filter: true,
+//         sort: true,
+//         // No customBodyRender needed here - date is already formatted
+//       },
+//     },
+//     {
+//       name: "Action",
+//       options: {
+//         filter: false,
+//         sort: false,
+//         customBodyRender: (value, tableMeta) => {
+//           // Use items directly, more reliable
+//           const item = items[tableMeta.rowIndex];
+//           if (!item) return null; // Handle potential undefined item
+
+//           return (
+//             <>
+//               {hasPermission(user, "update:orderitems") && (
+//                 <i
+//                   className="bx bx-pencil"
+//                   style={{
+//                     color: "#fe6c00",
+//                     cursor: "pointer",
+//                     marginRight: "12px",
+//                   }}
+//                   onClick={() => handleEditClick(item)} // Pass the whole item
+//                 ></i>
+//               )}
+
+//               {hasPermission(user, "delete:orderitems") && (
+//                 <i
+//                   className="bx bx-trash"
+//                   style={{ color: "#fe1e00", cursor: "pointer" }}
+//                   onClick={() => handleDeleteClick(item._id)} // Use item._id
+//                 ></i>
+//               )}
+//             </>
+//           );
+//         },
+//       },
+//     },
+//   ];
+
+//   const theme = createTheme({
+//     components: {
+//       MUIDataTable: {
+//         styleOverrides: {
+//           root: {
+//             "& .MuiPaper-root": {
+//               backgroundColor: "#f0f0f0",
+//             },
+//             "& .MuiTableRow-root": {
+//               backgroundColor: "#29221d",
+//               "&:hover": {
+//                 backgroundColor: "#1e1611",
+//                 "& .MuiTableCell-root": {
+//                   color: "#bdbabb",
+//                 },
+//               },
+//             },
+//             "& .MuiTableCell-root": {
+//               color: "#fff",
+//               fontSize: "18px",
+//             },
+//             "& .MuiTableRow-head": {
+//               backgroundColor: "#e0e0e0",
+//               "& .MuiTableCell-root": {
+//                 color: "#000",
+//                 fontSize: "18px",
+//                 fontWeight: "bold",
+//               },
+//             },
+//             "& .MuiToolbar-root": {
+//               backgroundColor: "#d0d0d0",
+//               "& .MuiTypography-root": {
+//                 fontSize: "18px",
+//               },
+//               "& .MuiIconButton-root": {
+//                 color: "#3f51b5",
+//               },
+//             },
+//           },
+//         },
+//       },
+//     },
+//   });
+
+//   const options = {
+//     filterType: "checkbox",
+//     rowsPerPage: 10,
+//     customToolbar: () =>
+//       hasPermission(user, "write:orderitems") ? (
+//         <Button
+//           variant="contained"
+//           size="small"
+//           onClick={() => {
+//             setEditData(null);
+//             setDrawerOpen(true);
+//           }}
+//           sx={{
+//             backgroundColor: "#fe6c00",
+//             color: "#fff",
+//             "&:hover": {
+//               backgroundColor: "#fec80a",
+//               color: "#bdbabb",
+//             },
+//           }}
+//         >
+//           Add New Item
+//         </Button>
+//       ) : null,
+//   };
+//   //   customToolbar: () => (
+//   //     <Button
+//   //       variant="contained"
+//   //       size="small"
+//   //       onClick={() => {
+//   //         setEditData(null);
+//   //         setDrawerOpen(true);
+//   //       }}
+//   //       sx={{
+//   //         backgroundColor: "#fe6c00",
+//   //         color: "#fff",
+//   //         "&:hover": {
+//   //           backgroundColor: "#fec80a",
+//   //           color: "#bdbabb",
+//   //         },
+//   //       }}
+//   //     >
+//   //       Add New Item
+//   //     </Button>
+//   //   ),
+//   // };
+
+//   const loadingData = [
+//     [
+//       <Box
+//         key="loading"
+//         sx={{
+//           display: "flex",
+//           justifyContent: "center",
+//           alignItems: "center",
+//           height: "200px",
+//           width: "100%",
+//         }}
+//       >
+//         <CircularProgress color="inherit" sx={{ color: "#fe6c00" }} />
+//       </Box>,
+//     ],
+//   ];
+
+//   return (
+//     <ThemeProvider theme={theme}>
+//       <div>
+//         {error ? (
+//           <div>Error: {error.message || "An error occurred."}</div>
+//         ) : (
+//           <>
+//             <MUIDataTable
+//               title={"Order Items"}
+//               data={isLoading ? loadingData : data}
+//               columns={columns}
+//               options={options}
+//             />
+//             <AddNewOrderItemDrawer
+//               open={drawerOpen}
+//               onClose={() => {
+//                 setDrawerOpen(false);
+//                 setEditData(null);
+//               }}
+//               editMode={!!editData}
+//               initialData={editData || {}}
+//               onSaveSuccess={() => dispatch(fetchOrderItems())}
+//             />
+//             <Dialog
+//               open={deleteDialogOpen}
+//               onClose={handleCloseDialog}
+//               aria-labelledby="alert-dialog-title"
+//               aria-describedby="alert-dialog-description"
+//             >
+//               <DialogTitle id="alert-dialog-title">
+//                 {"Confirm Delete"}
+//               </DialogTitle>
+//               <DialogContent>
+//                 <DialogContentText id="alert-dialog-description">
+//                   Are you sure you want to delete this order item?
+//                 </DialogContentText>
+//               </DialogContent>
+//               <DialogActions>
+//                 <Button onClick={handleCloseDialog} color="primary">
+//                   Cancel
+//                 </Button>
+//                 <Button onClick={handleConfirmDelete} color="primary" autoFocus>
+//                   Delete
+//                 </Button>
+//               </DialogActions>
+//             </Dialog>
+//           </>
+//         )}
+//       </div>
+//       <Toaster />
+//     </ThemeProvider>
+//   );
+// };
+
+// export default OrderItems;
+
 import React, { useEffect, useState } from "react";
-import MUIDataTable from "mui-datatables";
+import { DataGrid } from "@mui/x-data-grid";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Toaster, toast } from "react-hot-toast";
 import {
@@ -303,7 +606,6 @@ const OrderItems = () => {
   const dispatch = useDispatch();
   const { items, isLoading, error } = useSelector((state) => state.orderItems);
   const { user } = useSelector((state) => state.auth);
-  const [data, setData] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editData, setEditData] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -313,28 +615,26 @@ const OrderItems = () => {
     dispatch(fetchOrderItems());
   }, [dispatch]);
 
-  useEffect(() => {
-    if (items && Array.isArray(items) && items.length > 0) {
-      const formattedData = items.map((item) => [
-        item.itemName || "N/A",
-        item.unitPrice !== undefined ? `₦${item.unitPrice.toFixed(2)}` : "N/A",
-        // Format the date *here*
-        item.createdAt ? new Date(item.createdAt).toLocaleString() : "N/A",
-        item._id || "N/A",
-      ]);
-      setData(formattedData);
-    } else {
-      setData([]); // Set to empty array if no data
-    }
-  }, [items]);
+  const rows = items
+    ? items.map((item) => ({
+        id: item._id, // Required by DataGrid
+        itemName: item.itemName || "N/A",
+        unitPrice:
+          item.unitPrice !== undefined
+            ? `₦${item.unitPrice.toFixed(2)}`
+            : "N/A",
+        createdAt: item.createdAt
+          ? new Date(item.createdAt).toLocaleString()
+          : "N/A",
+      }))
+    : [];
 
   const handleEditClick = (item) => {
-    // Simplified data extraction, directly use the item from `items`
     if (!item) {
       console.error("Invalid item data:", item);
       return;
     }
-    setEditData(item); // Pass the whole item object, much cleaner
+    setEditData(item);
     setDrawerOpen(true);
   };
 
@@ -367,91 +667,87 @@ const OrderItems = () => {
   };
 
   const columns = [
-    { name: "Item Name", options: { filter: true, sort: true } },
-    { name: "Unit Price", options: { filter: true, sort: true } },
     {
-      name: "Created At",
-      options: {
-        filter: true,
-        sort: true,
-        // No customBodyRender needed here - date is already formatted
-      },
+      field: "itemName",
+      headerName: "Item Name",
+      width: 200,
+      filterable: true,
+      sortable: true,
     },
     {
-      name: "Action",
-      options: {
-        filter: false,
-        sort: false,
-        customBodyRender: (value, tableMeta) => {
-          // Use items directly, more reliable
-          const item = items[tableMeta.rowIndex];
-          if (!item) return null; // Handle potential undefined item
-
-          return (
-            <>
-              {hasPermission(user, "update:orderitems") && (
-                <i
-                  className="bx bx-pencil"
-                  style={{
-                    color: "#fe6c00",
-                    cursor: "pointer",
-                    marginRight: "12px",
-                  }}
-                  onClick={() => handleEditClick(item)} // Pass the whole item
-                ></i>
-              )}
-
-              {hasPermission(user, "delete:orderitems") && (
-                <i
-                  className="bx bx-trash"
-                  style={{ color: "#fe1e00", cursor: "pointer" }}
-                  onClick={() => handleDeleteClick(item._id)} // Use item._id
-                ></i>
-              )}
-            </>
-          );
-        },
+      field: "unitPrice",
+      headerName: "Unit Price",
+      width: 150,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "createdAt",
+      headerName: "Created At",
+      width: 180,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "action",
+      headerName: "Action",
+      width: 150,
+      filterable: false,
+      sortable: false,
+      renderCell: (params) => {
+        const item = items.find((i) => i._id === params.row.id);
+        if (!item) return null;
+        return (
+          <>
+            {hasPermission(user, "update:orderitems") && (
+              <i
+                className="bx bx-pencil"
+                style={{
+                  color: "#fe6c00",
+                  cursor: "pointer",
+                  marginRight: "12px",
+                }}
+                onClick={() => handleEditClick(item)}
+              />
+            )}
+            {hasPermission(user, "delete:orderitems") && (
+              <i
+                className="bx bx-trash"
+                style={{ color: "#fe1e00", cursor: "pointer" }}
+                onClick={() => handleDeleteClick(item._id)}
+              />
+            )}
+          </>
+        );
       },
     },
   ];
 
   const theme = createTheme({
     components: {
-      MUIDataTable: {
+      MuiDataGrid: {
         styleOverrides: {
           root: {
-            "& .MuiPaper-root": {
-              backgroundColor: "#f0f0f0",
-            },
-            "& .MuiTableRow-root": {
+            backgroundColor: "#f0f0f0",
+            "& .MuiDataGrid-row": {
               backgroundColor: "#29221d",
               "&:hover": {
                 backgroundColor: "#1e1611",
-                "& .MuiTableCell-root": {
-                  color: "#bdbabb",
-                },
+                "& .MuiDataGrid-cell": { color: "#bdbabb" },
               },
             },
-            "& .MuiTableCell-root": {
-              color: "#fff",
-              fontSize: "18px",
-            },
-            "& .MuiTableRow-head": {
+            "& .MuiDataGrid-cell": { color: "#fff", fontSize: "18px" },
+            "& .MuiDataGrid-columnHeaders": {
               backgroundColor: "#e0e0e0",
-              "& .MuiTableCell-root": {
+              "& .MuiDataGrid-columnHeaderTitle": {
                 color: "#000",
                 fontSize: "18px",
                 fontWeight: "bold",
               },
             },
-            "& .MuiToolbar-root": {
+            "& .MuiDataGrid-toolbarContainer": {
               backgroundColor: "#d0d0d0",
-              "& .MuiTypography-root": {
-                fontSize: "18px",
-              },
-              "& .MuiIconButton-root": {
-                color: "#3f51b5",
-              },
+              "& .MuiButton-root": { color: "#3f51b5" },
             },
           },
         },
@@ -459,83 +755,64 @@ const OrderItems = () => {
     },
   });
 
-  const options = {
-    filterType: "checkbox",
-    rowsPerPage: 10,
-    customToolbar: () =>
-      hasPermission(user, "write:orderitems") ? (
-        <Button
-          variant="contained"
-          size="small"
-          onClick={() => {
-            setEditData(null);
-            setDrawerOpen(true);
-          }}
-          sx={{
-            backgroundColor: "#fe6c00",
-            color: "#fff",
-            "&:hover": {
-              backgroundColor: "#fec80a",
-              color: "#bdbabb",
-            },
-          }}
-        >
-          Add New Item
-        </Button>
-      ) : null,
-  };
-  //   customToolbar: () => (
-  //     <Button
-  //       variant="contained"
-  //       size="small"
-  //       onClick={() => {
-  //         setEditData(null);
-  //         setDrawerOpen(true);
-  //       }}
-  //       sx={{
-  //         backgroundColor: "#fe6c00",
-  //         color: "#fff",
-  //         "&:hover": {
-  //           backgroundColor: "#fec80a",
-  //           color: "#bdbabb",
-  //         },
-  //       }}
-  //     >
-  //       Add New Item
-  //     </Button>
-  //   ),
-  // };
-
-  const loadingData = [
-    [
-      <Box
-        key="loading"
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "200px",
-          width: "100%",
-        }}
-      >
-        <CircularProgress color="inherit" sx={{ color: "#fe6c00" }} />
-      </Box>,
-    ],
-  ];
-
   return (
     <ThemeProvider theme={theme}>
-      <div>
+      <Box sx={{ position: "relative" }}>
         {error ? (
-          <div>Error: {error.message || "An error occurred."}</div>
+          <div style={{ color: "red", textAlign: "center", padding: "20px" }}>
+            Error: {error.message || "An error occurred."}
+          </div>
         ) : (
           <>
-            <MUIDataTable
-              title={"Order Items"}
-              data={isLoading ? loadingData : data}
-              columns={columns}
-              options={options}
-            />
+            {isLoading && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  zIndex: 1000,
+                }}
+              >
+                <CircularProgress sx={{ color: "#fe6c00" }} />
+              </Box>
+            )}
+            <Box sx={{ height: 600, width: "100%" }}>
+              <DataGrid
+                rows={rows}
+                columns={columns}
+                pageSizeOptions={[10, 20, 50]}
+                initialState={{
+                  pagination: { paginationModel: { pageSize: 10 } },
+                }}
+                checkboxSelection={false}
+                disableRowSelectionOnClick
+                slots={{
+                  toolbar: () =>
+                    hasPermission(user, "write:orderitems") ? (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => {
+                          setEditData(null);
+                          setDrawerOpen(true);
+                        }}
+                        sx={{
+                          backgroundColor: "#fe6c00",
+                          color: "#fff",
+                          "&:hover": {
+                            backgroundColor: "#fec80a",
+                            color: "#bdbabb",
+                          },
+                          m: 1,
+                        }}
+                      >
+                        Add New Item
+                      </Button>
+                    ) : null,
+                }}
+              />
+            </Box>
             <AddNewOrderItemDrawer
               open={drawerOpen}
               onClose={() => {
@@ -571,8 +848,8 @@ const OrderItems = () => {
             </Dialog>
           </>
         )}
-      </div>
-      <Toaster />
+        <Toaster />
+      </Box>
     </ThemeProvider>
   );
 };

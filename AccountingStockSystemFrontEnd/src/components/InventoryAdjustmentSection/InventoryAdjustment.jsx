@@ -284,9 +284,388 @@
 
 // export default InventoryAdjustment;
 
+// import React, { useEffect, useState } from "react";
+// import { useMemo } from "react";
+// import MUIDataTable from "mui-datatables";
+// import { createTheme, ThemeProvider } from "@mui/material/styles";
+// import {
+//   Button,
+//   CircularProgress,
+//   Box,
+//   Dialog,
+//   DialogTitle,
+//   DialogContent,
+//   DialogContentText,
+//   DialogActions,
+//   Tab,
+// } from "@mui/material";
+// import { format } from "date-fns";
+// import "boxicons";
+// import { useDispatch, useSelector } from "react-redux";
+// import {
+//   fetchInventoryAdjustments,
+//   deleteInventoryAdjustment,
+// } from "../../redux/slices/inventoryAdjustmentSlice";
+// import { hasPermission } from "../../utils/authUtils";
+// import AddNewInventoryAdjustmentDrawer from "../AddDrawerSection/AddNewInventoryAdjustmentDrawer";
+// import { TabContext, TabList, TabPanel } from "@mui/lab";
+// import InventoryAdjustmentReports from "./Reports/InventoryAdjustmentReports";
+
+// const InventoryAdjustment = () => {
+//   const dispatch = useDispatch();
+//   const { inventoryAdjustments, isLoading, error } = useSelector(
+//     (state) => state.inventoryAdjustments
+//   );
+//   const { inventories } = useSelector((state) => state.inventories);
+//   const { locations } = useSelector((state) => state.locations);
+//   const { users, user } = useSelector((state) => state.auth); // Assuming users for staff/approvedBy
+
+//   const [data, setData] = useState([]);
+//   const [drawerOpen, setDrawerOpen] = useState(false);
+//   const [editData, setEditData] = useState(null);
+//   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+//   const [adjustmentToDelete, setAdjustmentToDelete] = useState(null);
+//   const [value, setValue] = useState("0");
+
+//   useEffect(() => {
+//     console.log("Fetching inventory adjustments...");
+//     dispatch(fetchInventoryAdjustments());
+//   }, [dispatch]);
+
+//   useEffect(() => {
+//     console.log("Inventory Adjustments from state:", inventoryAdjustments);
+//     if (
+//       inventoryAdjustments &&
+//       Array.isArray(inventoryAdjustments) &&
+//       inventoryAdjustments.length > 0
+//     ) {
+//       const formattedData = inventoryAdjustments.map((adjustment) => {
+//         const productName = adjustment.product?.name || "N/A";
+//         const staffName = adjustment.staff?.fullName || "N/A";
+//         const approvedByName = adjustment.approvedBy?.fullName || "N/A";
+//         const locationName = adjustment.adjustmentLocation?.name || "N/A";
+
+//         return [
+//           productName,
+//           adjustment.type,
+//           adjustment.adjustmentReason,
+//           adjustment.changeInQuantity,
+//           adjustment.previousQuantity,
+//           adjustment.newQuantity,
+//           adjustment.adjustmentCost !== undefined
+//             ? `₦${adjustment.adjustmentCost.toFixed(2)}`
+//             : "N/A",
+//           adjustment.reason || "N/A",
+//           staffName,
+//           adjustment.status,
+//           approvedByName,
+//           adjustment.referenceId || "N/A",
+//           adjustment.referenceType || "N/A",
+//           adjustment.batchNumber || "N/A",
+//           locationName,
+//           adjustment.transactionDate
+//             ? format(
+//                 new Date(adjustment.transactionDate),
+//                 "yyyy-MM-dd HH:mm:ss"
+//               )
+//             : "N/A",
+//           adjustment._id || "N/A",
+//         ];
+//       });
+//       console.log("Formatted Data:", formattedData);
+//       setData(formattedData);
+//     } else {
+//       console.log(
+//         "No inventory adjustments data available or data is not in expected format"
+//       );
+//     }
+//   }, [inventoryAdjustments]);
+
+//   const handleEditClick = (adjustmentId) => {
+//     const adjustment = inventoryAdjustments.find(
+//       (adj) => adj._id === adjustmentId
+//     );
+//     if (!adjustment) {
+//       console.error("Adjustment not found:", adjustmentId);
+//       return;
+//     }
+
+//     const adjustmentData = {
+//       _id: adjustment._id,
+//       product: adjustment.product?._id || "",
+//       type: adjustment.type || "",
+//       adjustmentReason: adjustment.adjustmentReason || "",
+//       changeInQuantity:
+//         adjustment.changeInQuantity !== undefined
+//           ? String(adjustment.changeInQuantity)
+//           : "",
+//       previousQuantity:
+//         adjustment.previousQuantity !== undefined
+//           ? String(adjustment.previousQuantity)
+//           : "",
+//       newQuantity:
+//         adjustment.newQuantity !== undefined
+//           ? String(adjustment.newQuantity)
+//           : "",
+//       adjustmentCost:
+//         adjustment.adjustmentCost !== undefined
+//           ? String(adjustment.adjustmentCost)
+//           : "",
+//       reason: adjustment.reason || "",
+//       staff: adjustment.staff?._id || "",
+//       status: adjustment.status || "Pending",
+//       approvedBy: adjustment.approvedBy?._id || null,
+//       referenceId: adjustment.referenceId || null,
+//       referenceType: adjustment.referenceType || null,
+//       batchNumber: adjustment.batchNumber || "",
+//       adjustmentLocation: adjustment.adjustmentLocation?._id || null,
+//       transactionDate: adjustment.transactionDate
+//         ? format(new Date(adjustment.transactionDate), "yyyy-MM-dd")
+//         : null,
+//     };
+
+//     console.log("Edit data:", adjustmentData);
+//     setEditData(adjustmentData);
+//     setDrawerOpen(true);
+//   };
+
+//   const handleDeleteClick = (adjustmentId) => {
+//     setAdjustmentToDelete(adjustmentId);
+//     setDeleteDialogOpen(true);
+//   };
+
+//   const confirmDelete = () => {
+//     if (adjustmentToDelete) {
+//       dispatch(deleteInventoryAdjustment(adjustmentToDelete))
+//         .then(() => {
+//           console.log("Adjustment deleted successfully");
+//           dispatch(fetchInventoryAdjustments());
+//         })
+//         .catch((error) => {
+//           console.error("Error deleting adjustment:", error);
+//         });
+//     }
+//     setDeleteDialogOpen(false);
+//     setAdjustmentToDelete(null);
+//   };
+
+//   const cancelDelete = () => {
+//     setDeleteDialogOpen(false);
+//     setAdjustmentToDelete(null);
+//   };
+
+//   const handleChange = (event, newValue) => {
+//     setValue(newValue);
+//   };
+
+//   const columns = [
+//     { name: "Product Name", options: { filter: true, sort: true } },
+//     { name: "Adjustment Type", options: { filter: true, sort: true } },
+//     { name: "Adjustment Reason", options: { filter: true, sort: true } },
+//     { name: "Change In Quantity", options: { filter: true, sort: true } },
+//     { name: "Previous Quantity", options: { filter: true, sort: true } },
+//     { name: "New Quantity", options: { filter: true, sort: true } },
+//     { name: "Adjustment Cost", options: { filter: true, sort: true } },
+//     { name: "Reason", options: { filter: true, sort: true } },
+//     { name: "Staff", options: { filter: true, sort: true } },
+//     { name: "Status", options: { filter: true, sort: true } },
+//     { name: "Approved By", options: { filter: true, sort: true } },
+//     { name: "Reference ID", options: { filter: true, sort: true } },
+//     { name: "Reference Type", options: { filter: true, sort: true } },
+//     { name: "Batch Number", options: { filter: true, sort: true } },
+//     { name: "Adjustment Location", options: { filter: true, sort: true } },
+//     { name: "Date", options: { filter: true, sort: true } },
+//     {
+//       name: "Action",
+//       options: {
+//         filter: false,
+//         sort: false,
+//         customBodyRender: (value, tableMeta) => {
+//           const adjustmentId = tableMeta.rowData[16]; // _id at index 16
+//           return (
+//             <span>
+//               {hasPermission(user, "update:inventoryAdjustment") && (
+//                 <i
+//                   className="bx bx-pencil"
+//                   style={{
+//                     color: "#fe6c00",
+//                     cursor: "pointer",
+//                     marginRight: "12px",
+//                   }}
+//                   onClick={() => handleEditClick(adjustmentId)}
+//                 ></i>
+//               )}
+
+//               {hasPermission(user, "delete:inventoryAdjustment") && (
+//                 <i
+//                   className="bx bx-trash"
+//                   style={{ color: "#fe1e00", cursor: "pointer" }}
+//                   onClick={() => handleDeleteClick(adjustmentId)}
+//                 ></i>
+//               )}
+//             </span>
+//           );
+//         },
+//       },
+//     },
+//   ];
+
+//   const theme = createTheme({
+//     components: {
+//       MUIDataTable: {
+//         styleOverrides: {
+//           root: {
+//             "& .MuiPaper-root": { backgroundColor: "#f0f0f0" },
+//             "& .MuiTableRow-root": {
+//               backgroundColor: "#29221d",
+//               "&:hover": {
+//                 backgroundColor: "#1e1611",
+//                 "& .MuiTableCell-root": { color: "#bdbabb" },
+//               },
+//             },
+//             "& .MuiTableCell-root": { color: "#fff", fontSize: "18px" },
+//             "& .MuiTableRow-head": {
+//               backgroundColor: "#e0e0e0",
+//               "& .MuiTableCell-root": {
+//                 color: "#000",
+//                 fontSize: "18px",
+//                 fontWeight: "bold",
+//               },
+//             },
+//             "& .MuiToolbar-root": {
+//               backgroundColor: "#d0d0d0",
+//               "& .MuiTypography-root": { fontSize: "18px" },
+//               "& .MuiIconButton-root": { color: "#3f51b5" },
+//             },
+//           },
+//         },
+//       },
+//       MuiTab: {
+//         styleOverrides: {
+//           root: {
+//             color: "#fff", // Default color when not selected
+//             "&.Mui-selected": {
+//               color: "#fe6c00", // Color when selected
+//             },
+//             "&:hover": {
+//               color: "#fe6c00", // Color on hover
+//             },
+//           },
+//         },
+//       },
+//       MuiTabs: {
+//         styleOverrides: {
+//           indicator: {
+//             backgroundColor: "#fe6c00", // Color of the indicator when selected
+//           },
+//         },
+//       },
+//     },
+//   });
+
+//   const options = {
+//     filterType: "checkbox",
+//     rowsPerPage: 10,
+//     customToolbar: () =>
+//       hasPermission(user, "write:inventoryAdjustment") ? (
+//         <Button
+//           variant="contained"
+//           size="small"
+//           onClick={() => {
+//             setEditData(null);
+//             setDrawerOpen(true);
+//           }}
+//           sx={{
+//             backgroundColor: "#fe6c00",
+//             color: "#fff",
+//             "&:hover": { backgroundColor: "#fec80a", color: "#bdbabb" },
+//           }}
+//         >
+//           Add New Adjustment
+//         </Button>
+//       ) : null,
+//   };
+
+//   const loadingData = [
+//     [
+//       <Box
+//         key="loading"
+//         sx={{
+//           display: "flex",
+//           justifyContent: "center",
+//           alignItems: "center",
+//           height: "200px",
+//           width: "100%",
+//         }}
+//       >
+//         <CircularProgress color="inherit" sx={{ color: "#fe6c00" }} />
+//       </Box>,
+//     ],
+//   ];
+//   const memoizedInitialData = useMemo(() => editData || {}, [editData]);
+
+//   return (
+//     <ThemeProvider theme={theme}>
+//       <TabContext value={value}>
+//         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+//           <TabList onChange={handleChange} aria-label="Inventory tabs">
+//             <Tab label="Inventory Adjustment Records" value="0" />
+//             <Tab label="Reports" value="1" />
+//           </TabList>
+//         </Box>
+//         <TabPanel value="0">
+//           {error ? (
+//             <div>Error: {error.message || "An error occurred."}</div>
+//           ) : (
+//             <>
+//               <MUIDataTable
+//                 title={"Inventory Adjustments"}
+//                 data={isLoading ? loadingData : data}
+//                 columns={columns}
+//                 options={options}
+//                 initialData={memoizedInitialData}
+//               />
+//               <AddNewInventoryAdjustmentDrawer
+//                 open={drawerOpen}
+//                 onClose={() => {
+//                   setDrawerOpen(false);
+//                   setEditData(null);
+//                 }}
+//                 editMode={!!editData}
+//                 initialData={editData || {}}
+//               />
+//               <Dialog open={deleteDialogOpen} onClose={cancelDelete}>
+//                 <DialogTitle>{"Delete Confirmation"}</DialogTitle>
+//                 <DialogContent>
+//                   <DialogContentText>
+//                     Are you sure you want to delete this adjustment?
+//                   </DialogContentText>
+//                 </DialogContent>
+//                 <DialogActions>
+//                   <Button onClick={cancelDelete} color="primary">
+//                     Cancel
+//                   </Button>
+//                   <Button onClick={confirmDelete} color="secondary" autoFocus>
+//                     Delete
+//                   </Button>
+//                 </DialogActions>
+//               </Dialog>
+//             </>
+//           )}
+//         </TabPanel>
+//         <TabPanel value="1">
+//           <InventoryAdjustmentReports />
+//         </TabPanel>
+//       </TabContext>
+//     </ThemeProvider>
+//   );
+// };
+
+// export default InventoryAdjustment;
+
 import React, { useEffect, useState } from "react";
 import { useMemo } from "react";
-import MUIDataTable from "mui-datatables";
+import { DataGrid } from "@mui/x-data-grid";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
   Button,
@@ -300,6 +679,7 @@ import {
   Tab,
 } from "@mui/material";
 import { format } from "date-fns";
+import { TabContext, TabList, TabPanel } from "@mui/lab";
 import "boxicons";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -308,8 +688,8 @@ import {
 } from "../../redux/slices/inventoryAdjustmentSlice";
 import { hasPermission } from "../../utils/authUtils";
 import AddNewInventoryAdjustmentDrawer from "../AddDrawerSection/AddNewInventoryAdjustmentDrawer";
-import { TabContext, TabList, TabPanel } from "@mui/lab";
 import InventoryAdjustmentReports from "./Reports/InventoryAdjustmentReports";
+import { Toaster, toast } from "react-hot-toast";
 
 const InventoryAdjustment = () => {
   const dispatch = useDispatch();
@@ -318,9 +698,8 @@ const InventoryAdjustment = () => {
   );
   const { inventories } = useSelector((state) => state.inventories);
   const { locations } = useSelector((state) => state.locations);
-  const { users, user } = useSelector((state) => state.auth); // Assuming users for staff/approvedBy
+  const { users, user } = useSelector((state) => state.auth);
 
-  const [data, setData] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editData, setEditData] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -332,54 +711,32 @@ const InventoryAdjustment = () => {
     dispatch(fetchInventoryAdjustments());
   }, [dispatch]);
 
-  useEffect(() => {
-    console.log("Inventory Adjustments from state:", inventoryAdjustments);
-    if (
-      inventoryAdjustments &&
-      Array.isArray(inventoryAdjustments) &&
-      inventoryAdjustments.length > 0
-    ) {
-      const formattedData = inventoryAdjustments.map((adjustment) => {
-        const productName = adjustment.product?.name || "N/A";
-        const staffName = adjustment.staff?.fullName || "N/A";
-        const approvedByName = adjustment.approvedBy?.fullName || "N/A";
-        const locationName = adjustment.adjustmentLocation?.name || "N/A";
-
-        return [
-          productName,
-          adjustment.type,
-          adjustment.adjustmentReason,
-          adjustment.changeInQuantity,
-          adjustment.previousQuantity,
-          adjustment.newQuantity,
+  const rows = inventoryAdjustments
+    ? inventoryAdjustments.map((adjustment) => ({
+        id: adjustment._id, // Required by DataGrid
+        productName: adjustment.product?.name || "N/A",
+        type: adjustment.type || "N/A",
+        adjustmentReason: adjustment.adjustmentReason || "N/A",
+        changeInQuantity: adjustment.changeInQuantity ?? "N/A",
+        previousQuantity: adjustment.previousQuantity ?? "N/A",
+        newQuantity: adjustment.newQuantity ?? "N/A",
+        adjustmentCost:
           adjustment.adjustmentCost !== undefined
             ? `₦${adjustment.adjustmentCost.toFixed(2)}`
             : "N/A",
-          adjustment.reason || "N/A",
-          staffName,
-          adjustment.status,
-          approvedByName,
-          adjustment.referenceId || "N/A",
-          adjustment.referenceType || "N/A",
-          adjustment.batchNumber || "N/A",
-          locationName,
-          adjustment.transactionDate
-            ? format(
-                new Date(adjustment.transactionDate),
-                "yyyy-MM-dd HH:mm:ss"
-              )
-            : "N/A",
-          adjustment._id || "N/A",
-        ];
-      });
-      console.log("Formatted Data:", formattedData);
-      setData(formattedData);
-    } else {
-      console.log(
-        "No inventory adjustments data available or data is not in expected format"
-      );
-    }
-  }, [inventoryAdjustments]);
+        reason: adjustment.reason || "N/A",
+        staff: adjustment.staff?.fullName || "N/A",
+        status: adjustment.status || "N/A",
+        approvedBy: adjustment.approvedBy?.fullName || "N/A",
+        referenceId: adjustment.referenceId || "N/A",
+        referenceType: adjustment.referenceType || "N/A",
+        batchNumber: adjustment.batchNumber || "N/A",
+        adjustmentLocation: adjustment.adjustmentLocation?.name || "N/A",
+        transactionDate: adjustment.transactionDate
+          ? format(new Date(adjustment.transactionDate), "yyyy-MM-dd HH:mm:ss")
+          : "N/A",
+      }))
+    : [];
 
   const handleEditClick = (adjustmentId) => {
     const adjustment = inventoryAdjustments.find(
@@ -437,12 +794,20 @@ const InventoryAdjustment = () => {
   const confirmDelete = () => {
     if (adjustmentToDelete) {
       dispatch(deleteInventoryAdjustment(adjustmentToDelete))
+        .unwrap()
         .then(() => {
           console.log("Adjustment deleted successfully");
+          toast.success("Inventory adjustment deleted successfully!", {
+            duration: 5000,
+          });
           dispatch(fetchInventoryAdjustments());
         })
         .catch((error) => {
           console.error("Error deleting adjustment:", error);
+          toast.error(
+            "Error deleting adjustment: " + (error.message || "Unknown error"),
+            { duration: 5000 }
+          );
         });
     }
     setDeleteDialogOpen(false);
@@ -459,83 +824,174 @@ const InventoryAdjustment = () => {
   };
 
   const columns = [
-    { name: "Product Name", options: { filter: true, sort: true } },
-    { name: "Adjustment Type", options: { filter: true, sort: true } },
-    { name: "Adjustment Reason", options: { filter: true, sort: true } },
-    { name: "Change In Quantity", options: { filter: true, sort: true } },
-    { name: "Previous Quantity", options: { filter: true, sort: true } },
-    { name: "New Quantity", options: { filter: true, sort: true } },
-    { name: "Adjustment Cost", options: { filter: true, sort: true } },
-    { name: "Reason", options: { filter: true, sort: true } },
-    { name: "Staff", options: { filter: true, sort: true } },
-    { name: "Status", options: { filter: true, sort: true } },
-    { name: "Approved By", options: { filter: true, sort: true } },
-    { name: "Reference ID", options: { filter: true, sort: true } },
-    { name: "Reference Type", options: { filter: true, sort: true } },
-    { name: "Batch Number", options: { filter: true, sort: true } },
-    { name: "Adjustment Location", options: { filter: true, sort: true } },
-    { name: "Date", options: { filter: true, sort: true } },
     {
-      name: "Action",
-      options: {
-        filter: false,
-        sort: false,
-        customBodyRender: (value, tableMeta) => {
-          const adjustmentId = tableMeta.rowData[16]; // _id at index 16
-          return (
-            <span>
-              {hasPermission(user, "update:inventoryAdjustment") && (
-                <i
-                  className="bx bx-pencil"
-                  style={{
-                    color: "#fe6c00",
-                    cursor: "pointer",
-                    marginRight: "12px",
-                  }}
-                  onClick={() => handleEditClick(adjustmentId)}
-                ></i>
-              )}
-
-              {hasPermission(user, "delete:inventoryAdjustment") && (
-                <i
-                  className="bx bx-trash"
-                  style={{ color: "#fe1e00", cursor: "pointer" }}
-                  onClick={() => handleDeleteClick(adjustmentId)}
-                ></i>
-              )}
-            </span>
-          );
-        },
-      },
+      field: "productName",
+      headerName: "Product Name",
+      width: 150,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "type",
+      headerName: "Adjustment Type",
+      width: 130,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "adjustmentReason",
+      headerName: "Adjustment Reason",
+      width: 150,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "changeInQuantity",
+      headerName: "Change In Quantity",
+      width: 150,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "previousQuantity",
+      headerName: "Previous Quantity",
+      width: 150,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "newQuantity",
+      headerName: "New Quantity",
+      width: 130,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "adjustmentCost",
+      headerName: "Adjustment Cost",
+      width: 150,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "reason",
+      headerName: "Reason",
+      width: 200,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "staff",
+      headerName: "Staff",
+      width: 150,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      width: 120,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "approvedBy",
+      headerName: "Approved By",
+      width: 150,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "referenceId",
+      headerName: "Reference ID",
+      width: 130,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "referenceType",
+      headerName: "Reference Type",
+      width: 130,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "batchNumber",
+      headerName: "Batch Number",
+      width: 130,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "adjustmentLocation",
+      headerName: "Adjustment Location",
+      width: 150,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "transactionDate",
+      headerName: "Date",
+      width: 180,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "action",
+      headerName: "Action",
+      width: 150,
+      filterable: false,
+      sortable: false,
+      renderCell: (params) => (
+        <span>
+          {hasPermission(user, "update:inventoryAdjustment") && (
+            <i
+              className="bx bx-pencil"
+              style={{
+                color: "#fe6c00",
+                cursor: "pointer",
+                marginRight: "12px",
+              }}
+              onClick={() => handleEditClick(params.row.id)}
+            />
+          )}
+          {hasPermission(user, "delete:inventoryAdjustment") && (
+            <i
+              className="bx bx-trash"
+              style={{ color: "#fe1e00", cursor: "pointer" }}
+              onClick={() => handleDeleteClick(params.row.id)}
+            />
+          )}
+        </span>
+      ),
     },
   ];
 
   const theme = createTheme({
     components: {
-      MUIDataTable: {
+      MuiDataGrid: {
         styleOverrides: {
           root: {
-            "& .MuiPaper-root": { backgroundColor: "#f0f0f0" },
-            "& .MuiTableRow-root": {
+            backgroundColor: "#f0f0f0",
+            "& .MuiDataGrid-row": {
               backgroundColor: "#29221d",
               "&:hover": {
                 backgroundColor: "#1e1611",
-                "& .MuiTableCell-root": { color: "#bdbabb" },
+                "& .MuiDataGrid-cell": { color: "#bdbabb" },
               },
             },
-            "& .MuiTableCell-root": { color: "#fff", fontSize: "18px" },
-            "& .MuiTableRow-head": {
+            "& .MuiDataGrid-cell": { color: "#fff", fontSize: "18px" },
+            "& .MuiDataGrid-columnHeaders": {
               backgroundColor: "#e0e0e0",
-              "& .MuiTableCell-root": {
+              "& .MuiDataGrid-columnHeaderTitle": {
                 color: "#000",
                 fontSize: "18px",
                 fontWeight: "bold",
               },
             },
-            "& .MuiToolbar-root": {
+            "& .MuiDataGrid-toolbarContainer": {
               backgroundColor: "#d0d0d0",
-              "& .MuiTypography-root": { fontSize: "18px" },
-              "& .MuiIconButton-root": { color: "#3f51b5" },
+              "& .MuiButton-root": { color: "#3f51b5" },
             },
           },
         },
@@ -543,65 +999,20 @@ const InventoryAdjustment = () => {
       MuiTab: {
         styleOverrides: {
           root: {
-            color: "#fff", // Default color when not selected
-            "&.Mui-selected": {
-              color: "#fe6c00", // Color when selected
-            },
-            "&:hover": {
-              color: "#fe6c00", // Color on hover
-            },
+            color: "#fff",
+            "&.Mui-selected": { color: "#fe6c00" },
+            "&:hover": { color: "#fe6c00" },
           },
         },
       },
       MuiTabs: {
         styleOverrides: {
-          indicator: {
-            backgroundColor: "#fe6c00", // Color of the indicator when selected
-          },
+          indicator: { backgroundColor: "#fe6c00" },
         },
       },
     },
   });
 
-  const options = {
-    filterType: "checkbox",
-    rowsPerPage: 10,
-    customToolbar: () =>
-      hasPermission(user, "write:inventoryAdjustment") ? (
-        <Button
-          variant="contained"
-          size="small"
-          onClick={() => {
-            setEditData(null);
-            setDrawerOpen(true);
-          }}
-          sx={{
-            backgroundColor: "#fe6c00",
-            color: "#fff",
-            "&:hover": { backgroundColor: "#fec80a", color: "#bdbabb" },
-          }}
-        >
-          Add New Adjustment
-        </Button>
-      ) : null,
-  };
-
-  const loadingData = [
-    [
-      <Box
-        key="loading"
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "200px",
-          width: "100%",
-        }}
-      >
-        <CircularProgress color="inherit" sx={{ color: "#fe6c00" }} />
-      </Box>,
-    ],
-  ];
   const memoizedInitialData = useMemo(() => editData || {}, [editData]);
 
   return (
@@ -615,15 +1026,57 @@ const InventoryAdjustment = () => {
         </Box>
         <TabPanel value="0">
           {error ? (
-            <div>Error: {error.message || "An error occurred."}</div>
+            <div style={{ color: "red", textAlign: "center", padding: "20px" }}>
+              Error: {error.message || "An error occurred."}
+            </div>
           ) : (
-            <>
-              <MUIDataTable
-                title={"Inventory Adjustments"}
-                data={isLoading ? loadingData : data}
+            <Box sx={{ height: 600, width: "100%", position: "relative" }}>
+              {isLoading && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    zIndex: 1000,
+                  }}
+                >
+                  <CircularProgress sx={{ color: "#fe6c00" }} />
+                </Box>
+              )}
+              <DataGrid
+                rows={rows}
                 columns={columns}
-                options={options}
-                initialData={memoizedInitialData}
+                pageSizeOptions={[10, 20, 50]}
+                initialState={{
+                  pagination: { paginationModel: { pageSize: 10 } },
+                }}
+                checkboxSelection={false}
+                disableRowSelectionOnClick
+                slots={{
+                  toolbar: () =>
+                    hasPermission(user, "write:inventoryAdjustment") ? (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => {
+                          setEditData(null);
+                          setDrawerOpen(true);
+                        }}
+                        sx={{
+                          backgroundColor: "#fe6c00",
+                          color: "#fff",
+                          "&:hover": {
+                            backgroundColor: "#fec80a",
+                            color: "#bdbabb",
+                          },
+                          m: 1,
+                        }}
+                      >
+                        Add New Adjustment
+                      </Button>
+                    ) : null,
+                }}
               />
               <AddNewInventoryAdjustmentDrawer
                 open={drawerOpen}
@@ -632,7 +1085,7 @@ const InventoryAdjustment = () => {
                   setEditData(null);
                 }}
                 editMode={!!editData}
-                initialData={editData || {}}
+                initialData={memoizedInitialData}
               />
               <Dialog open={deleteDialogOpen} onClose={cancelDelete}>
                 <DialogTitle>{"Delete Confirmation"}</DialogTitle>
@@ -650,13 +1103,14 @@ const InventoryAdjustment = () => {
                   </Button>
                 </DialogActions>
               </Dialog>
-            </>
+            </Box>
           )}
         </TabPanel>
         <TabPanel value="1">
           <InventoryAdjustmentReports />
         </TabPanel>
       </TabContext>
+      <Toaster />
     </ThemeProvider>
   );
 };

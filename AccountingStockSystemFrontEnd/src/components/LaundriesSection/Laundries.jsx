@@ -1474,8 +1474,387 @@
 
 // export default Laundries;
 
+// import React, { useEffect, useState, useCallback } from "react";
+// import { DataGrid } from "@mui/x-data-grid";
+// import { createTheme, ThemeProvider } from "@mui/material/styles";
+// import {
+//   Button,
+//   CircularProgress,
+//   Box,
+//   Dialog,
+//   DialogActions,
+//   DialogContent,
+//   DialogContentText,
+//   DialogTitle,
+//   Tabs,
+//   Tab,
+// } from "@mui/material";
+// import { TabContext, TabList, TabPanel } from "@mui/lab";
+// import "boxicons";
+// import { useDispatch, useSelector } from "react-redux";
+// import { fetchLaundries, voidLaundry } from "../../redux/slices/laundrySlice";
+// import { fetchPaymentMethods } from "../../redux/slices/paymentMethodsSlice";
+// import AddNewLaundryDrawer from "../AddDrawerSection/AddNewLaundryDrawer";
+// import { hasPermission } from "../../utils/authUtils";
+// import { Toaster, toast } from "react-hot-toast";
+// import LaundryReports from "./Reports/LaundriesReports";
+
+// const Laundries = () => {
+//   const dispatch = useDispatch();
+//   const { laundries, status, error } = useSelector((state) => state.laundry);
+//   const { paymentMethods } = useSelector((state) => state.paymentMethods); // Not directly used in this corrected code, but kept for completeness
+//   const { user } = useSelector((state) => state.auth);
+//   const [data, setData] = useState([]);
+//   const [drawerOpen, setDrawerOpen] = useState(false);
+//   const [editData, setEditData] = useState(null);
+//   const [openVoidDialog, setOpenVoidDialog] = useState(false);
+//   const [laundryToVoid, setLaundryToVoid] = useState(null);
+//   const [value, setValue] = useState("0");
+
+//   const formatDate = (isoDate) => {
+//     if (!isoDate) return "N/A";
+//     const date = new Date(isoDate);
+//     return !isNaN(date.getTime())
+//       ? date.toLocaleString("en-US", {
+//           dateStyle: "medium",
+//           timeStyle: "short",
+//         })
+//       : "N/A";
+//   };
+
+//   useEffect(() => {
+//     dispatch(fetchLaundries());
+//     dispatch(fetchPaymentMethods()); // Fetch payment methods (good practice)
+//   }, [dispatch]);
+
+//   useEffect(() => {
+//     if (laundries && Array.isArray(laundries)) {
+//       // Calculate the sum *directly* from the laundries data
+//       const sum = laundries.reduce(
+//         (acc, laundry) => acc + (parseFloat(laundry.totalAmount) || 0), // Ensure totalAmount is a number
+//         0
+//       );
+
+//       const formattedData = laundries.map((laundry) => [
+//         laundry.customer || "N/A",
+//         laundry.createdAt ? formatDate(laundry.createdAt) : "N/A",
+//         laundry.receiptNo || "N/A",
+//         laundry.phoneNo || "N/A",
+//         laundry.salesBy ? laundry.salesBy.fullName : "N/A",
+//         laundry.paymentMethod ? laundry.paymentMethod.name : "N/A",
+//         laundry.isVoided ? "Yes" : "No",
+//         laundry.status || "N/A",
+//         `₦${(parseFloat(laundry.totalAmount) || 0).toFixed(2)}`, // Format *here*, keep original value for calculations.
+//         laundry._id,
+//       ]);
+
+//       // Add the "Grand Total" row *after* processing the laundry data
+//       formattedData.push([
+//         "",
+//         "",
+//         "",
+//         "",
+//         "",
+//         "",
+//         "",
+//         "Grand Total:",
+//         `₦${sum.toFixed(2)}`,
+//         "",
+//       ]);
+
+//       setData(formattedData);
+//     } else {
+//       setData([]); // Set to empty array if no data
+//       console.log("No laundries data available");
+//     }
+//   }, [laundries]); // Depend only on laundries
+
+//   const handleEditClick = useCallback(
+//     (laundryId) => {
+//       const laundry = laundries.find((l) => l._id === laundryId);
+//       if (!laundry) {
+//         console.error("Invalid laundry data for ID:", laundryId);
+//         return;
+//       }
+//       setEditData(laundry);
+//       setDrawerOpen(true);
+//     },
+//     [laundries]
+//   );
+
+//   const handleVoidClick = useCallback(
+//     (laundryId) => {
+//       const laundry = laundries.find((l) => l._id === laundryId);
+//       if (!laundry) {
+//         console.error("Invalid laundry data for ID:", laundryId);
+//         return;
+//       }
+//       setLaundryToVoid(laundry);
+//       setOpenVoidDialog(true);
+//     },
+//     [laundries]
+//   );
+//   const handleConfirmVoid = () => {
+//     if (laundryToVoid) {
+//       dispatch(voidLaundry(laundryToVoid._id))
+//         .unwrap()
+//         .then((response) => {
+//           toast.success("Laundry record successfully voided");
+//           dispatch(fetchLaundries());
+//         })
+//         .catch((err) => {
+//           console.error("Void error:", err);
+//           toast.error(err || "Failed to void laundry record");
+//         })
+//         .finally(() => {
+//           setOpenVoidDialog(false);
+//           setLaundryToVoid(null);
+//         });
+//     }
+//   };
+
+//   const handleAddNewClick = useCallback(() => {
+//     setEditData(null);
+//     setDrawerOpen(true);
+//   }, []);
+
+//   const handleChange = (event, newValue) => {
+//     setValue(newValue);
+//   };
+
+//   const columns = [
+//     { name: "Customer", options: { filter: true, sort: true } },
+//     { name: "Created At", options: { filter: true, sort: true } },
+//     { name: "Receipt No", options: { filter: true, sort: false } },
+//     { name: "Phone No", options: { filter: true, sort: false } },
+//     { name: "Sold By", options: { filter: true, sort: false } },
+//     { name: "Payment Method", options: { filter: true, sort: false } },
+//     { name: "Voided", options: { filter: true, sort: false } },
+//     { name: "Status", options: { filter: true, sort: false } },
+//     {
+//       name: "Total Amount",
+//       options: {
+//         filter: true,
+//         sort: true,
+//         // No customBodyRender needed here anymore
+//       },
+//     },
+//     {
+//       name: "Action",
+//       options: {
+//         filter: false,
+//         sort: false,
+//         customBodyRender: (value, tableMeta) => {
+//           // Check if it's the *last* row (Grand Total)
+//           if (tableMeta.rowIndex === data.length - 1) {
+//             return null; // Don't show actions for the grand total
+//           }
+
+//           const laundryId = tableMeta.rowData[9]; // Get the _id
+//           const laundry = laundries.find((l) => l._id === laundryId); // Find the laundry object
+
+//           if (!laundry) {
+//             return null; // Or some error indicator if you like
+//           }
+
+//           return (
+//             <>
+//               {hasPermission(user, "update:laundries") && (
+//                 <i
+//                   className="bx bx-pencil"
+//                   style={{
+//                     color: "#fe6c00",
+//                     cursor: "pointer",
+//                     marginRight: "12px",
+//                   }}
+//                   onClick={(e) => {
+//                     e.stopPropagation();
+//                     handleEditClick(laundryId);
+//                   }}
+//                 ></i>
+//               )}
+
+//               {hasPermission(user, "void:laundries") && (
+//                 <i
+//                   className="bx bx-trash"
+//                   style={{
+//                     color: "#fe1e00",
+//                     cursor: laundry.isVoided ? "not-allowed" : "pointer",
+//                     opacity: laundry.isVoided ? 0.5 : 1,
+//                   }}
+//                   onClick={(e) => {
+//                     e.stopPropagation();
+//                     !laundry.isVoided && handleVoidClick(laundryId);
+//                   }}
+//                 ></i>
+//               )}
+//             </>
+//           );
+//         },
+//       },
+//     },
+//   ];
+
+//   const theme = createTheme({
+//     components: {
+//       MuiDataGrid: {
+//         styleOverrides: {
+//           root: {
+//             backgroundColor: "#f0f0f0",
+//             "& .MuiDataGrid-row": {
+//               backgroundColor: "#29221d",
+//               "&:hover": {
+//                 backgroundColor: "#1e1611",
+//                 "& .MuiDataGrid-cell": { color: "#bdbabb" },
+//               },
+//             },
+//             "& .MuiDataGrid-cell": { color: "#fff", fontSize: "18px" },
+//             "& .MuiDataGrid-columnHeaders": {
+//               backgroundColor: "#e0e0e0",
+//               "& .MuiDataGrid-columnHeaderTitle": {
+//                 color: "#000",
+//                 fontSize: "18px",
+//                 fontWeight: "bold",
+//               },
+//             },
+//             "& .MuiDataGrid-toolbarContainer": {
+//               backgroundColor: "#d0d0d0",
+//               "& .MuiButton-root": { color: "#3f51b5" },
+//             },
+//           },
+//         },
+//       },
+//       MuiTab: {
+//         styleOverrides: {
+//           root: {
+//             color: "#fff",
+//             "&.Mui-selected": { color: "#fe6c00" },
+//             "&:hover": { color: "#fe6c00" },
+//           },
+//         },
+//       },
+//       MuiTabs: {
+//         styleOverrides: {
+//           indicator: { backgroundColor: "#fe6c00" },
+//         },
+//       },
+//     },
+//   });
+
+//   const options = {
+//     filterType: "checkbox",
+//     rowsPerPage: 10,
+//     customToolbar: () =>
+//       hasPermission(user, "write:laundries") ? (
+//         <Button
+//           variant="contained"
+//           size="small"
+//           onClick={(e) => {
+//             e.stopPropagation();
+//             handleAddNewClick();
+//           }}
+//           sx={{
+//             backgroundColor: "#fe6c00",
+//             color: "#fff",
+//             "&:hover": { backgroundColor: "#fec80a", color: "#bdbabb" },
+//           }}
+//         >
+//           Add New Laundry
+//         </Button>
+//       ) : null,
+//   };
+
+//   const loadingData = [
+//     [
+//       <Box
+//         key="loading"
+//         sx={{
+//           display: "flex",
+//           justifyContent: "center",
+//           alignItems: "center",
+//           height: "200px",
+//         }}
+//       >
+//         <CircularProgress sx={{ color: "#fe6c00" }} />
+//       </Box>,
+//     ],
+//   ];
+
+//   return (
+//     <ThemeProvider theme={theme}>
+//       <TabContext value={value}>
+//         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+//           <TabList onChange={handleChange} aria-label="laundry tabs">
+//             <Tab label="Sales Records" value="0" />
+//             <Tab label="Reports" value="1" />
+//           </TabList>
+//         </Box>
+//         <TabPanel value="0">
+//           {status === "failed" && error ? (
+//             <div style={{ color: "red", textAlign: "center", padding: "20px" }}>
+//               Error: {error || "An error occurred"}
+//             </div>
+//           ) : (
+//             <>
+//               <MUIDataTable
+//                 title="Laundry Records"
+//                 data={status === "loading" ? loadingData : data}
+//                 columns={columns}
+//                 options={options}
+//               />
+//               <AddNewLaundryDrawer
+//                 open={drawerOpen}
+//                 onClose={() => {
+//                   console.log("Closing drawer");
+//                   setDrawerOpen(false);
+//                   setEditData(null);
+//                 }}
+//                 editMode={!!editData}
+//                 initialData={editData || {}}
+//               />
+//               <Dialog
+//                 open={openVoidDialog}
+//                 onClose={() => setOpenVoidDialog(false)}
+//                 aria-labelledby="void-dialog-title"
+//                 aria-describedby="void-dialog-description"
+//               >
+//                 <DialogTitle id="void-dialog-title">
+//                   Confirm Void Transaction
+//                 </DialogTitle>
+//                 <DialogContent>
+//                   <DialogContentText id="void-dialog-description">
+//                     Are you sure you want to void this transaction? This action
+//                     cannot be undone.
+//                   </DialogContentText>
+//                 </DialogContent>
+//                 <DialogActions>
+//                   <Button
+//                     onClick={() => setOpenVoidDialog(false)}
+//                     color="primary"
+//                   >
+//                     Cancel
+//                   </Button>
+//                   <Button onClick={handleConfirmVoid} color="error" autoFocus>
+//                     Void
+//                   </Button>
+//                 </DialogActions>
+//               </Dialog>
+//             </>
+//           )}
+//         </TabPanel>
+//         <TabPanel value="1">
+//           <LaundryReports />
+//         </TabPanel>
+//       </TabContext>
+//       <Toaster />
+//     </ThemeProvider>
+//   );
+// };
+
+// export default Laundries;
+
 import React, { useEffect, useState, useCallback } from "react";
-import MUIDataTable from "mui-datatables";
+import { DataGrid } from "@mui/x-data-grid";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
   Button,
@@ -1486,7 +1865,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Tabs,
   Tab,
 } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
@@ -1502,9 +1880,8 @@ import LaundryReports from "./Reports/LaundriesReports";
 const Laundries = () => {
   const dispatch = useDispatch();
   const { laundries, status, error } = useSelector((state) => state.laundry);
-  const { paymentMethods } = useSelector((state) => state.paymentMethods); // Not directly used in this corrected code, but kept for completeness
+  const { paymentMethods } = useSelector((state) => state.paymentMethods);
   const { user } = useSelector((state) => state.auth);
-  const [data, setData] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editData, setEditData] = useState(null);
   const [openVoidDialog, setOpenVoidDialog] = useState(false);
@@ -1524,50 +1901,44 @@ const Laundries = () => {
 
   useEffect(() => {
     dispatch(fetchLaundries());
-    dispatch(fetchPaymentMethods()); // Fetch payment methods (good practice)
+    dispatch(fetchPaymentMethods());
   }, [dispatch]);
 
-  useEffect(() => {
-    if (laundries && Array.isArray(laundries)) {
-      // Calculate the sum *directly* from the laundries data
-      const sum = laundries.reduce(
-        (acc, laundry) => acc + (parseFloat(laundry.totalAmount) || 0), // Ensure totalAmount is a number
-        0
-      );
-
-      const formattedData = laundries.map((laundry) => [
-        laundry.customer || "N/A",
-        laundry.createdAt ? formatDate(laundry.createdAt) : "N/A",
-        laundry.receiptNo || "N/A",
-        laundry.phoneNo || "N/A",
-        laundry.salesBy ? laundry.salesBy.fullName : "N/A",
-        laundry.paymentMethod ? laundry.paymentMethod.name : "N/A",
-        laundry.isVoided ? "Yes" : "No",
-        laundry.status || "N/A",
-        `₦${(parseFloat(laundry.totalAmount) || 0).toFixed(2)}`, // Format *here*, keep original value for calculations.
-        laundry._id,
-      ]);
-
-      // Add the "Grand Total" row *after* processing the laundry data
-      formattedData.push([
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "Grand Total:",
-        `₦${sum.toFixed(2)}`,
-        "",
-      ]);
-
-      setData(formattedData);
-    } else {
-      setData([]); // Set to empty array if no data
-      console.log("No laundries data available");
-    }
-  }, [laundries]); // Depend only on laundries
+  const rows = laundries
+    ? [
+        ...laundries.map((laundry) => ({
+          id: laundry._id, // Required by DataGrid
+          customer: laundry.customer || "N/A",
+          createdAt: laundry.createdAt ? formatDate(laundry.createdAt) : "N/A",
+          receiptNo: laundry.receiptNo || "N/A",
+          phoneNo: laundry.phoneNo || "N/A",
+          salesBy: laundry.salesBy ? laundry.salesBy.fullName : "N/A",
+          paymentMethod: laundry.paymentMethod
+            ? laundry.paymentMethod.name
+            : "N/A",
+          isVoided: laundry.isVoided ? "Yes" : "No",
+          status: laundry.status || "N/A",
+          totalAmount: `₦${(parseFloat(laundry.totalAmount) || 0).toFixed(2)}`,
+        })),
+        {
+          id: "grand-total",
+          customer: "",
+          createdAt: "",
+          receiptNo: "",
+          phoneNo: "",
+          salesBy: "",
+          paymentMethod: "",
+          isVoided: "",
+          status: "Grand Total:",
+          totalAmount: `₦${laundries
+            .reduce(
+              (acc, laundry) => acc + (parseFloat(laundry.totalAmount) || 0),
+              0
+            )
+            .toFixed(2)}`,
+        },
+      ]
+    : [];
 
   const handleEditClick = useCallback(
     (laundryId) => {
@@ -1594,6 +1965,7 @@ const Laundries = () => {
     },
     [laundries]
   );
+
   const handleConfirmVoid = () => {
     if (laundryToVoid) {
       dispatch(voidLaundry(laundryToVoid._id))
@@ -1623,104 +1995,141 @@ const Laundries = () => {
   };
 
   const columns = [
-    { name: "Customer", options: { filter: true, sort: true } },
-    { name: "Created At", options: { filter: true, sort: true } },
-    { name: "Receipt No", options: { filter: true, sort: false } },
-    { name: "Phone No", options: { filter: true, sort: false } },
-    { name: "Sold By", options: { filter: true, sort: false } },
-    { name: "Payment Method", options: { filter: true, sort: false } },
-    { name: "Voided", options: { filter: true, sort: false } },
-    { name: "Status", options: { filter: true, sort: false } },
     {
-      name: "Total Amount",
-      options: {
-        filter: true,
-        sort: true,
-        // No customBodyRender needed here anymore
-      },
+      field: "customer",
+      headerName: "Customer",
+      width: 150,
+      filterable: true,
+      sortable: true,
     },
     {
-      name: "Action",
-      options: {
-        filter: false,
-        sort: false,
-        customBodyRender: (value, tableMeta) => {
-          // Check if it's the *last* row (Grand Total)
-          if (tableMeta.rowIndex === data.length - 1) {
-            return null; // Don't show actions for the grand total
-          }
-
-          const laundryId = tableMeta.rowData[9]; // Get the _id
-          const laundry = laundries.find((l) => l._id === laundryId); // Find the laundry object
-
-          if (!laundry) {
-            return null; // Or some error indicator if you like
-          }
-
-          return (
-            <>
-              {hasPermission(user, "update:laundries") && (
-                <i
-                  className="bx bx-pencil"
-                  style={{
-                    color: "#fe6c00",
-                    cursor: "pointer",
-                    marginRight: "12px",
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleEditClick(laundryId);
-                  }}
-                ></i>
-              )}
-
-              {hasPermission(user, "void:laundries") && (
-                <i
-                  className="bx bx-trash"
-                  style={{
-                    color: "#fe1e00",
-                    cursor: laundry.isVoided ? "not-allowed" : "pointer",
-                    opacity: laundry.isVoided ? 0.5 : 1,
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    !laundry.isVoided && handleVoidClick(laundryId);
-                  }}
-                ></i>
-              )}
-            </>
-          );
-        },
+      field: "createdAt",
+      headerName: "Created At",
+      width: 180,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "receiptNo",
+      headerName: "Receipt No",
+      width: 120,
+      filterable: true,
+      sortable: false,
+    },
+    {
+      field: "phoneNo",
+      headerName: "Phone No",
+      width: 120,
+      filterable: true,
+      sortable: false,
+    },
+    {
+      field: "salesBy",
+      headerName: "Sold By",
+      width: 150,
+      filterable: true,
+      sortable: false,
+    },
+    {
+      field: "paymentMethod",
+      headerName: "Payment Method",
+      width: 150,
+      filterable: true,
+      sortable: false,
+    },
+    {
+      field: "isVoided",
+      headerName: "Voided",
+      width: 100,
+      filterable: true,
+      sortable: false,
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      width: 120,
+      filterable: true,
+      sortable: false,
+    },
+    {
+      field: "totalAmount",
+      headerName: "Total Amount",
+      width: 150,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "action",
+      headerName: "Action",
+      width: 150,
+      filterable: false,
+      sortable: false,
+      renderCell: (params) => {
+        if (params.row.id === "grand-total") return null; // No actions for grand total
+        const laundryId = params.row.id;
+        const laundry = laundries.find((l) => l._id === laundryId);
+        if (!laundry) return null;
+        return (
+          <>
+            {hasPermission(user, "update:laundries") && (
+              <i
+                className="bx bx-pencil"
+                style={{
+                  color: "#fe6c00",
+                  cursor: "pointer",
+                  marginRight: "12px",
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEditClick(laundryId);
+                }}
+              />
+            )}
+            {hasPermission(user, "void:laundries") && (
+              <i
+                className="bx bx-trash"
+                style={{
+                  color: "#fe1e00",
+                  cursor: laundry.isVoided ? "not-allowed" : "pointer",
+                  opacity: laundry.isVoided ? 0.5 : 1,
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  !laundry.isVoided && handleVoidClick(laundryId);
+                }}
+              />
+            )}
+          </>
+        );
       },
     },
   ];
 
   const theme = createTheme({
     components: {
-      MUIDataTable: {
+      MuiDataGrid: {
         styleOverrides: {
           root: {
-            "& .MuiPaper-root": { backgroundColor: "#f0f0f0" },
-            "& .MuiTableRow-root": {
+            backgroundColor: "#f0f0f0",
+            "& .MuiDataGrid-row": {
               backgroundColor: "#29221d",
               "&:hover": {
                 backgroundColor: "#1e1611",
-                "& .MuiTableCell-root": { color: "#bdbabb" },
+                "& .MuiDataGrid-cell": { color: "#bdbabb" },
               },
             },
-            "& .MuiTableCell-root": { color: "#fff", fontSize: "18px" },
-            "& .MuiTableRow-head": {
+            "& .MuiDataGrid-cell": { color: "#fff", fontSize: "18px" },
+            "& .MuiDataGrid-columnHeaders": {
               backgroundColor: "#e0e0e0",
-              "& .MuiTableCell-root": {
+              "& .MuiDataGrid-columnHeaderTitle": {
                 color: "#000",
                 fontSize: "18px",
                 fontWeight: "bold",
               },
             },
-            "& .MuiToolbar-root": {
+            "& .MuiDataGrid-toolbarContainer": {
               backgroundColor: "#d0d0d0",
-              "& .MuiTypography-root": { fontSize: "18px" },
-              "& .MuiIconButton-root": { color: "#3f51b5" },
+              "& .MuiButton-root": { color: "#3f51b5" },
             },
           },
         },
@@ -1742,45 +2151,6 @@ const Laundries = () => {
     },
   });
 
-  const options = {
-    filterType: "checkbox",
-    rowsPerPage: 10,
-    customToolbar: () =>
-      hasPermission(user, "write:laundries") ? (
-        <Button
-          variant="contained"
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleAddNewClick();
-          }}
-          sx={{
-            backgroundColor: "#fe6c00",
-            color: "#fff",
-            "&:hover": { backgroundColor: "#fec80a", color: "#bdbabb" },
-          }}
-        >
-          Add New Laundry
-        </Button>
-      ) : null,
-  };
-
-  const loadingData = [
-    [
-      <Box
-        key="loading"
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "200px",
-        }}
-      >
-        <CircularProgress sx={{ color: "#fe6c00" }} />
-      </Box>,
-    ],
-  ];
-
   return (
     <ThemeProvider theme={theme}>
       <TabContext value={value}>
@@ -1796,12 +2166,53 @@ const Laundries = () => {
               Error: {error || "An error occurred"}
             </div>
           ) : (
-            <>
-              <MUIDataTable
-                title="Laundry Records"
-                data={status === "loading" ? loadingData : data}
+            <Box sx={{ height: 600, width: "100%", position: "relative" }}>
+              {status === "loading" && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    zIndex: 1000,
+                  }}
+                >
+                  <CircularProgress sx={{ color: "#fe6c00" }} />
+                </Box>
+              )}
+              <DataGrid
+                rows={rows}
                 columns={columns}
-                options={options}
+                pageSizeOptions={[10, 20, 50]}
+                initialState={{
+                  pagination: { paginationModel: { pageSize: 10 } },
+                }}
+                checkboxSelection={false}
+                disableRowSelectionOnClick
+                slots={{
+                  toolbar: () =>
+                    hasPermission(user, "write:laundries") ? (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddNewClick();
+                        }}
+                        sx={{
+                          backgroundColor: "#fe6c00",
+                          color: "#fff",
+                          "&:hover": {
+                            backgroundColor: "#fec80a",
+                            color: "#bdbabb",
+                          },
+                          m: 1,
+                        }}
+                      >
+                        Add New Laundry
+                      </Button>
+                    ) : null,
+                }}
               />
               <AddNewLaundryDrawer
                 open={drawerOpen}
@@ -1840,7 +2251,7 @@ const Laundries = () => {
                   </Button>
                 </DialogActions>
               </Dialog>
-            </>
+            </Box>
           )}
         </TabPanel>
         <TabPanel value="1">

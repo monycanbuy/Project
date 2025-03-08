@@ -652,8 +652,714 @@
 
 // export default UnifiedTransaction;
 
+// import React, { useEffect, useState } from "react";
+// import MUIDataTable from "mui-datatables";
+// import { createTheme, ThemeProvider } from "@mui/material/styles";
+// import { useDispatch, useSelector } from "react-redux";
+// import {
+//   fetchSalesTransactions,
+//   voidSalesTransaction,
+// } from "../../redux/slices/salesTransactionSlice";
+// import {
+//   Button,
+//   CircularProgress,
+//   Dialog,
+//   DialogActions,
+//   DialogContent,
+//   DialogContentText,
+//   DialogTitle,
+//   Box,
+//   Tab,
+// } from "@mui/material";
+// import { TabContext, TabList, TabPanel } from "@mui/lab";
+// import { hasPermission } from "../../utils/authUtils";
+// import UnifiedTransactionReport from "./Reports/UnifiedTransactionReport";
+// import AddNewUnifiedTransactionDrawer from "../AddNewUnifiedTransactionDrawer";
+
+// const UnifiedTransaction = () => {
+//   const dispatch = useDispatch();
+//   const { salesTransactions, status, error } = useSelector(
+//     (state) => state.salesTransactions
+//   );
+//   const { user } = useSelector((state) => state.auth);
+//   const [drawerOpen, setDrawerOpen] = useState(false);
+//   const [editData, setEditData] = useState(null);
+//   const [voidDialogOpen, setVoidDialogOpen] = useState(false);
+//   const [saleToVoid, setSaleToVoid] = useState(null);
+//   const [isFetching, setIsFetching] = useState(false);
+//   const [value, setValue] = useState("0");
+
+//   useEffect(() => {
+//     console.log("Fetching sales transactions...");
+//     const fetchSales = () => {
+//       setIsFetching(true);
+//       dispatch(fetchSalesTransactions()).finally(() => {
+//         setIsFetching(false);
+//         console.log("Sales transactions fetched:", salesTransactions);
+//       });
+//     };
+
+//     const debounceFetch = setTimeout(fetchSales, 300);
+//     return () => clearTimeout(debounceFetch);
+//   }, [dispatch]);
+
+//   const handleChange = (event, newValue) => {
+//     console.log("Tab changed to:", newValue);
+//     setValue(newValue);
+//   };
+
+//   const handleAddNewClick = () => {
+//     console.log("Add New Sale button clicked");
+//     setEditData(null);
+//     setDrawerOpen(true);
+//   };
+
+//   const handleEditClick = (sale) => {
+//     console.log("Edit clicked for sale:", sale);
+//     setEditData(sale);
+//     setDrawerOpen(true);
+//   };
+
+//   const handleVoidClick = (sale) => {
+//     console.log("Void clicked for sale:", sale);
+//     setSaleToVoid(sale);
+//     setVoidDialogOpen(true);
+//   };
+
+//   const handleConfirmVoid = () => {
+//     if (saleToVoid) {
+//       console.log("Confirming void for sale:", saleToVoid);
+//       dispatch(voidSalesTransaction(saleToVoid._id))
+//         .then(() => {
+//           console.log("Void successful");
+//           setVoidDialogOpen(false);
+//           setIsFetching(true);
+//           dispatch(fetchSalesTransactions()).finally(() =>
+//             setIsFetching(false)
+//           );
+//         })
+//         .catch((error) => console.error("Void failed:", error));
+//       setSaleToVoid(null);
+//     } else {
+//       console.log("No sale to void");
+//       setVoidDialogOpen(false);
+//     }
+//   };
+
+//   const columns = [
+//     {
+//       name: "date",
+//       label: "Date",
+//       options: {
+//         filter: true,
+//         sort: true,
+//         customBodyRender: (value) => new Date(value).toLocaleString(),
+//       },
+//     },
+//     {
+//       name: "totalAmount",
+//       label: "Total Amount",
+//       options: {
+//         filter: true,
+//         sort: true,
+//         customBodyRender: (value) =>
+//           new Intl.NumberFormat("en-NG", {
+//             style: "currency",
+//             currency: "NGN",
+//             minimumFractionDigits: 2,
+//           }).format(value),
+//       },
+//     },
+//     {
+//       name: "paymentMethod",
+//       label: "Payment Method",
+//       options: {
+//         filter: true,
+//         sort: false,
+//         customBodyRender: (value) => value?.name || "Unknown",
+//       },
+//     },
+//     {
+//       name: "location",
+//       label: "Location",
+//       options: {
+//         filter: true,
+//         sort: false,
+//         customBodyRender: (value) => value?.name || "Unknown",
+//       },
+//     },
+//     {
+//       name: "saleType",
+//       label: "Sale Type",
+//       options: {
+//         filter: true,
+//         sort: false,
+//         filterOptions: {
+//           names: ["restaurant", "minimart", "kabasa"].filter((type) =>
+//             hasPermission(user, `read:${type}`)
+//           ),
+//         },
+//       },
+//     },
+//     {
+//       name: "cashier",
+//       label: "Cashier",
+//       options: {
+//         filter: true,
+//         sort: false,
+//         customBodyRender: (value) => value?.fullName || "Unknown",
+//       },
+//     },
+//     {
+//       name: "isVoided",
+//       label: "Voided",
+//       options: {
+//         filter: true,
+//         sort: false,
+//         customBodyRender: (value) => (value ? "Yes" : "No"),
+//       },
+//     },
+//     {
+//       name: "actions",
+//       label: "Actions",
+//       options: {
+//         filter: false,
+//         sort: false,
+//         customBodyRender: (value, tableMeta) => {
+//           const sale = salesTransactions[tableMeta.rowIndex];
+//           return (
+//             <div style={{ display: "flex", gap: "12px" }}>
+//               {hasPermission(user, "update:salestransactions") && (
+//                 <i
+//                   className="bx bx-pencil"
+//                   style={{
+//                     color: "#fe6c00",
+//                     cursor: "pointer",
+//                     marginRight: "12px",
+//                   }}
+//                   onClick={() => handleEditClick(sale)}
+//                 ></i>
+//               )}
+//               {hasPermission(user, "void:salestransactions") && (
+//                 <i
+//                   className="bx bx-trash"
+//                   style={{ color: "#fe1e00", cursor: "pointer" }}
+//                   onClick={() => handleVoidClick(sale)}
+//                 ></i>
+//               )}
+//             </div>
+//           );
+//         },
+//       },
+//     },
+//   ];
+
+//   const theme = createTheme({
+//     components: {
+//       MUIDataTable: {
+//         styleOverrides: {
+//           root: {
+//             "& .MuiPaper-root": { backgroundColor: "#f0f0f0" },
+//             "& .MuiTableRow-root": {
+//               backgroundColor: "#29221d",
+//               "&:hover": {
+//                 backgroundColor: "#1e1611",
+//                 "& .MuiTableCell-root": { color: "#bdbabb" },
+//               },
+//             },
+//             "& .MuiTableCell-root": { color: "#fff", fontSize: "18px" },
+//             "& .MuiTableRow-head": {
+//               backgroundColor: "#e0e0e0",
+//               "& .MuiTableCell-root": {
+//                 color: "#000",
+//                 fontSize: "18px",
+//                 fontWeight: "bold",
+//               },
+//             },
+//             "& .MuiToolbar-root": {
+//               backgroundColor: "#d0d0d0",
+//               "& .MuiTypography-root": { fontSize: "18px" },
+//               "& .MuiIconButton-root": { color: "#3f51b5" },
+//             },
+//           },
+//         },
+//       },
+//       MuiTab: {
+//         styleOverrides: {
+//           root: {
+//             color: "#fff",
+//             "&.Mui-selected": { color: "#fe6c00" },
+//             "&:hover": { color: "#fe6c00" },
+//           },
+//         },
+//       },
+//       MuiTabs: {
+//         styleOverrides: {
+//           indicator: { backgroundColor: "#fe6c00" },
+//         },
+//       },
+//     },
+//   });
+
+//   const options = {
+//     filterType: "checkbox",
+//     responsive: "standard",
+//     selectableRows: "none",
+//     customToolbar: () =>
+//       hasPermission(user, "write:salestransactions") ? (
+//         <Button
+//           variant="contained"
+//           size="small"
+//           onClick={handleAddNewClick}
+//           sx={{
+//             backgroundColor: "#fe6c00",
+//             color: "#fff",
+//             "&:hover": { backgroundColor: "#fec80a", color: "#bdbabb" },
+//           }}
+//         >
+//           Add New Sale
+//         </Button>
+//       ) : null,
+//   };
+
+//   return (
+//     <ThemeProvider theme={theme}>
+//       <TabContext value={value}>
+//         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+//           <TabList onChange={handleChange} aria-label="sales unified tabs">
+//             <Tab label="Sales Records" value="0" />
+//             <Tab label="Reports" value="1" />
+//           </TabList>
+//         </Box>
+//         <TabPanel value="0">
+//           <div>
+//             {isFetching && (
+//               <div
+//                 style={{
+//                   position: "absolute",
+//                   top: "50%",
+//                   left: "50%",
+//                   transform: "translate(-50%, -50%)",
+//                   zIndex: 1000,
+//                 }}
+//               >
+//                 <CircularProgress size={60} style={{ color: "#fe6c00" }} />
+//               </div>
+//             )}
+//             <MUIDataTable
+//               title={"Unified Sales List"}
+//               data={salesTransactions}
+//               columns={columns}
+//               options={options}
+//             />
+//             <AddNewUnifiedTransactionDrawer
+//               open={drawerOpen}
+//               onClose={() => {
+//                 console.log("Drawer closing");
+//                 setDrawerOpen(false);
+//                 setEditData(null);
+//               }}
+//               editMode={!!editData}
+//               initialData={editData || {}}
+//               onSaveSuccess={() => {
+//                 console.log("Save success, refetching");
+//                 dispatch(fetchSalesTransactions());
+//               }}
+//             />
+//             <Dialog
+//               open={voidDialogOpen}
+//               onClose={() => {
+//                 console.log("Void dialog closing");
+//                 setVoidDialogOpen(false);
+//               }}
+//               aria-labelledby="alert-dialog-title"
+//               aria-describedby="alert-dialog-description"
+//             >
+//               <DialogTitle id="alert-dialog-title">
+//                 {"Confirm Void Transaction"}
+//               </DialogTitle>
+//               <DialogContent>
+//                 <DialogContentText id="alert-dialog-description">
+//                   Are you sure you want to void this transaction? This action
+//                   cannot be undone.
+//                 </DialogContentText>
+//               </DialogContent>
+//               <DialogActions>
+//                 <Button onClick={() => setVoidDialogOpen(false)}>Cancel</Button>
+//                 <Button onClick={handleConfirmVoid} color="error" autoFocus>
+//                   Void
+//                 </Button>
+//               </DialogActions>
+//             </Dialog>
+//           </div>
+//         </TabPanel>
+//         <TabPanel value="1">
+//           <UnifiedTransactionReport />
+//         </TabPanel>
+//       </TabContext>
+//     </ThemeProvider>
+//   );
+// };
+
+// export default UnifiedTransaction;
+
+// import React, { useEffect, useState } from "react";
+// import { DataGrid } from "@mui/x-data-grid";
+// import { createTheme, ThemeProvider } from "@mui/material/styles";
+// import { useDispatch, useSelector } from "react-redux";
+// import {
+//   fetchSalesTransactions,
+//   voidSalesTransaction,
+// } from "../../redux/slices/salesTransactionSlice";
+// import {
+//   Button,
+//   CircularProgress,
+//   Dialog,
+//   DialogActions,
+//   DialogContent,
+//   DialogContentText,
+//   DialogTitle,
+//   Box,
+//   Tab,
+// } from "@mui/material";
+// import { TabContext, TabList, TabPanel } from "@mui/lab";
+// import { hasPermission } from "../../utils/authUtils";
+// import UnifiedTransactionReport from "./Reports/UnifiedTransactionReport";
+// import AddNewUnifiedTransactionDrawer from "../AddNewUnifiedTransactionDrawer";
+
+// const UnifiedTransaction = () => {
+//   const dispatch = useDispatch();
+//   const { salesTransactions, status, error } = useSelector(
+//     (state) => state.salesTransactions
+//   );
+//   const { user } = useSelector((state) => state.auth);
+//   const [drawerOpen, setDrawerOpen] = useState(false);
+//   const [editData, setEditData] = useState(null);
+//   const [voidDialogOpen, setVoidDialogOpen] = useState(false);
+//   const [saleToVoid, setSaleToVoid] = useState(null);
+//   const [isFetching, setIsFetching] = useState(false);
+//   const [value, setValue] = useState("0");
+
+//   useEffect(() => {
+//     console.log("Fetching sales transactions...");
+//     const fetchSales = () => {
+//       setIsFetching(true);
+//       dispatch(fetchSalesTransactions()).finally(() => {
+//         setIsFetching(false);
+//         console.log("Sales transactions fetched:", salesTransactions);
+//       });
+//     };
+
+//     const debounceFetch = setTimeout(fetchSales, 300);
+//     return () => clearTimeout(debounceFetch);
+//   }, [dispatch]);
+
+//   const handleChange = (event, newValue) => {
+//     console.log("Tab changed to:", newValue);
+//     setValue(newValue);
+//   };
+
+//   const handleAddNewClick = () => {
+//     console.log("Add New Sale button clicked");
+//     setEditData(null);
+//     setDrawerOpen(true);
+//   };
+
+//   const handleEditClick = (sale) => {
+//     console.log("Edit clicked for sale:", sale);
+//     setEditData(sale);
+//     setDrawerOpen(true);
+//   };
+
+//   const handleVoidClick = (sale) => {
+//     console.log("Void clicked for sale:", sale);
+//     setSaleToVoid(sale);
+//     setVoidDialogOpen(true);
+//   };
+
+//   const handleConfirmVoid = () => {
+//     if (saleToVoid) {
+//       console.log("Confirming void for sale:", saleToVoid);
+//       dispatch(voidSalesTransaction(saleToVoid._id))
+//         .then(() => {
+//           console.log("Void successful");
+//           setVoidDialogOpen(false);
+//           setIsFetching(true);
+//           dispatch(fetchSalesTransactions()).finally(() =>
+//             setIsFetching(false)
+//           );
+//         })
+//         .catch((error) => console.error("Void failed:", error));
+//       setSaleToVoid(null);
+//     } else {
+//       console.log("No sale to void");
+//       setVoidDialogOpen(false);
+//     }
+//   };
+
+//   const columns = [
+//     {
+//       field: "date",
+//       headerName: "Date",
+//       width: 180,
+//       filterable: true,
+//       sortable: true,
+//       renderCell: (params) => new Date(params.value).toLocaleString(),
+//     },
+//     {
+//       field: "totalAmount",
+//       headerName: "Total Amount",
+//       width: 150,
+//       filterable: true,
+//       sortable: true,
+//       renderCell: (params) =>
+//         new Intl.NumberFormat("en-NG", {
+//           style: "currency",
+//           currency: "NGN",
+//           minimumFractionDigits: 2,
+//         }).format(params.value),
+//     },
+//     {
+//       field: "paymentMethod",
+//       headerName: "Payment Method",
+//       width: 150,
+//       filterable: true,
+//       sortable: false,
+//       renderCell: (params) => params.value?.name || "Unknown",
+//     },
+//     {
+//       field: "location",
+//       headerName: "Location",
+//       width: 150,
+//       filterable: true,
+//       sortable: false,
+//       renderCell: (params) => params.value?.name || "Unknown",
+//     },
+//     {
+//       field: "saleType",
+//       headerName: "Sale Type",
+//       width: 120,
+//       filterable: true,
+//       sortable: false,
+//       filterOperators: ["equals"], // Basic filtering
+//     },
+//     {
+//       field: "cashier",
+//       headerName: "Cashier",
+//       width: 150,
+//       filterable: true,
+//       sortable: false,
+//       renderCell: (params) => params.value?.fullName || "Unknown",
+//     },
+//     {
+//       field: "isVoided",
+//       headerName: "Voided",
+//       width: 100,
+//       filterable: true,
+//       sortable: false,
+//       renderCell: (params) => (params.value ? "Yes" : "No"),
+//     },
+//     {
+//       field: "actions",
+//       headerName: "Actions",
+//       width: 150,
+//       filterable: false,
+//       sortable: false,
+//       renderCell: (params) => {
+//         const sale = params.row;
+//         return (
+//           <div style={{ display: "flex", gap: "12px" }}>
+//             {hasPermission(user, "update:salestransactions") && (
+//               <i
+//                 className="bx bx-pencil"
+//                 style={{
+//                   color: "#fe6c00",
+//                   cursor: "pointer",
+//                   marginRight: "12px",
+//                 }}
+//                 onClick={() => handleEditClick(sale)}
+//               ></i>
+//             )}
+//             {hasPermission(user, "void:salestransactions") && (
+//               <i
+//                 className="bx bx-trash"
+//                 style={{ color: "#fe1e00", cursor: "pointer" }}
+//                 onClick={() => handleVoidClick(sale)}
+//               ></i>
+//             )}
+//           </div>
+//         );
+//       },
+//     },
+//   ];
+
+//   const theme = createTheme({
+//     components: {
+//       MuiDataGrid: {
+//         styleOverrides: {
+//           root: {
+//             backgroundColor: "#f0f0f0",
+//             "& .MuiDataGrid-row": {
+//               backgroundColor: "#29221d",
+//               "&:hover": {
+//                 backgroundColor: "#1e1611",
+//                 "& .MuiDataGrid-cell": { color: "#bdbabb" },
+//               },
+//             },
+//             "& .MuiDataGrid-cell": { color: "#fff", fontSize: "18px" },
+//             "& .MuiDataGrid-columnHeaders": {
+//               backgroundColor: "#e0e0e0",
+//               "& .MuiDataGrid-columnHeaderTitle": {
+//                 color: "#000",
+//                 fontSize: "18px",
+//                 fontWeight: "bold",
+//               },
+//             },
+//             "& .MuiDataGrid-toolbarContainer": {
+//               backgroundColor: "#d0d0d0",
+//               "& .MuiButton-root": { color: "#3f51b5" },
+//             },
+//           },
+//         },
+//       },
+//       MuiTab: {
+//         styleOverrides: {
+//           root: {
+//             color: "#fff",
+//             "&.Mui-selected": { color: "#fe6c00" },
+//             "&:hover": { color: "#fe6c00" },
+//           },
+//         },
+//       },
+//       MuiTabs: {
+//         styleOverrides: {
+//           indicator: { backgroundColor: "#fe6c00" },
+//         },
+//       },
+//     },
+//   });
+
+//   const rows = salesTransactions.map((sale) => ({
+//     id: sale._id, // DataGrid requires a unique 'id' field
+//     date: sale.date,
+//     totalAmount: sale.totalAmount,
+//     paymentMethod: sale.paymentMethod,
+//     location: sale.location,
+//     saleType: sale.saleType,
+//     cashier: sale.cashier,
+//     isVoided: sale.isVoided,
+//   }));
+
+//   return (
+//     <ThemeProvider theme={theme}>
+//       <TabContext value={value}>
+//         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+//           <TabList onChange={handleChange} aria-label="sales unified tabs">
+//             <Tab label="Sales Records" value="0" />
+//             <Tab label="Reports" value="1" />
+//           </TabList>
+//         </Box>
+//         <TabPanel value="0">
+//           <div style={{ position: "relative" }}>
+//             {isFetching && (
+//               <div
+//                 style={{
+//                   position: "absolute",
+//                   top: "50%",
+//                   left: "50%",
+//                   transform: "translate(-50%, -50%)",
+//                   zIndex: 1000,
+//                 }}
+//               >
+//                 <CircularProgress size={60} style={{ color: "#fe6c00" }} />
+//               </div>
+//             )}
+//             <Box sx={{ height: 600, width: "100%" }}>
+//               <DataGrid
+//                 rows={rows}
+//                 columns={columns}
+//                 pageSizeOptions={[5, 10, 20]}
+//                 initialState={{
+//                   pagination: { paginationModel: { pageSize: 5 } },
+//                 }}
+//                 checkboxSelection={false} // No selectable rows
+//                 disableRowSelectionOnClick
+//                 slots={{
+//                   toolbar: () =>
+//                     hasPermission(user, "write:salestransactions") ? (
+//                       <Button
+//                         variant="contained"
+//                         size="small"
+//                         onClick={handleAddNewClick}
+//                         sx={{
+//                           backgroundColor: "#fe6c00",
+//                           color: "#fff",
+//                           "&:hover": {
+//                             backgroundColor: "#fec80a",
+//                             color: "#bdbabb",
+//                           },
+//                           m: 1,
+//                         }}
+//                       >
+//                         Add New Sale
+//                       </Button>
+//                     ) : null,
+//                 }}
+//               />
+//             </Box>
+//             <AddNewUnifiedTransactionDrawer
+//               open={drawerOpen}
+//               onClose={() => {
+//                 console.log("Drawer closing");
+//                 setDrawerOpen(false);
+//                 setEditData(null);
+//               }}
+//               editMode={!!editData}
+//               initialData={editData || {}}
+//               onSaveSuccess={() => {
+//                 console.log("Save success, refetching");
+//                 dispatch(fetchSalesTransactions());
+//               }}
+//             />
+//             <Dialog
+//               open={voidDialogOpen}
+//               onClose={() => {
+//                 console.log("Void dialog closing");
+//                 setVoidDialogOpen(false);
+//               }}
+//               aria-labelledby="alert-dialog-title"
+//               aria-describedby="alert-dialog-description"
+//             >
+//               <DialogTitle id="alert-dialog-title">
+//                 {"Confirm Void Transaction"}
+//               </DialogTitle>
+//               <DialogContent>
+//                 <DialogContentText id="alert-dialog-description">
+//                   Are you sure you want to void this transaction? This action
+//                   cannot be undone.
+//                 </DialogContentText>
+//               </DialogContent>
+//               <DialogActions>
+//                 <Button onClick={() => setVoidDialogOpen(false)}>Cancel</Button>
+//                 <Button onClick={handleConfirmVoid} color="error" autoFocus>
+//                   Void
+//                 </Button>
+//               </DialogActions>
+//             </Dialog>
+//           </div>
+//         </TabPanel>
+//         <TabPanel value="1">
+//           <UnifiedTransactionReport />
+//         </TabPanel>
+//       </TabContext>
+//     </ThemeProvider>
+//   );
+// };
+
+// export default UnifiedTransaction;
+
 import React, { useEffect, useState } from "react";
-import MUIDataTable from "mui-datatables";
+import { DataGrid } from "@mui/x-data-grid";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -748,138 +1454,124 @@ const UnifiedTransaction = () => {
 
   const columns = [
     {
-      name: "date",
-      label: "Date",
-      options: {
-        filter: true,
-        sort: true,
-        customBodyRender: (value) => new Date(value).toLocaleString(),
-      },
+      field: "date",
+      headerName: "Date",
+      flex: 1,
+      filterable: true,
+      sortable: true,
+      renderCell: (params) => new Date(params.value).toLocaleString(),
     },
     {
-      name: "totalAmount",
-      label: "Total Amount",
-      options: {
-        filter: true,
-        sort: true,
-        customBodyRender: (value) =>
-          new Intl.NumberFormat("en-NG", {
-            style: "currency",
-            currency: "NGN",
-            minimumFractionDigits: 2,
-          }).format(value),
-      },
+      field: "totalAmount",
+      headerName: "Total Amount",
+      flex: 1,
+      filterable: true,
+      sortable: true,
+      renderCell: (params) =>
+        new Intl.NumberFormat("en-NG", {
+          style: "currency",
+          currency: "NGN",
+          minimumFractionDigits: 2,
+        }).format(params.value),
     },
     {
-      name: "paymentMethod",
-      label: "Payment Method",
-      options: {
-        filter: true,
-        sort: false,
-        customBodyRender: (value) => value?.name || "Unknown",
-      },
+      field: "paymentMethod",
+      headerName: "Payment Method",
+      flex: 1,
+      filterable: true,
+      sortable: false,
+      renderCell: (params) => params.value?.name || "Unknown",
     },
     {
-      name: "location",
-      label: "Location",
-      options: {
-        filter: true,
-        sort: false,
-        customBodyRender: (value) => value?.name || "Unknown",
-      },
+      field: "location",
+      headerName: "Location",
+      flex: 1,
+      filterable: true,
+      sortable: false,
+      renderCell: (params) => params.value?.name || "Unknown",
     },
     {
-      name: "saleType",
-      label: "Sale Type",
-      options: {
-        filter: true,
-        sort: false,
-        filterOptions: {
-          names: ["restaurant", "minimart", "kabasa"].filter((type) =>
-            hasPermission(user, `read:${type}`)
-          ),
-        },
-      },
+      field: "saleType",
+      headerName: "Sale Type",
+      flex: 1,
+      filterable: true,
+      sortable: false,
     },
     {
-      name: "cashier",
-      label: "Cashier",
-      options: {
-        filter: true,
-        sort: false,
-        customBodyRender: (value) => value?.fullName || "Unknown",
-      },
+      field: "cashier",
+      headerName: "Cashier",
+      flex: 1,
+      filterable: true,
+      sortable: false,
+      renderCell: (params) => params.value?.fullName || "Unknown",
     },
     {
-      name: "isVoided",
-      label: "Voided",
-      options: {
-        filter: true,
-        sort: false,
-        customBodyRender: (value) => (value ? "Yes" : "No"),
-      },
+      field: "isVoided",
+      headerName: "Voided",
+      flex: 1,
+      filterable: true,
+      sortable: false,
+      renderCell: (params) => (params.value ? "Yes" : "No"),
     },
     {
-      name: "actions",
-      label: "Actions",
-      options: {
-        filter: false,
-        sort: false,
-        customBodyRender: (value, tableMeta) => {
-          const sale = salesTransactions[tableMeta.rowIndex];
-          return (
-            <div style={{ display: "flex", gap: "12px" }}>
-              {hasPermission(user, "update:salestransactions") && (
-                <i
-                  className="bx bx-pencil"
-                  style={{
-                    color: "#fe6c00",
-                    cursor: "pointer",
-                    marginRight: "12px",
-                  }}
-                  onClick={() => handleEditClick(sale)}
-                ></i>
-              )}
-              {hasPermission(user, "void:salestransactions") && (
-                <i
-                  className="bx bx-trash"
-                  style={{ color: "#fe1e00", cursor: "pointer" }}
-                  onClick={() => handleVoidClick(sale)}
-                ></i>
-              )}
-            </div>
-          );
-        },
+      field: "actions",
+      headerName: "Actions",
+      flex: 1,
+      filterable: false,
+      sortable: false,
+      renderCell: (params) => {
+        const sale = params.row;
+        return (
+          <div style={{ display: "flex", gap: "12px" }}>
+            {hasPermission(user, "update:salestransactions") && (
+              <i
+                className="bx bx-pencil"
+                style={{
+                  color: "#fe6c00",
+                  cursor: "pointer",
+                  marginRight: "12px",
+                }}
+                onClick={() => handleEditClick(sale)}
+              ></i>
+            )}
+            {hasPermission(user, "void:salestransactions") && (
+              <i
+                className="bx bx-trash"
+                style={{ color: "#fe1e00", cursor: "pointer" }}
+                onClick={() => handleVoidClick(sale)}
+              ></i>
+            )}
+          </div>
+        );
       },
     },
   ];
 
   const theme = createTheme({
     components: {
-      MUIDataTable: {
+      MuiDataGrid: {
         styleOverrides: {
           root: {
-            "& .MuiPaper-root": { backgroundColor: "#f0f0f0" },
-            "& .MuiTableRow-root": {
+            backgroundColor: "#f0f0f0",
+            "& .MuiDataGrid-row": {
               backgroundColor: "#29221d",
               "&:hover": {
                 backgroundColor: "#1e1611",
-                "& .MuiTableCell-root": { color: "#bdbabb" },
+                "& .MuiDataGrid-cell": { color: "#bdbabb" },
               },
             },
-            "& .MuiTableCell-root": { color: "#fff", fontSize: "18px" },
-            "& .MuiTableRow-head": {
+            "& .MuiDataGrid-cell": { color: "#fff", fontSize: "18px" },
+            "& .MuiDataGrid-columnHeaders": {
               backgroundColor: "#e0e0e0",
-              "& .MuiTableCell-root": {
+              "& .MuiDataGrid-columnHeaderTitle": {
                 color: "#000",
                 fontSize: "18px",
                 fontWeight: "bold",
               },
             },
-            "& .MuiToolbar-root": {
+            "& .MuiDataGrid-toolbarContainer": {
               backgroundColor: "#d0d0d0",
-              "& .MuiTypography-root": { fontSize: "18px" },
-              "& .MuiIconButton-root": { color: "#3f51b5" },
+              "& .MuiButton-root": { color: "#3f51b5" },
             },
           },
         },
@@ -901,26 +1593,16 @@ const UnifiedTransaction = () => {
     },
   });
 
-  const options = {
-    filterType: "checkbox",
-    responsive: "standard",
-    selectableRows: "none",
-    customToolbar: () =>
-      hasPermission(user, "write:salestransactions") ? (
-        <Button
-          variant="contained"
-          size="small"
-          onClick={handleAddNewClick}
-          sx={{
-            backgroundColor: "#fe6c00",
-            color: "#fff",
-            "&:hover": { backgroundColor: "#fec80a", color: "#bdbabb" },
-          }}
-        >
-          Add New Sale
-        </Button>
-      ) : null,
-  };
+  const rows = salesTransactions.map((sale) => ({
+    id: sale._id, // DataGrid requires a unique 'id' field
+    date: sale.date,
+    totalAmount: sale.totalAmount,
+    paymentMethod: sale.paymentMethod,
+    location: sale.location,
+    saleType: sale.saleType,
+    cashier: sale.cashier,
+    isVoided: sale.isVoided,
+  }));
 
   return (
     <ThemeProvider theme={theme}>
@@ -932,7 +1614,7 @@ const UnifiedTransaction = () => {
           </TabList>
         </Box>
         <TabPanel value="0">
-          <div>
+          <div style={{ position: "relative" }}>
             {isFetching && (
               <div
                 style={{
@@ -946,12 +1628,39 @@ const UnifiedTransaction = () => {
                 <CircularProgress size={60} style={{ color: "#fe6c00" }} />
               </div>
             )}
-            <MUIDataTable
-              title={"Unified Sales List"}
-              data={salesTransactions}
-              columns={columns}
-              options={options}
-            />
+            <Box sx={{ height: 600, width: "100%" }}>
+              <DataGrid
+                rows={rows}
+                columns={columns}
+                pageSizeOptions={[5, 10, 20]}
+                initialState={{
+                  pagination: { paginationModel: { pageSize: 5 } },
+                }}
+                checkboxSelection={false} // No selectable rows
+                disableRowSelectionOnClick
+                components={{
+                  Toolbar: () =>
+                    hasPermission(user, "write:salestransactions") ? (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={handleAddNewClick}
+                        sx={{
+                          backgroundColor: "#fe6c00",
+                          color: "#fff",
+                          "&:hover": {
+                            backgroundColor: "#fec80a",
+                            color: "#bdbabb",
+                          },
+                          m: 1,
+                        }}
+                      >
+                        Add New Sale
+                      </Button>
+                    ) : null,
+                }}
+              />
+            </Box>
             <AddNewUnifiedTransactionDrawer
               open={drawerOpen}
               onClose={() => {

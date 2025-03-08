@@ -686,8 +686,307 @@
 
 // export default Laundrys;
 
+// import React, { useEffect, useState } from "react";
+// import MUIDataTable from "mui-datatables";
+// import { createTheme, ThemeProvider } from "@mui/material/styles";
+// import {
+//   Button,
+//   CircularProgress,
+//   Box,
+//   Dialog,
+//   DialogActions,
+//   DialogContent,
+//   DialogContentText,
+//   DialogTitle,
+// } from "@mui/material";
+// import "boxicons";
+// import { useDispatch, useSelector } from "react-redux";
+// import {
+//   fetchLaundryServices,
+//   deleteLaundryService,
+// } from "../../redux/slices/laundryServicesSlice";
+// import { hasPermission } from "../../utils/authUtils";
+// import AddNewLaundryServiceDrawer from "../AddDrawerSection/AddNewLaundryServiceDrawer";
+// import { Toaster, toast } from "react-hot-toast";
+
+// const Laundrys = () => {
+//   const dispatch = useDispatch();
+//   const { services, status, error } = useSelector(
+//     (state) => state.laundryServices
+//   );
+//   const { user } = useSelector((state) => state.auth);
+//   const [data, setData] = useState([]);
+//   const [drawerOpen, setDrawerOpen] = useState(false);
+//   const [editData, setEditData] = useState(null);
+//   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+//   const [serviceToDelete, setServiceToDelete] = useState(null);
+
+//   useEffect(() => {
+//     console.log("Fetching laundry services...");
+//     dispatch(fetchLaundryServices());
+//   }, [dispatch]);
+
+//   useEffect(() => {
+//     console.log("Services from state:", services);
+//     if (services && Array.isArray(services) && services.length > 0) {
+//       const formattedData = services.map((service) => {
+//         const rawDate = service.createdAt;
+//         console.log("Raw createdAt for service:", service._id, rawDate); // Debug raw date
+//         return [
+//           service.serviceType || "N/A",
+//           service.price !== undefined
+//             ? `₦${parseFloat(service.price).toFixed(2)}`
+//             : "N/A",
+//           rawDate,
+//           service._id || "N/A",
+//         ];
+//       });
+//       console.log("Formatted Data:", formattedData);
+//       setData(formattedData);
+//     } else {
+//       console.log(
+//         "No laundry services data available or data is not in expected format"
+//       );
+//       setData([]);
+//     }
+//   }, [services]);
+
+//   const handleEditClick = (service) => {
+//     if (!service || service.length < 4) {
+//       console.error("Invalid service data:", service);
+//       return;
+//     }
+//     const priceString = service[1]; // "₦22.00"
+//     const price = parseFloat(priceString.replace("₦", ""));
+//     const serviceData = {
+//       _id: service[3],
+//       serviceType: service[0],
+//       price: price,
+//     };
+//     console.log("Edit Data:", serviceData);
+//     setEditData(serviceData);
+//     setDrawerOpen(true);
+//   };
+
+//   const handleDeleteClick = (serviceId) => {
+//     setServiceToDelete(serviceId);
+//     setDeleteDialogOpen(true);
+//   };
+
+//   const handleConfirmDelete = () => {
+//     if (serviceToDelete) {
+//       dispatch(deleteLaundryService(serviceToDelete))
+//         .unwrap()
+//         .then(() => {
+//           toast.success("Laundry service deleted successfully!", {
+//             duration: 5000,
+//           });
+//           dispatch(fetchLaundryServices());
+//           // No need to fetch again; reducer updates state
+//         })
+//         .catch((error) => {
+//           toast.error("Error deleting service: " + (error || "Unknown error"), {
+//             duration: 7000,
+//           });
+//         })
+//         .finally(() => {
+//           setDeleteDialogOpen(false);
+//           setServiceToDelete(null);
+//         });
+//     }
+//   };
+
+//   const handleCloseDialog = () => {
+//     setDeleteDialogOpen(false);
+//     setServiceToDelete(null);
+//   };
+
+//   const columns = [
+//     { name: "Service Type", options: { filter: true, sort: true } },
+//     { name: "Price", options: { filter: true, sort: true } },
+//     {
+//       name: "Created At",
+//       options: {
+//         filter: true,
+//         sort: true,
+//         customBodyRender: (value) => {
+//           console.log("customBodyRender value:", value); // Debug value passed
+//           const date = new Date(value);
+//           return date.toString() === "Invalid Date"
+//             ? "N/A"
+//             : date.toLocaleString();
+//         },
+//       },
+//     },
+//     {
+//       name: "Action",
+//       options: {
+//         filter: false,
+//         sort: false,
+//         customBodyRender: (value, tableMeta) => {
+//           const service = tableMeta.rowData;
+//           const serviceId = service[3]; // _id
+//           return (
+//             <>
+//               {hasPermission(user, "update:laundryService") && (
+//                 <i
+//                   className="bx bx-pencil"
+//                   style={{
+//                     color: "#fe6c00",
+//                     cursor: "pointer",
+//                     marginRight: "12px",
+//                   }}
+//                   onClick={() => handleEditClick(service)}
+//                 ></i>
+//               )}
+//               <i
+//                 className="bx bx-pencil"
+//                 style={{
+//                   color: "#fe6c00",
+//                   cursor: "pointer",
+//                   marginRight: "12px",
+//                 }}
+//                 onClick={() => handleEditClick(service)}
+//               ></i>
+//               {hasPermission(user, "delete:laundryService") && (
+//                 <i
+//                   className="bx bx-trash"
+//                   style={{ color: "#fe1e00", cursor: "pointer" }}
+//                   onClick={() => handleDeleteClick(serviceId)}
+//                 ></i>
+//               )}
+//             </>
+//           );
+//         },
+//       },
+//     },
+//   ];
+
+//   const theme = createTheme({
+//     components: {
+//       MUIDataTable: {
+//         styleOverrides: {
+//           root: {
+//             "& .MuiPaper-root": { backgroundColor: "#f0f0f0" },
+//             "& .MuiTableRow-root": {
+//               backgroundColor: "#29221d",
+//               "&:hover": {
+//                 backgroundColor: "#1e1611",
+//                 "& .MuiTableCell-root": { color: "#bdbabb" },
+//               },
+//             },
+//             "& .MuiTableCell-root": { color: "#fff", fontSize: "18px" },
+//             "& .MuiTableRow-head": {
+//               backgroundColor: "#e0e0e0",
+//               "& .MuiTableCell-root": {
+//                 color: "#000",
+//                 fontSize: "18px",
+//                 fontWeight: "bold",
+//               },
+//             },
+//             "& .MuiToolbar-root": {
+//               backgroundColor: "#d0d0d0",
+//               "& .MuiTypography-root": { fontSize: "18px" },
+//               "& .MuiIconButton-root": { color: "#3f51b5" },
+//             },
+//           },
+//         },
+//       },
+//     },
+//   });
+
+//   const options = {
+//     filterType: "checkbox",
+//     rowsPerPage: 10,
+//     customToolbar: () =>
+//       hasPermission(user, "write:laundryService") ? (
+//         <Button
+//           variant="contained"
+//           size="small"
+//           onClick={() => {
+//             setEditData(null);
+//             setDrawerOpen(true);
+//           }}
+//           sx={{
+//             backgroundColor: "#fe6c00",
+//             color: "#fff",
+//             "&:hover": { backgroundColor: "#fec80a", color: "#bdbabb" },
+//           }}
+//         >
+//           Add New Service
+//         </Button>
+//       ) : null,
+//   };
+
+//   return (
+//     <ThemeProvider theme={theme}>
+//       <div>
+//         {status === "failed" ? (
+//           <div style={{ color: "red", textAlign: "center", padding: "20px" }}>
+//             Error: {error || "An error occurred"}
+//           </div>
+//         ) : (
+//           <>
+//             <MUIDataTable
+//               title="Laundry Services"
+//               data={
+//                 status === "loading"
+//                   ? [
+//                       [
+//                         <CircularProgress
+//                           key="loading"
+//                           sx={{ color: "#fe6c00" }}
+//                         />,
+//                       ],
+//                     ]
+//                   : data
+//               }
+//               columns={columns}
+//               options={options}
+//             />
+//             <Dialog
+//               open={deleteDialogOpen}
+//               onClose={handleCloseDialog}
+//               aria-labelledby="delete-dialog-title"
+//               aria-describedby="delete-dialog-description"
+//             >
+//               <DialogTitle id="delete-dialog-title">Confirm Delete</DialogTitle>
+//               <DialogContent>
+//                 <DialogContentText id="delete-dialog-description">
+//                   Are you sure you want to delete this laundry service? This
+//                   action cannot be undone.
+//                 </DialogContentText>
+//               </DialogContent>
+//               <DialogActions>
+//                 <Button onClick={handleCloseDialog} color="primary">
+//                   Cancel
+//                 </Button>
+//                 <Button onClick={handleConfirmDelete} color="error" autoFocus>
+//                   Delete
+//                 </Button>
+//               </DialogActions>
+//             </Dialog>
+//           </>
+//         )}
+//         <AddNewLaundryServiceDrawer
+//           open={drawerOpen}
+//           onClose={() => {
+//             setDrawerOpen(false);
+//             setEditData(null);
+//           }}
+//           editMode={!!editData}
+//           initialData={editData || {}}
+//         />
+//       </div>
+//       <Toaster />
+//     </ThemeProvider>
+//   );
+// };
+
+// export default Laundrys;
+
 import React, { useEffect, useState } from "react";
-import MUIDataTable from "mui-datatables";
+import { DataGrid } from "@mui/x-data-grid";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
   Button,
@@ -715,7 +1014,6 @@ const Laundrys = () => {
     (state) => state.laundryServices
   );
   const { user } = useSelector((state) => state.auth);
-  const [data, setData] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editData, setEditData] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -726,41 +1024,24 @@ const Laundrys = () => {
     dispatch(fetchLaundryServices());
   }, [dispatch]);
 
-  useEffect(() => {
-    console.log("Services from state:", services);
-    if (services && Array.isArray(services) && services.length > 0) {
-      const formattedData = services.map((service) => {
-        const rawDate = service.createdAt;
-        console.log("Raw createdAt for service:", service._id, rawDate); // Debug raw date
-        return [
-          service.serviceType || "N/A",
+  const rows = services
+    ? services.map((service) => ({
+        id: service._id, // Required by DataGrid
+        serviceType: service.serviceType || "N/A",
+        price:
           service.price !== undefined
             ? `₦${parseFloat(service.price).toFixed(2)}`
             : "N/A",
-          rawDate,
-          service._id || "N/A",
-        ];
-      });
-      console.log("Formatted Data:", formattedData);
-      setData(formattedData);
-    } else {
-      console.log(
-        "No laundry services data available or data is not in expected format"
-      );
-      setData([]);
-    }
-  }, [services]);
+        createdAt: service.createdAt || "N/A",
+      }))
+    : [];
 
   const handleEditClick = (service) => {
-    if (!service || service.length < 4) {
-      console.error("Invalid service data:", service);
-      return;
-    }
-    const priceString = service[1]; // "₦22.00"
+    const priceString = service.price; // "₦22.00"
     const price = parseFloat(priceString.replace("₦", ""));
     const serviceData = {
-      _id: service[3],
-      serviceType: service[0],
+      _id: service.id,
+      serviceType: service.serviceType,
       price: price,
     };
     console.log("Edit Data:", serviceData);
@@ -782,7 +1063,6 @@ const Laundrys = () => {
             duration: 5000,
           });
           dispatch(fetchLaundryServices());
-          // No need to fetch again; reducer updates state
         })
         .catch((error) => {
           toast.error("Error deleting service: " + (error || "Unknown error"), {
@@ -802,92 +1082,89 @@ const Laundrys = () => {
   };
 
   const columns = [
-    { name: "Service Type", options: { filter: true, sort: true } },
-    { name: "Price", options: { filter: true, sort: true } },
     {
-      name: "Created At",
-      options: {
-        filter: true,
-        sort: true,
-        customBodyRender: (value) => {
-          console.log("customBodyRender value:", value); // Debug value passed
-          const date = new Date(value);
-          return date.toString() === "Invalid Date"
-            ? "N/A"
-            : date.toLocaleString();
-        },
+      field: "serviceType",
+      headerName: "Service Type",
+      width: 200,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "price",
+      headerName: "Price",
+      width: 150,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      field: "createdAt",
+      headerName: "Created At",
+      width: 180,
+      filterable: true,
+      sortable: true,
+      renderCell: (params) => {
+        const date = new Date(params.value);
+        return date.toString() === "Invalid Date"
+          ? "N/A"
+          : date.toLocaleString();
       },
     },
     {
-      name: "Action",
-      options: {
-        filter: false,
-        sort: false,
-        customBodyRender: (value, tableMeta) => {
-          const service = tableMeta.rowData;
-          const serviceId = service[3]; // _id
-          return (
-            <>
-              {hasPermission(user, "update:laundryService") && (
-                <i
-                  className="bx bx-pencil"
-                  style={{
-                    color: "#fe6c00",
-                    cursor: "pointer",
-                    marginRight: "12px",
-                  }}
-                  onClick={() => handleEditClick(service)}
-                ></i>
-              )}
-              <i
-                className="bx bx-pencil"
-                style={{
-                  color: "#fe6c00",
-                  cursor: "pointer",
-                  marginRight: "12px",
-                }}
-                onClick={() => handleEditClick(service)}
-              ></i>
-              {hasPermission(user, "delete:laundryService") && (
-                <i
-                  className="bx bx-trash"
-                  style={{ color: "#fe1e00", cursor: "pointer" }}
-                  onClick={() => handleDeleteClick(serviceId)}
-                ></i>
-              )}
-            </>
-          );
-        },
-      },
+      field: "action",
+      headerName: "Action",
+      width: 150,
+      filterable: false,
+      sortable: false,
+      renderCell: (params) => (
+        <>
+          {hasPermission(user, "update:laundryService") && (
+            <i
+              className="bx bx-pencil"
+              style={{
+                color: "#fe6c00",
+                cursor: "pointer",
+                marginRight: "12px",
+              }}
+              onClick={() => handleEditClick(params.row)}
+            />
+          )}
+          {hasPermission(user, "delete:laundryService") && (
+            <i
+              className="bx bx-trash"
+              style={{ color: "#fe1e00", cursor: "pointer" }}
+              onClick={() => handleDeleteClick(params.row.id)}
+            />
+          )}
+        </>
+      ),
     },
   ];
 
   const theme = createTheme({
     components: {
-      MUIDataTable: {
+      MuiDataGrid: {
         styleOverrides: {
           root: {
-            "& .MuiPaper-root": { backgroundColor: "#f0f0f0" },
-            "& .MuiTableRow-root": {
+            backgroundColor: "#f0f0f0",
+            "& .MuiDataGrid-row": {
               backgroundColor: "#29221d",
               "&:hover": {
                 backgroundColor: "#1e1611",
-                "& .MuiTableCell-root": { color: "#bdbabb" },
+                "& .MuiDataGrid-cell": { color: "#bdbabb" },
               },
             },
-            "& .MuiTableCell-root": { color: "#fff", fontSize: "18px" },
-            "& .MuiTableRow-head": {
+            "& .MuiDataGrid-cell": { color: "#fff", fontSize: "18px" },
+            "& .MuiDataGrid-columnHeaders": {
               backgroundColor: "#e0e0e0",
-              "& .MuiTableCell-root": {
+              "& .MuiDataGrid-columnHeaderTitle": {
                 color: "#000",
                 fontSize: "18px",
                 fontWeight: "bold",
               },
             },
-            "& .MuiToolbar-root": {
+            "& .MuiDataGrid-toolbarContainer": {
               backgroundColor: "#d0d0d0",
-              "& .MuiTypography-root": { fontSize: "18px" },
-              "& .MuiIconButton-root": { color: "#3f51b5" },
+              "& .MuiButton-root": { color: "#3f51b5" },
             },
           },
         },
@@ -895,55 +1172,64 @@ const Laundrys = () => {
     },
   });
 
-  const options = {
-    filterType: "checkbox",
-    rowsPerPage: 10,
-    customToolbar: () =>
-      hasPermission(user, "write:laundryService") ? (
-        <Button
-          variant="contained"
-          size="small"
-          onClick={() => {
-            setEditData(null);
-            setDrawerOpen(true);
-          }}
-          sx={{
-            backgroundColor: "#fe6c00",
-            color: "#fff",
-            "&:hover": { backgroundColor: "#fec80a", color: "#bdbabb" },
-          }}
-        >
-          Add New Service
-        </Button>
-      ) : null,
-  };
-
   return (
     <ThemeProvider theme={theme}>
-      <div>
+      <Box sx={{ position: "relative" }}>
         {status === "failed" ? (
           <div style={{ color: "red", textAlign: "center", padding: "20px" }}>
             Error: {error || "An error occurred"}
           </div>
         ) : (
           <>
-            <MUIDataTable
-              title="Laundry Services"
-              data={
-                status === "loading"
-                  ? [
-                      [
-                        <CircularProgress
-                          key="loading"
-                          sx={{ color: "#fe6c00" }}
-                        />,
-                      ],
-                    ]
-                  : data
-              }
-              columns={columns}
-              options={options}
-            />
+            {status === "loading" && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  zIndex: 1000,
+                }}
+              >
+                <CircularProgress sx={{ color: "#fe6c00" }} />
+              </Box>
+            )}
+            <Box sx={{ height: 600, width: "100%" }}>
+              <DataGrid
+                rows={rows}
+                columns={columns}
+                pageSizeOptions={[10, 20, 50]}
+                initialState={{
+                  pagination: { paginationModel: { pageSize: 10 } },
+                }}
+                checkboxSelection={false}
+                disableRowSelectionOnClick
+                slots={{
+                  toolbar: () =>
+                    hasPermission(user, "write:laundryService") ? (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => {
+                          setEditData(null);
+                          setDrawerOpen(true);
+                        }}
+                        sx={{
+                          backgroundColor: "#fe6c00",
+                          color: "#fff",
+                          "&:hover": {
+                            backgroundColor: "#fec80a",
+                            color: "#bdbabb",
+                          },
+                          m: 1,
+                        }}
+                      >
+                        Add New Service
+                      </Button>
+                    ) : null,
+                }}
+              />
+            </Box>
             <Dialog
               open={deleteDialogOpen}
               onClose={handleCloseDialog}
@@ -977,7 +1263,7 @@ const Laundrys = () => {
           editMode={!!editData}
           initialData={editData || {}}
         />
-      </div>
+      </Box>
       <Toaster />
     </ThemeProvider>
   );
