@@ -95,40 +95,41 @@ const allowedOrigins =
       ];
 
 // Middleware to verify JWT token in request headers
-// const verifyToken = (req, res, next) => {
-//   const token = req.headers["authorization"]?.split(" ")[1]; // Extract token from Authorization header
-//   if (!token) {
-//     return res.status(403).json({ message: "No token provided" });
-//   }
-
-//   // Verify the token
-//   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-//     if (err) {
-//       return res.status(401).json({ message: "Unauthorized" });
-//     }
-//     req.user = decoded; // Attach decoded user data to request object
-//     next();
-//   });
-// };
-
-// Apply middleware globally or to protected routes
 const verifyToken = (req, res, next) => {
-  const token = req.cookies.token;
+  const token = req.headers["authorization"]?.split(" ")[1]; // Extract token from Authorization header
   if (!token) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized: No token provided" });
+    return res.status(403).json({ message: "No token provided" });
   }
+
+  // Verify the token
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Unauthorized: Invalid token" });
+      return res.status(401).json({ message: "Unauthorized" });
     }
-    req.user = decoded;
+    req.user = decoded; // Attach decoded user data to request object
     next();
   });
 };
+
+// Apply middleware globally or to protected routes
+
+// const verifyToken = (req, res, next) => {
+//   const token = req.cookies.token;
+//   if (!token) {
+//     return res
+//       .status(401)
+//       .json({ success: false, message: "Unauthorized: No token provided" });
+//   }
+//   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+//     if (err) {
+//       return res
+//         .status(401)
+//         .json({ success: false, message: "Unauthorized: Invalid token" });
+//     }
+//     req.user = decoded;
+//     next();
+//   });
+// };
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 // app.use(

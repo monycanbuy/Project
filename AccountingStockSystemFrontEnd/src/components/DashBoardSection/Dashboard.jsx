@@ -241,21 +241,19 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const { salesHistory, status, error } = useSelector(
     (state) => state.aggregateSales
-  ); // Changed to salesHistory
-
+  );
   const [value, setValue] = useState("0");
 
   useEffect(() => {
     console.log("Fetching daily sales history...");
     dispatch(fetchDailySalesHistory());
 
-    // Poll every 30 seconds for live updates
     const interval = setInterval(() => {
       console.log("Polling for updated sales history...");
       dispatch(fetchDailySalesHistory());
     }, 30000);
 
-    return () => clearInterval(interval); // Cleanup on unmount
+    return () => clearInterval(interval);
   }, [dispatch]);
 
   useEffect(() => {
@@ -293,32 +291,54 @@ const Dashboard = () => {
   ];
 
   const data = Array.isArray(salesHistory)
-    ? salesHistory.map((item) => ({
-        id: item.date,
-        date: item.date,
-        laundry: numberFormatter.format(item.laundry || 0),
-        hallTransaction: numberFormatter.format(item.hallTransaction || 0),
-        frontOfficeSale: numberFormatter.format(item.frontOfficeSale || 0),
-        seminar: numberFormatter.format(item.seminar || 0),
-        totalMinimartRestaurant: numberFormatter.format(
-          item.totalMinimartRestaurant || 0
-        ),
-        totalAmount: numberFormatter.format(item.totalAmount || 0),
-      }))
+    ? salesHistory
+        .filter((item) => item && (item.date || item.Date)) // Handle both 'date' and 'Date'
+        .map((item, index) => {
+          console.log("Mapping item:", item);
+          const date = item.date || item.Date || `row-${index}`; // Fallback for date
+          return {
+            id: date, // Use date as ID, fallback to index-based
+            date: date,
+            laundry: numberFormatter.format(item.laundry || item.Laundry || 0),
+            hallTransaction: numberFormatter.format(
+              item.hallTransaction || item.HallTransaction || 0
+            ),
+            frontOfficeSale: numberFormatter.format(
+              item.frontOfficeSale || item.FrontOfficeSale || 0
+            ),
+            seminar: numberFormatter.format(item.seminar || item.Seminar || 0),
+            totalMinimartRestaurant: numberFormatter.format(
+              item.totalMinimartRestaurant ||
+                item["Total of Minimart&Restaurant"] ||
+                0
+            ),
+            totalAmount: numberFormatter.format(
+              item.totalAmount || item.TotalAmount || 0
+            ),
+          };
+        })
     : [];
+
+  console.log("Processed data:", data); // Log the final data array
 
   const totals = data.reduce((acc, row) => {
     Object.keys(row).forEach((key, index) => {
       if (index > 0) {
-        // Skip the 'id' field
-        acc[key] =
-          (acc[key] || 0) + parseFloat(row[key].replace(/[^0-9.-]+/g, ""));
+        // Skip 'id'
+        const value = row[key];
+        if (typeof value !== "string") {
+          console.error(`Unexpected value for ${key}:`, value);
+          acc[key] = acc[key] || 0;
+        } else {
+          acc[key] =
+            (acc[key] || 0) + parseFloat(value.replace(/[^0-9.-]+/g, "") || 0);
+        }
       }
     });
     return acc;
   }, {});
 
-  data.push({
+  const totalsRow = {
     id: "totals",
     date: "Totals",
     laundry: numberFormatter.format(totals.laundry || 0),
@@ -329,7 +349,10 @@ const Dashboard = () => {
       totals.totalMinimartRestaurant || 0
     ),
     totalAmount: numberFormatter.format(totals.totalAmount || 0),
-  });
+  };
+
+  const rows = data.length > 0 ? [...data, totalsRow] : [];
+  console.log("Rows for DataGrid:", rows); // Log the rows array
 
   const theme = createTheme({
     components: {
@@ -353,7 +376,7 @@ const Dashboard = () => {
                 fontWeight: "bold",
               },
             },
-            "& .MuiDataGrid-toolbarContainer": {
+            "& .MuiData GreeceGrid-toolbarContainer": {
               backgroundColor: "#d0d0d0",
               "& .MuiButton-root": { color: "#3f51b5" },
             },
@@ -378,7 +401,6 @@ const Dashboard = () => {
   });
 
   if (status === "loading" && salesHistory.length === 0) {
-    // Only show loading initially
     return (
       <ThemeProvider theme={createTheme()}>
         <Box
@@ -427,7 +449,7 @@ const Dashboard = () => {
         <TabPanel value="0">
           <Box sx={{ height: 600, width: "100%" }}>
             <DataGrid
-              rows={data}
+              rows={rows}
               columns={columns}
               pageSize={10}
               rowsPerPageOptions={[10]}

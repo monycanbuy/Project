@@ -78,14 +78,14 @@ exports.createHallTransaction = async (req, res) => {
       discount,
     } = req.body;
 
-    if (!req.user || !req.user.id) {
+    // Updated to use req.user.userId
+    if (!req.user || !req.user.userId) {
       return res.status(400).json({
         success: false,
         message: "User information is missing.",
       });
     }
 
-    // Fetch Hall data by name and prepare for HallTransaction creation
     const updatedHalls = await Promise.all(
       halls.map(async (item) => {
         const hall = await Hall.findOne({ name: item.name });
@@ -93,25 +93,21 @@ exports.createHallTransaction = async (req, res) => {
           throw new Error(`Hall with name ${item.name} not found`);
         }
         return {
-          hall: hall._id, // Use hall for linking
-          name: item.name, // Keep name for display
+          hall: hall._id,
+          name: item.name,
           qty: item.qty,
-          price: hall.price, // Use the price from Hall for consistency
+          price: hall.price,
         };
       })
     );
 
-    // Calculate total amount based on updated halls
     const totalAmount = updatedHalls.reduce((sum, item) => {
       return sum + item.qty * item.price;
     }, 0);
-    const discountValue = req.body.discount; // Since it's already a number in your schema
+    const discountValue = req.body.discount || 0;
     const discountedTotal = totalAmount - totalAmount * (discountValue / 100);
-    //const discountedTotal = totalAmount - totalAmount * (discount / 100);
-
     const finalDiscountedTotal = Math.round(discountedTotal * 100) / 100;
 
-    // Generate a unique transaction ID
     const generateTransactionId = () => {
       const randomDigits = Math.floor(Math.random() * 90000 + 10000).toString();
       return `TRX-${randomDigits}`;
@@ -119,9 +115,9 @@ exports.createHallTransaction = async (req, res) => {
 
     const newHallTransaction = await HallTransaction.create({
       halls: req.body.halls.map((hall) => ({
-        hallId: hall._id || hall.hallId, // Use _id if hallId isn't present, but prefer hallId if available
+        hallId: hall._id || hall.hallId,
         name: hall.name,
-        qty: hall.qty || 1, // Default to 1 if not provided
+        qty: hall.qty || 1,
         price: hall.price,
       })),
       transactionId: generateTransactionId(),
@@ -129,17 +125,15 @@ exports.createHallTransaction = async (req, res) => {
       contactPhone,
       startTime,
       endTime,
-      //halls: updatedHalls,
       eventType,
       paymentMethod,
       paymentStatus,
       notes,
       discount: discountValue,
       totalAmount: finalDiscountedTotal,
-      staffInvolved: req.user.id,
+      staffInvolved: req.user.userId, // Updated here too
     });
 
-    // If you need to return populated data for immediate display:
     const populatedHallTransaction = await HallTransaction.findById(
       newHallTransaction._id
     )

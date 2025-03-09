@@ -495,6 +495,56 @@
 
 // export default AdminLayout;
 
+// import React, { useContext } from "react";
+// import { useSelector } from "react-redux";
+// import { Outlet, Navigate } from "react-router-dom";
+// import Sidebar from "../Sidebar/Sidebar";
+// import Content from "../Content/Content";
+// import AddNewUserDrawer from "../../components/AddDrawerSection/AddNewUserDrawer";
+// import { SidebarContext } from "../../context/sidebarContext";
+// import { Box } from "@mui/material";
+// import ErrorBoundary from "../../error/ErrorBoundary";
+
+// const AdminLayout = () => {
+//   const { isAuthenticated, isVerified, user } = useSelector(
+//     (state) => state.auth
+//   );
+//   const sidebarContext = useContext(SidebarContext) || {
+//     isDrawerOpen: false,
+//     isUploadMode: false,
+//     toggleDrawer: () => {},
+//   };
+
+//   // Redirect to login if not authenticated, verified, or user is missing
+//   if (!isAuthenticated || !isVerified || !user) {
+//     return <Navigate to="/login" replace />;
+//   }
+
+//   return (
+//     <div className="admin-layout">
+//       <ErrorBoundary>
+//         <Box sx={{ display: "flex", minHeight: "100vh" }}>
+//           <Sidebar />
+//           <Content>
+//             <Outlet />
+//           </Content>
+//           {sidebarContext.isDrawerOpen && (
+//             <AddNewUserDrawer
+//               open={sidebarContext.isDrawerOpen}
+//               onClose={() => sidebarContext.toggleDrawer(false, false)}
+//               editMode={false}
+//               initialData={{}}
+//               uploadImageMode={sidebarContext.isUploadMode}
+//             />
+//           )}
+//         </Box>
+//       </ErrorBoundary>
+//     </div>
+//   );
+// };
+
+// export default AdminLayout;
+
 import React, { useContext } from "react";
 import { useSelector } from "react-redux";
 import { Outlet, Navigate } from "react-router-dom";
@@ -506,19 +556,20 @@ import { Box } from "@mui/material";
 import ErrorBoundary from "../../error/ErrorBoundary";
 
 const AdminLayout = () => {
-  // const { isAuthenticated, isVerified, user } = useSelector(
-  //   (state) => state.auth
-  // );
+  const { isAuthenticated, isVerified, user } = useSelector(
+    (state) => state.auth
+  );
   const sidebarContext = useContext(SidebarContext) || {
     isDrawerOpen: false,
     isUploadMode: false,
     toggleDrawer: () => {},
   };
 
-  // Redirect to login if not authenticated, verified, or user is missing
-  // if (!isAuthenticated || !isVerified || !user) {
-  //   return <Navigate to="/login" replace />;
-  // }
+  console.log("AdminLayout state:", { isAuthenticated, isVerified, user });
+
+  if (!isAuthenticated || !isVerified || !user) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div className="admin-layout">

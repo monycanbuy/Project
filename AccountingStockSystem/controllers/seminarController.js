@@ -25,7 +25,7 @@ exports.createSeminar = async (req, res) => {
       discount,
     } = req.body;
 
-    if (!req.user || !req.user.id) {
+    if (!req.user || !req.user.userId) {
       return res.status(400).json({
         success: false,
         message: "User information is missing.",
@@ -76,7 +76,7 @@ exports.createSeminar = async (req, res) => {
       additionalNotes,
       discount,
       totalAmount: discountedTotal,
-      salesBy: req.user.id, // Example: logged-in user's ID
+      salesBy: req.user.userId, // Example: logged-in user's ID
     });
 
     // If you need to return populated data for immediate display:
@@ -238,11 +238,30 @@ exports.updateSeminar = async (req, res) => {
   }
 };
 //void Seminar
+const mongoose = require("mongoose");
+
 exports.voidSeminar = async (req, res) => {
   const { id } = req.params;
 
+  // Step 1: Check if id is provided
+  if (!id || id === "undefined") {
+    return res.status(400).json({
+      success: false,
+      message: "Seminar ID is required",
+    });
+  }
+
+  // Step 2: Validate if id is a valid MongoDB ObjectId
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid seminar ID format. Must be a valid MongoDB ObjectId",
+    });
+  }
+
   try {
-    const seminar = await Seminar.findById(id);
+    // Step 3: Find the seminar by ID
+    const seminar = await mongoose.model("Seminar").findById(id);
     if (!seminar) {
       return res.status(404).json({
         success: false,
@@ -250,6 +269,7 @@ exports.voidSeminar = async (req, res) => {
       });
     }
 
+    // Step 4: Check if already voided
     if (seminar.isVoided) {
       return res.status(400).json({
         success: false,
@@ -257,11 +277,12 @@ exports.voidSeminar = async (req, res) => {
       });
     }
 
-    // Void the Seminar record
+    // Step 5: Void the seminar
     seminar.isVoided = true;
-    seminar.voidedAt = new Date(); // Optionally, add when it was voided
+    seminar.voidedAt = new Date();
     const voidedSeminar = await seminar.save();
 
+    // Step 6: Return success response
     res.status(200).json({
       success: true,
       message: "Seminar has been voided",

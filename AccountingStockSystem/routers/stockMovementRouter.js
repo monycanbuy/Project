@@ -55,7 +55,7 @@ router.get(
 router.post(
   "/",
   authenticateUser,
-  authorize("post:stockMovement"),
+  authorize("write:stockMovement"),
   stockMovementController.createStockMovement
 );
 

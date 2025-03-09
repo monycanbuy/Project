@@ -35,7 +35,7 @@ exports.createStockMovement = async (req, res) => {
 
     const newStockMovement = await StockMovement.create({
       ...value,
-      staff: req.user.id, // Associate the stock movement with the logged-in staff member
+      staff: req.user.userId, // Associate the stock movement with the logged-in staff member
     });
 
     res.status(201).json({

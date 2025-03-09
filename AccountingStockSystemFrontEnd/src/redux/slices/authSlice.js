@@ -1040,6 +1040,27 @@ const STAFF_TASK_ACHIEVEMENTS_URL = "/auth/staff-task-achievements";
 const TOTAL_USERS_URL = "/auth/total-users";
 
 // Thunks
+// export const signupUser = createAsyncThunk(
+//   "auth/signupUser",
+//   async (userData, { rejectWithValue }) => {
+//     try {
+//       const response = await apiClient.post(SIGNUP_URL, {
+//         fullName: userData.fullName,
+//         email: userData.email,
+//         password: userData.password,
+//         phoneNumber: userData.phoneNumber,
+//         roles: userData.roles || ["user"],
+//       });
+//       return response.data;
+//     } catch (error) {
+//       return rejectWithValue({
+//         message: error.response?.data?.message || "Failed to sign up",
+//         status: error.response?.status || 500,
+//       });
+//     }
+//   }
+// );
+
 export const signupUser = createAsyncThunk(
   "auth/signupUser",
   async (userData, { rejectWithValue }) => {
@@ -1070,6 +1091,8 @@ export const loginUser = createAsyncThunk(
         password: userData.password,
       };
       const response = await apiClient.post(AUTH_URL, requestData);
+      console.log("Login response headers:", response.headers); // Check for Set-Cookie
+      console.log("Login response data:", response.data);
       if (response.status === 202) {
         return {
           needsVerification: true,
@@ -1525,7 +1548,7 @@ const authSlice = createSlice({
       })
       .addCase(signupUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.result;
+        //state.user = action.payload.result;
       })
       .addCase(signupUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -1749,19 +1772,23 @@ const authSlice = createSlice({
       .addCase(checkAuthStatus.fulfilled, (state, action) => {
         console.log("checkAuthStatus fulfilled:", action.payload);
         state.isLoading = false;
-        state.user = action.payload.data;
+        //state.user = action.payload.data;
+        state.user = action.payload.data || action.payload;
         state.email = action.payload.data.email;
-        state.isVerified = action.payload.data.verified || false;
+        //state.isVerified = action.payload.data.verified || false;
+        state.isVerified =
+          action.payload.data?.verified || action.payload.verified || false;
         state.isAuthenticated = true;
+        state.status = "succeeded";
         state.error = null;
         state.needsVerification = false;
         state.codeSent = null;
-        state.status = "succeeded";
       })
       .addCase(checkAuthStatus.rejected, (state, action) => {
         console.log("checkAuthStatus rejected:", action.payload);
         state.isLoading = false;
-        state.error = action.payload;
+        //state.error = action.payload;
+        state.error = action.payload?.message || "Auth check failed";
         state.isAuthenticated = false;
         state.user = null;
         state.email = "";

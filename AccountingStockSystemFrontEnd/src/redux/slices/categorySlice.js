@@ -381,6 +381,34 @@ export const createCategory = createAsyncThunk(
   }
 );
 
+// export const updateCategory = createAsyncThunk(
+//   "categories/update",
+//   async ({ categoryId, categoryData }, { rejectWithValue }) => {
+//     try {
+//       const response = await apiClient.put(
+//         `${CATEGORIES_URL}/${categoryId}`,
+//         categoryData
+//       );
+//       return response.data.category;
+//     } catch (error) {
+//       console.error("Error updating category:", error); // Keep for console
+//       if (error.response) {
+//         return rejectWithValue({
+//           status: error.response.status,
+//           message:
+//             error.response.data.message || "Server error updating category",
+//           data: error.response.data,
+//         });
+//       } else if (error.request) {
+//         return rejectWithValue({ message: "No response from server" });
+//       } else {
+//         return rejectWithValue({
+//           message: error.message || "Failed to update category",
+//         });
+//       }
+//     }
+//   }
+// );
 export const updateCategory = createAsyncThunk(
   "categories/update",
   async ({ categoryId, categoryData }, { rejectWithValue }) => {
@@ -389,16 +417,11 @@ export const updateCategory = createAsyncThunk(
         `${CATEGORIES_URL}/${categoryId}`,
         categoryData
       );
-      return response.data.category;
+      return response.data; // Return full { success, message, category }
     } catch (error) {
-      console.error("Error updating category:", error); // Keep for console
+      console.error("Error updating category:", error);
       if (error.response) {
-        return rejectWithValue({
-          status: error.response.status,
-          message:
-            error.response.data.message || "Server error updating category",
-          data: error.response.data,
-        });
+        return rejectWithValue(error.response.data); // Use server-provided error
       } else if (error.request) {
         return rejectWithValue({ message: "No response from server" });
       } else {
@@ -487,17 +510,18 @@ const categoriesSlice = createSlice({
       .addCase(updateCategory.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.isLoading = false;
+        const updatedCategory = action.payload.category; // Extract category from payload
         const index = state.categories.findIndex(
-          (category) => category._id === action.payload._id
+          (category) => category._id === updatedCategory._id
         );
         if (index !== -1) {
-          state.categories[index] = action.payload;
+          state.categories[index] = updatedCategory;
         }
       })
       .addCase(updateCategory.rejected, (state, action) => {
         state.status = "failed";
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = action.payload; // Payload is now { success, message }
       })
       .addCase(deleteCategory.pending, (state) => {
         state.status = "loading";

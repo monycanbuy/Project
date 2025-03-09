@@ -46,7 +46,7 @@ exports.createSupplier = async (req, res) => {
       contactPhone,
       contactEmail,
       contactPerson,
-      staffInvolved: req.user.id,
+      staffInvolved: req.user.userId,
       //staffInvolved: [req.user.fullName], // Dynamically set staffInvolved to the user who created the supplier
     });
 

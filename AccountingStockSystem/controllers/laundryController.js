@@ -52,7 +52,7 @@ exports.createLaundry = async (req, res) => {
       paymentMethod,
       phoneNo,
       totalAmount: discountedTotal,
-      salesBy: req.user.id, // Example: logged-in user's ID
+      salesBy: req.user.userId, // Example: logged-in user's ID
       status, // Include status in the new laundry record
     });
 
@@ -70,9 +70,55 @@ exports.createLaundry = async (req, res) => {
   }
 };
 
+// exports.updateLaundry = async (req, res) => {
+//   try {
+//     // Validate request body
+//     const { error, value } = updateLaundrySchema.validate(req.body);
+//     if (error) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: error.details[0].message });
+//     }
+
+//     const { discount, services } = value;
+
+//     // Fetch existing laundry record
+//     const laundry = await Laundry.findById(req.params.id);
+//     if (!laundry) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Laundry record not found",
+//       });
+//     }
+
+//     // Calculate total amount if services are updated
+//     if (services) {
+//       const totalAmount = services.reduce((sum, service) => {
+//         return sum + service.qty * service.unitPrice;
+//       }, 0);
+
+//       value.totalAmount = totalAmount - totalAmount * (discount / 100);
+//     }
+
+//     // Update record
+//     Object.assign(laundry, value);
+//     await laundry.save();
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Laundry record updated successfully",
+//       data: laundry,
+//     });
+//   } catch (error) {
+//     console.error("Error updating laundry record:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Error updating laundry record",
+//     });
+//   }
+// };
 exports.updateLaundry = async (req, res) => {
   try {
-    // Validate request body
     const { error, value } = updateLaundrySchema.validate(req.body);
     if (error) {
       return res
@@ -82,7 +128,6 @@ exports.updateLaundry = async (req, res) => {
 
     const { discount, services } = value;
 
-    // Fetch existing laundry record
     const laundry = await Laundry.findById(req.params.id);
     if (!laundry) {
       return res.status(404).json({
@@ -91,17 +136,19 @@ exports.updateLaundry = async (req, res) => {
       });
     }
 
-    // Calculate total amount if services are updated
     if (services) {
       const totalAmount = services.reduce((sum, service) => {
         return sum + service.qty * service.unitPrice;
       }, 0);
-
       value.totalAmount = totalAmount - totalAmount * (discount / 100);
     }
 
-    // Update record
-    Object.assign(laundry, value);
+    console.log("Updating laundry with req.user:", req.user, "body:", req.body); // Debugging
+    const updateFields = { ...value };
+    if (updateFields.salesBy === undefined) {
+      delete updateFields.salesBy; // Preserve existing salesBy
+    }
+    Object.assign(laundry, updateFields);
     await laundry.save();
 
     res.status(200).json({

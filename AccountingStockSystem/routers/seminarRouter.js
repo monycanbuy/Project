@@ -1075,12 +1075,12 @@ router.put(
  *     parameters:
  *       - name: id
  *         in: path
- *         description: ID of the seminar to void
+ *         description: ID of the seminar to void (MongoDB ObjectId)
  *         required: true
  *         schema:
  *           type: string
- *           format: uuid
- *           example: "507f1f77bcf86cd799439011"
+ *           pattern: ^[0-9a-fA-F]{24}$  # Matches 24-character MongoDB ObjectId
+ *           example: "67bdf24613722afb566d3bbd"  # Example updated to ObjectId
  *     responses:
  *       '200':
  *         description: Seminar voided successfully
@@ -1089,7 +1089,7 @@ router.put(
  *             schema:
  *               $ref: '#/components/schemas/Seminar'
  *       '400':
- *         description: Seminar is already voided
+ *         description: Seminar is already voided or invalid ID
  *       '404':
  *         description: Seminar not found
  *       '500':

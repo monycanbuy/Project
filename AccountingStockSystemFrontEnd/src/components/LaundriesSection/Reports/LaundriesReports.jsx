@@ -249,6 +249,103 @@
 
 // export default LaundriesReports;
 
+// import { useEffect } from "react";
+// import { useDispatch, useSelector } from "react-redux";
+// import Typography from "@mui/material/Typography";
+// import Box from "@mui/material/Box";
+// import Stack from "@mui/material/Stack";
+// import LaundriesCharts from "../../../charts/Laundries/LaundryCharts";
+// import LaundriesRevenue from "../../../charts/Laundries/LaundriesRevenue";
+// import { fetchDailyLaundrySales } from "../../../redux/slices/laundrySlice"; // Adjust path
+
+// const LaundriesReports = () => {
+//   const dispatch = useDispatch();
+//   const { dailySales, dailySalesStatus, dailySalesError } = useSelector(
+//     (state) => state.laundry
+//   );
+
+//   // Fetch daily sales data on mount
+//   useEffect(() => {
+//     dispatch(fetchDailyLaundrySales({})); // Fetch today's sales
+//     // Optional: dispatch(fetchDailyLaundrySales({ date: "2025-02-23" })) for a specific date
+//   }, [dispatch]);
+
+//   // Extract data from Redux state with fallback values
+//   const totalSales = dailySales?.totalSales || 0;
+//   const paymentMethodSales = dailySales?.paymentMethodSales || {
+//     cash: 0,
+//     pos: 0,
+//     transfer: 0,
+//     "signing credit": 0,
+//     credit: 0,
+//   };
+
+//   // Prepare series data for payment methods (single value for simplicity)
+//   const paymentMethods = [
+//     { title: "Cash", value: paymentMethodSales.cash, key: "cash" },
+//     { title: "POS", value: paymentMethodSales.pos, key: "pos" },
+//     { title: "Transfer", value: paymentMethodSales.transfer, key: "transfer" },
+//     {
+//       title: "Signing Credit",
+//       value: paymentMethodSales["signing credit"],
+//       key: "signing credit",
+//     },
+//     { title: "Credit", value: paymentMethodSales.credit, key: "credit" },
+//   ];
+
+//   return (
+//     <Box>
+//       <Typography fontSize={25} fontWeight={700} color="#fe6c00">
+//         Dashboard
+//       </Typography>
+
+//       {/* Loading and Error States */}
+//       {dailySalesStatus === "loading" && (
+//         <Typography>Loading daily sales...</Typography>
+//       )}
+//       {dailySalesStatus === "failed" && (
+//         <Typography color="error">
+//           Error: {dailySalesError?.message || "Failed to load daily sales"}
+//         </Typography>
+//       )}
+
+//       {/* Display Charts when Data is Available */}
+//       {dailySalesStatus === "succeeded" && (
+//         <Box mt="20px" display="flex" flexWrap="wrap" gap={4}>
+//           {/* Total Sales Chart */}
+//           <LaundriesCharts
+//             title="Total Sales"
+//             value={`₦${totalSales.toFixed(2)}`}
+//             series={[totalSales]} // Single value for total sales
+//             colors={["#fe6c00"]}
+//           />
+
+//           {/* Payment Method Charts */}
+//           {paymentMethods.map((method) => (
+//             <LaundriesCharts
+//               key={method.key}
+//               title={method.title}
+//               value={`₦${method.value.toFixed(2)}`}
+//               series={[method.value]} // Single value for each payment method
+//               colors={["#275be8"]}
+//             />
+//           ))}
+//         </Box>
+//       )}
+
+//       <Stack
+//         mt="25px"
+//         width="100%"
+//         direction={{ xs: "column", lg: "row" }}
+//         gap={4}
+//       >
+//         <LaundriesRevenue />
+//       </Stack>
+//     </Box>
+//   );
+// };
+
+// export default LaundriesReports;
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Typography from "@mui/material/Typography";
@@ -256,7 +353,7 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import LaundriesCharts from "../../../charts/Laundries/LaundryCharts";
 import LaundriesRevenue from "../../../charts/Laundries/LaundriesRevenue";
-import { fetchDailyLaundrySales } from "../../../redux/slices/laundrySlice"; // Adjust path
+import { fetchDailyLaundrySales } from "../../../redux/slices/laundrySlice";
 
 const LaundriesReports = () => {
   const dispatch = useDispatch();
@@ -264,14 +361,18 @@ const LaundriesReports = () => {
     (state) => state.laundry
   );
 
-  // Fetch daily sales data on mount
   useEffect(() => {
-    dispatch(fetchDailyLaundrySales({})); // Fetch today's sales
-    // Optional: dispatch(fetchDailyLaundrySales({ date: "2025-02-23" })) for a specific date
-  }, [dispatch]);
+    if (dailySalesStatus === "idle") {
+      console.log("Fetching daily laundry sales...");
+      dispatch(fetchDailyLaundrySales({})); // Fetch today's sales
+    }
+  }, [dispatch, dailySalesStatus]);
 
-  // Extract data from Redux state with fallback values
-  const totalSales = dailySales?.totalSales || 0;
+  // Robust fallbacks
+  const totalSales =
+    dailySales && typeof dailySales.totalSales === "number"
+      ? dailySales.totalSales
+      : 0;
   const paymentMethodSales = dailySales?.paymentMethodSales || {
     cash: 0,
     pos: 0,
@@ -280,17 +381,20 @@ const LaundriesReports = () => {
     credit: 0,
   };
 
-  // Prepare series data for payment methods (single value for simplicity)
   const paymentMethods = [
-    { title: "Cash", value: paymentMethodSales.cash, key: "cash" },
-    { title: "POS", value: paymentMethodSales.pos, key: "pos" },
-    { title: "Transfer", value: paymentMethodSales.transfer, key: "transfer" },
+    { title: "Cash", value: paymentMethodSales.cash || 0, key: "cash" },
+    { title: "POS", value: paymentMethodSales.pos || 0, key: "pos" },
+    {
+      title: "Transfer",
+      value: paymentMethodSales.transfer || 0,
+      key: "transfer",
+    },
     {
       title: "Signing Credit",
-      value: paymentMethodSales["signing credit"],
+      value: paymentMethodSales["signing credit"] || 0,
       key: "signing credit",
     },
-    { title: "Credit", value: paymentMethodSales.credit, key: "credit" },
+    { title: "Credit", value: paymentMethodSales.credit || 0, key: "credit" },
   ];
 
   return (
@@ -309,24 +413,21 @@ const LaundriesReports = () => {
         </Typography>
       )}
 
-      {/* Display Charts when Data is Available */}
-      {dailySalesStatus === "succeeded" && (
+      {/* Render Charts Only When Data is Valid */}
+      {dailySalesStatus === "succeeded" && dailySales && (
         <Box mt="20px" display="flex" flexWrap="wrap" gap={4}>
-          {/* Total Sales Chart */}
           <LaundriesCharts
             title="Total Sales"
             value={`₦${totalSales.toFixed(2)}`}
-            series={[totalSales]} // Single value for total sales
+            series={[totalSales]}
             colors={["#fe6c00"]}
           />
-
-          {/* Payment Method Charts */}
           {paymentMethods.map((method) => (
             <LaundriesCharts
               key={method.key}
               title={method.title}
               value={`₦${method.value.toFixed(2)}`}
-              series={[method.value]} // Single value for each payment method
+              series={[method.value]}
               colors={["#275be8"]}
             />
           ))}

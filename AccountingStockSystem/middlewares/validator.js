@@ -138,14 +138,15 @@ exports.updateRoleSchema = Joi.object({
 }).min(1); // This ensures at least one key is present in the object
 
 // Permission Schemas
+
 exports.createPermissionSchema = Joi.object({
   name: Joi.string()
     .required()
     .min(3)
-    .pattern(/^[a-z]+:[a-z]+$/i) // e.g., "read:users"
+    .pattern(/^[a-z]+:[a-z*]+$/i) // Allow "action:resource" or "action:*"
     .messages({
       "string.pattern.base":
-        "Permission name must follow 'action:resource' format (e.g., 'read:users')",
+        "Permission name must follow 'action:resource' format (e.g., 'read:users') or 'action:*' (e.g., 'void:*')",
       "string.min": "Permission name must be at least 3 characters",
       "any.required": "Permission name is required",
     }),
@@ -155,10 +156,10 @@ exports.createPermissionSchema = Joi.object({
 exports.updatePermissionSchema = Joi.object({
   name: Joi.string()
     .min(3)
-    .pattern(/^[a-z]+:[a-z]+$/i)
+    .pattern(/^[a-z]+:[a-z*]+$/i) // Allow "action:resource" or "action:*"
     .messages({
       "string.pattern.base":
-        "Permission name must follow 'action:resource' format (e.g., 'read:users')",
+        "Permission name must follow 'action:resource' format (e.g., 'read:users') or 'action:*' (e.g., 'void:*')",
       "string.min": "Permission name must be at least 3 characters",
     }),
   description: Joi.string().optional().allow(""),

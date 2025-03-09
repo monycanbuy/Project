@@ -183,6 +183,36 @@ exports.getAlerts = async (req, res) => {
     });
   }
 };
+// exports.getAlerts = async (req, res) => {
+//   try {
+//     const { page = 1, limit = 10 } = req.query;
+
+//     const alerts = await Alert.find()
+//       .populate("user", "fullName")
+//       .sort({ createdAt: -1 }) // Order by descending
+//       .skip((page - 1) * limit)
+//       .limit(parseInt(limit));
+
+//     const totalAlerts = await Alert.countDocuments();
+
+//     res.status(200).json({
+//       success: true,
+//       data: alerts,
+//       pagination: {
+//         total: totalAlerts,
+//         page: parseInt(page),
+//         limit: parseInt(limit),
+//         totalPages: Math.ceil(totalAlerts / limit),
+//       },
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: "Error fetching alerts",
+//       error: error.message,
+//     });
+//   }
+// };
 
 // Create a new alert
 // exports.createAlert = async (req, res) => {
