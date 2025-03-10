@@ -25,6 +25,31 @@ import react from "@vitejs/plugin-react";
 //     },
 //   },
 // });
+// export default defineConfig({
+//   plugins: [react()],
+//   resolve: {
+//     mainFields: ["browser", "module", "main"],
+//   },
+//   server: {
+//     proxy: {
+//       "/api": {
+//         target:
+//           process.env.NODE_ENV === "development"
+//             ? "http://localhost:8000"
+//             : "https://accounting-stock-system-backend.onrender.com",
+//         changeOrigin: true,
+//         secure: process.env.NODE_ENV !== "development",
+//         //secure: false, // For dev (http)
+//         configure: (proxy, options) => {
+//           proxy.on("proxyReq", (proxyReq, req, res) => {
+//             proxyReq.setHeader("Origin", "http://localhost:5173");
+//           });
+//         },
+//       },
+//     },
+//   },
+// });
+
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -38,13 +63,7 @@ export default defineConfig({
             ? "http://localhost:8000"
             : "https://accounting-stock-system-backend.onrender.com",
         changeOrigin: true,
-        secure: process.env.NODE_ENV !== "development",
-        //secure: false, // For dev (http)
-        configure: (proxy, options) => {
-          proxy.on("proxyReq", (proxyReq, req, res) => {
-            proxyReq.setHeader("Origin", "http://localhost:5173");
-          });
-        },
+        secure: process.env.NODE_ENV !== "development", // HTTPS in prod, HTTP in dev
       },
     },
   },
