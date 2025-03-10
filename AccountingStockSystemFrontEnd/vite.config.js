@@ -38,7 +38,8 @@ export default defineConfig({
             ? "http://localhost:8000"
             : "https://accounting-stock-system-backend.onrender.com",
         changeOrigin: true,
-        secure: false, // For dev (http)
+        secure: process.env.NODE_ENV !== "development",
+        //secure: false, // For dev (http)
         configure: (proxy, options) => {
           proxy.on("proxyReq", (proxyReq, req, res) => {
             proxyReq.setHeader("Origin", "http://localhost:5173");
