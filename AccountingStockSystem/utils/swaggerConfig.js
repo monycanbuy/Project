@@ -277,8 +277,10 @@ const swaggerOptions = {
         },
       },
     },
-    servers: [{ url: `http://localhost:${process.env.PORT || 5000}` }],
-    schemes: ["http", "https"],
+    //servers: [{ url: `http://localhost:${process.env.PORT || 5000}` }],
+    url: "https://accounting-stock-system-backend.onrender.com",
+    description: "Production Server",
+    //schemes: ["http", "https"],
   },
   apis: [
     "./routers/*.js",

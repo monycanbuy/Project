@@ -132,12 +132,7 @@ const verifyToken = (req, res, next) => {
 // };
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-// app.use(
-//   cors({
-//     origin: allowedOrigins,
-//     credentials: true, // Allow cookies and headers
-//   })
-// );
+
 // app.use(
 //   cors({
 //     origin: (origin, callback) => {
@@ -150,33 +145,12 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 //     credentials: true,
 //     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 //     allowedHeaders: ["Content-Type", "Authorization"],
-//   })
-// );
-// app.use(
-//   cors({
-//     origin: (origin, callback) => {
-//       const allowedOrigins = ["http://localhost:8000", "http://localhost:5173"];
-//       if (!origin || allowedOrigins.includes(origin)) {
-//         callback(null, true);
-//       } else {
-//         callback(new Error("Not allowed by CORS"));
-//       }
-//     },
-//     credentials: true,
-//     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-//     allowedHeaders: ["Content-Type", "Authorization"],
-//     exposedHeaders: ["Set-Cookie"], // Expose Set-Cookie to frontend
+//     exposedHeaders: ["Set-Cookie"],
 //   })
 // );
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: "*", // Allow all origins for testing
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
