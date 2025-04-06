@@ -165,13 +165,21 @@ app.use(
 );
 
 // Ensure static files also respect CORS
+// app.use(
+//   "/uploads",
+//   (req, res, next) => {
+//     res.header("Access-Control-Allow-Origin", "http://localhost:5173"); // Match frontend origin
+//     res.header("Access-Control-Allow-Credentials", "true");
+//     next();
+//   },
+//   express.static(path.join(__dirname, "uploads"))
+// );
 app.use(
   "/uploads",
-  (req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "http://localhost:5173"); // Match frontend origin
-    res.header("Access-Control-Allow-Credentials", "true");
-    next();
-  },
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  }),
   express.static(path.join(__dirname, "uploads"))
 );
 
