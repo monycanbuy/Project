@@ -1,9 +1,16 @@
 const mongoose = require("mongoose");
+const moment = require("moment-timezone");
 
 const laundrySchema = new mongoose.Schema(
   {
     customer: { type: String, required: true },
     receiptNo: { type: String, required: true },
+    transactionDate: {
+      // Added laundryDate field
+      type: Date,
+      required: true,
+      default: () => moment.tz("Africa/Lagos").toDate(), // Default to current WAT
+    },
     discount: { type: Number, default: 0 },
     services: [
       {
@@ -30,9 +37,9 @@ const laundrySchema = new mongoose.Schema(
     totalAmount: { type: Number, required: true },
     salesBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Reference to User model
+      ref: "User",
       required: true,
-    }, // Example: logged-in user creating the laundry record
+    },
     isVoided: { type: Boolean, default: false },
   },
   { timestamps: true }

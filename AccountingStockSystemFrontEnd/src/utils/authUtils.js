@@ -166,34 +166,68 @@
 
 export const hasPermission = (user, permission) => {
   if (!user || !user.roles || !Array.isArray(user.roles)) {
-    console.log("hasPermission: Invalid user or roles", { user });
+    //console.log("hasPermission: Invalid user or roles", { user });
     return false;
   }
 
+  // const hasPerm = user.roles.some((role) => {
+  //   if (role.name && Array.isArray(role.permissions)) {
+  //     if (role.name === "admin") return true;
+  //     return role.permissions.includes(permission);
+  //   }
+  //   if (typeof role === "string") {
+  //     return role === "admin";
+  //   }
+  //   return false;
+  // });
   const hasPerm = user.roles.some((role) => {
-    if (role.name && Array.isArray(role.permissions)) {
-      if (role.name === "admin") return true; // Admin gets all permissions
-      return role.permissions.includes(permission);
-    }
-    if (typeof role === "string") {
-      return role === "admin";
+    if (role.name === "admin") return true; // Admin wildcard
+    if (Array.isArray(role.permissions)) {
+      return (
+        role.permissions.includes(permission) ||
+        role.permissions.includes(`${permission.split(":")[0]}:*`) // Wildcard support
+      );
     }
     return false;
   });
 
-  console.log(`Checking permission '${permission}' for user:`, {
-    roles: user.roles,
-    result: hasPerm,
-  });
+  // console.log(`Checking permission '${permission}' for user:`, {
+  //   roles: user.roles,
+  //   result: hasPerm,
+  // });
   return hasPerm;
 };
 
+// export const hasPermission = (user, permission) => {
+//   if (!user || !user.roles || !Array.isArray(user.roles)) {
+//     console.log("hasPermission: Invalid user or roles", { user });
+//     return false;
+//   }
+
+//   const hasPerm = user.roles.some((role) => {
+//     if (role.name && Array.isArray(role.permissions)) {
+//       if (role.name === "admin") return true; // Admin gets all permissions
+//       return role.permissions.includes(permission);
+//     }
+//     if (typeof role === "string") {
+//       return role === "admin";
+//     }
+//     return false;
+//   });
+
+//   console.log(`Checking permission '${permission}' for user:`, {
+//     roles: user.roles,
+//     result: hasPerm,
+//   });
+//   return hasPerm;
+// };
+
 export const getAuthorizedRoute = (user, isAuthenticated) => {
   if (!user || !isAuthenticated || !user.roles || !Array.isArray(user.roles)) {
-    console.log("Redirecting to /login: invalid user or auth state", {
-      user,
-      isAuthenticated,
-    });
+    // console.log("Redirecting to /login: invalid user or auth state", {
+    //   user,
+    //   isAuthenticated,
+    // });
     return "/login";
   }
 
@@ -329,20 +363,33 @@ export const getAuthorizedRoute = (user, isAuthenticated) => {
       permission: "void:salestransactions",
       route: "/admin/unified-transaction",
     },
+    {
+      permission: "read:profile",
+      route: "/admin/profile",
+    },
+    {
+      permission: "write:profile",
+      route: "/admin/profile",
+    },
+    {
+      permission: "update:profile",
+      route: "/admin/profile",
+    },
   ];
 
   if (user.roles.some((role) => (role.name || role) === "admin")) {
-    console.log("Redirecting to /admin/users: admin role found");
+    //console.log("Redirecting to /admin/users: admin role found");
     return "/admin/users"; // Default for admin
   }
 
   for (const { permission, route } of permissionRoutes) {
     if (hasPermission(user, permission)) {
-      console.log(`Redirecting to ${route}: ${permission} permission found`);
+      //console.log(`Redirecting to ${route}: ${permission} permission found`);
       return route;
     }
   }
 
-  console.log("Redirecting to /unauthorized: no matching permissions");
-  return "/unauthorized";
+  //console.log("Redirecting to /unauthorized: no matching permissions");
+  return "/admin/profile";
+  //return "/unauthorized";
 };

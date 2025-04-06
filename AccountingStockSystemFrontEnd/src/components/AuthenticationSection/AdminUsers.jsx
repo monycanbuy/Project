@@ -1268,7 +1268,7 @@ const AdminUsers = () => {
   const [userToDelete, setUserToDelete] = useState(null);
 
   useEffect(() => {
-    console.log("AdminUsers - Initial fetch...");
+    //console.log("AdminUsers - Initial fetch...");
     if (isAuthenticated) {
       dispatch(fetchAllUsers());
       dispatch(fetchRoles());
@@ -1278,7 +1278,7 @@ const AdminUsers = () => {
   }, [dispatch, isAuthenticated]);
 
   useEffect(() => {
-    console.log("AdminUsers - State:", { users, roles, authError, rolesError });
+    //console.log("AdminUsers - State:", { users, roles, authError, rolesError });
     if (users && Array.isArray(users)) {
       const formattedData = users.map((user) => ({
         id: user._id,
@@ -1326,7 +1326,7 @@ const AdminUsers = () => {
         isLocked: originalUser.isLocked,
         availableRoles: roles,
       };
-      console.log("Edit Data:", userData);
+      //console.log("Edit Data:", userData);
       setEditData(userData);
       setDrawerOpen(true);
     },
@@ -1539,15 +1539,22 @@ const AdminUsers = () => {
       MuiDataGrid: {
         styleOverrides: {
           root: {
-            backgroundColor: "#f0f0f0",
+            "& .MuiPaper-root": {
+              backgroundColor: "#f0f0f0",
+            },
             "& .MuiDataGrid-row": {
               backgroundColor: "#29221d",
               "&:hover": {
                 backgroundColor: "#1e1611",
-                "& .MuiDataGrid-cell": { color: "#bdbabb" },
+                "& .MuiDataGrid-cell": {
+                  color: "#bdbabb",
+                },
               },
             },
-            "& .MuiDataGrid-cell": { color: "#fff", fontSize: "18px" }, // ✅ Keep only one
+            "& .MuiDataGrid-cell": {
+              color: "#fff",
+              fontSize: "18px",
+            },
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: "#e0e0e0",
               "& .MuiDataGrid-columnHeaderTitle": {
@@ -1555,21 +1562,21 @@ const AdminUsers = () => {
                 fontSize: "18px",
                 fontWeight: "bold",
               },
-            }, // ✅ Keep only one
+            },
             "& .MuiDataGrid-footerContainer": {
-              backgroundColor: "#29221d",
-              color: "#fcfcfc",
-              "& .MuiTablePagination-root": { color: "#fcfcfc" },
-              "& .MuiIconButton-root": { color: "#fcfcfc" },
+              backgroundColor: "#29221d", // Match row background
+              color: "#fcfcfc", // Light text for visibility
+              "& .MuiTablePagination-root": {
+                color: "#fcfcfc",
+              },
+              "& .MuiIconButton-root": {
+                color: "#fcfcfc",
+              },
             },
             "@media print": {
               "& .MuiDataGrid-main": {
-                color: "#000",
+                color: "#000", // Ensure text is readable when printing
               },
-            },
-            "& .MuiDataGrid-toolbarContainer": {
-              backgroundColor: "#d0d0d0",
-              "& .MuiButton-root": { color: "#3f51b5" },
             },
           },
         },

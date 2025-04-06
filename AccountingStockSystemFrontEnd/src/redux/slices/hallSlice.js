@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { apiClient } from "./authSlice";
+import { apiClient } from "../../utils/apiClient";
 
 // API Base URL
 const BASE_URL = "/hall-transactions";
@@ -62,13 +62,13 @@ export const updateHallTransaction = createAsyncThunk(
   "hallTransactions/updateHallTransaction",
   async ({ id, transactionData }, { rejectWithValue }) => {
     try {
-      console.log("Updating transaction with ID:", id);
-      console.log("Transaction data being sent to backend:", transactionData);
+      // console.log("Updating transaction with ID:", id);
+      // console.log("Transaction data being sent to backend:", transactionData);
       const response = await apiClient.put(
         `${BASE_URL}/${id}`,
         transactionData
       );
-      console.log("Response from backend:", response.data);
+      //console.log("Response from backend:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error from backend:", error.response?.data);
@@ -110,7 +110,7 @@ export const fetchHallSummary = createAsyncThunk(
       const response = await apiClient.get(`${BASE_URL}/summary`, {
         params: params,
       });
-      console.log("API Response:", response.data);
+      //console.log("API Response:", response.data);
       return response.data; // Directly return the data as it matches your expected structure
     } catch (error) {
       // Handle errors

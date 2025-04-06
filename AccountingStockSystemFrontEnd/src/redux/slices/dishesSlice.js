@@ -3,7 +3,7 @@ import {
   createAsyncThunk,
   createSelector,
 } from "@reduxjs/toolkit";
-import { apiClient } from "./authSlice";
+import { apiClient } from "../../utils/apiClient";
 
 // Base URL for the API
 const API_URL = "/dishes";
@@ -45,10 +45,10 @@ export const updateDish = createAsyncThunk(
   "dishes/updateDish",
   async ({ dishId, dishData }, { rejectWithValue }) => {
     try {
-      console.log("Inside updateDish thunk - dishId:", dishId); // Log 1: Check dishId
-      console.log("Inside updateDish thunk - dishData:", dishData);
+      // console.log("Inside updateDish thunk - dishId:", dishId); // Log 1: Check dishId
+      // console.log("Inside updateDish thunk - dishData:", dishData);
       const response = await apiClient.put(`${API_URL}/${dishId}`, dishData);
-      console.log("Inside updateDish thunk - response.data:", response.data); // Log 3: Check API response
+      //console.log("Inside updateDish thunk - response.data:", response.data); // Log 3: Check API response
       return response.data.dish; // Assuming response.data.dish contains the updated dish
     } catch (error) {
       console.error("Error updating dish:", error);

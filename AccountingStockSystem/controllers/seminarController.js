@@ -1,13 +1,225 @@
+const mongoose = require("mongoose");
 const Seminar = require("../models/seminarsModel");
 const OrderItem = require("../models/orderItemModel");
 const PaymentMethod = require("../models/PaymentMethodModel"); // Assuming this is your PaymentMethod model file
-
+const moment = require("moment-timezone");
 const {
   createSeminarSchema,
   updateSeminarSchema,
 } = require("../middlewares/validator");
 
 //create Seminar
+// exports.createSeminar = async (req, res) => {
+//   try {
+//     console.log("Request Body:", req.body);
+//     console.log("User Info:", req.user);
+//     const {
+//       organizationName,
+//       contactPhone,
+//       seminarDate,
+//       orderItems,
+//       address,
+//       eventType,
+//       paymentMethod,
+//       status,
+//       additionalNotes,
+//       discount,
+//     } = req.body;
+
+//     if (!req.user || !req.user.userId) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "User information is missing.",
+//       });
+//     }
+
+//     // Ensure orderItems is an array and has content
+//     if (!Array.isArray(orderItems) || orderItems.length === 0) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "At least one order item is required.",
+//       });
+//     }
+
+//     // Fetch OrderItems by name and prepare for Seminar creation
+//     const updatedOrderItems = await Promise.all(
+//       orderItems.map(async (item) => {
+//         const orderItem = await OrderItem.findOne({ itemName: item.itemName });
+//         if (!orderItem) {
+//           throw new Error(`OrderItem with name ${item.itemName} not found`);
+//         }
+//         return {
+//           itemId: orderItem._id, // Use itemId for linking
+//           itemName: item.itemName, // Keep itemName for display
+//           qty: item.qty,
+//           unitPrice: orderItem.unitPrice, // Use the unitPrice from OrderItem for consistency
+//         };
+//       })
+//     );
+
+//     // Calculate total amount based on updated order items
+//     const totalAmount = updatedOrderItems.reduce((sum, item) => {
+//       return sum + item.qty * item.unitPrice;
+//     }, 0);
+
+//     const discountedTotal = totalAmount - totalAmount * (discount / 100);
+
+//     // Create the new seminar record
+//     const newSeminar = await Seminar.create({
+//       organizationName,
+//       contactPhone,
+//       seminarDate,
+//       orderItems: updatedOrderItems, // Use the updated items with itemId
+//       address,
+//       eventType,
+//       paymentMethod,
+//       status,
+//       additionalNotes,
+//       discount,
+//       totalAmount: discountedTotal,
+//       salesBy: req.user.userId, // Example: logged-in user's ID
+//     });
+
+//     // If you need to return populated data for immediate display:
+//     const populatedSeminar = await Seminar.findById(newSeminar._id)
+//       .populate("orderItems.itemId", "itemName unitPrice")
+//       .populate("paymentMethod", "name")
+//       .populate("salesBy", "fullName");
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Seminar record created successfully",
+//       data: populatedSeminar, // Send back the populated Seminar for immediate use
+//     });
+//   } catch (error) {
+//     console.error("Error creating seminar record:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Error creating seminar record",
+//     });
+//   }
+// };
+// exports.createSeminar = async (req, res) => {
+//   try {
+//     console.log("Request Body:", req.body);
+//     console.log("User Info:", req.user);
+//     const {
+//       organizationName,
+//       contactPhone,
+//       seminarDate,
+//       transactionDate, // Added
+//       orderItems,
+//       address,
+//       eventType,
+//       paymentMethod,
+//       status,
+//       additionalNotes,
+//       discount,
+//     } = req.body;
+
+//     if (!req.user || !req.user.userId) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "User information is missing.",
+//       });
+//     }
+
+//     // Ensure orderItems is an array and has content
+//     if (!Array.isArray(orderItems) || orderItems.length === 0) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "At least one order item is required.",
+//       });
+//     }
+
+//     // Handle transactionDate: Use provided value or default to current WAT
+//     const parsedTransactionDate = transactionDate
+//       ? moment.tz(transactionDate, "Africa/Lagos").toDate()
+//       : moment.tz("Africa/Lagos").toDate();
+
+//     // Fetch OrderItems by name and prepare for Seminar creation
+//     const updatedOrderItems = await Promise.all(
+//       orderItems.map(async (item) => {
+//         const orderItem = await OrderItem.findOne({ itemName: item.itemName });
+//         if (!orderItem) {
+//           throw new Error(`OrderItem with name ${item.itemName} not found`);
+//         }
+//         return {
+//           itemId: orderItem._id,
+//           itemName: item.itemName,
+//           qty: item.qty,
+//           unitPrice: orderItem.unitPrice,
+//         };
+//       })
+//     );
+
+//     // Calculate total amount based on updated order items
+//     const totalAmount = updatedOrderItems.reduce((sum, item) => {
+//       return sum + item.qty * item.unitPrice;
+//     }, 0);
+
+//     const discountedTotal = totalAmount - totalAmount * (discount / 100);
+
+//     // Create the new seminar record
+//     const newSeminar = await Seminar.create({
+//       organizationName,
+//       contactPhone,
+//       seminarDate,
+//       transactionDate: parsedTransactionDate, // Added
+//       orderItems: updatedOrderItems,
+//       address,
+//       eventType,
+//       paymentMethod,
+//       status,
+//       additionalNotes,
+//       discount,
+//       totalAmount: discountedTotal,
+//       salesBy: req.user.userId,
+//     });
+
+//     // Populate data for response
+//     const populatedSeminar = await Seminar.findById(newSeminar._id)
+//       .populate("orderItems.itemId", "itemName unitPrice")
+//       .populate("paymentMethod", "name")
+//       .populate("salesBy", "fullName");
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Seminar record created successfully",
+//       data: populatedSeminar,
+//     });
+//   } catch (error) {
+//     console.error("Error creating seminar record:", error);
+//     if (error.message.includes("Transaction date cannot be before")) {
+//       return res.status(400).json({ success: false, message: error.message });
+//     }
+//     res.status(500).json({
+//       success: false,
+//       message: "Error creating seminar record: " + error.message,
+//     });
+//   }
+// };
+
+// get all seminar
+// exports.getAllSeminars = async (req, res) => {
+//   try {
+//     const seminars = await Seminar.find()
+//       .populate("orderItems", "itemName unitPrice") // Assuming 'itemName' is the field name for the ObjectId reference to OrderItem
+//       .populate("paymentMethod", "name")
+//       .populate("salesBy", "fullName");
+
+//     res.status(200).json({
+//       success: true,
+//       data: seminars,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching seminars records:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Error fetching seminars records",
+//     });
+//   }
+// };
 exports.createSeminar = async (req, res) => {
   try {
     console.log("Request Body:", req.body);
@@ -40,6 +252,11 @@ exports.createSeminar = async (req, res) => {
       });
     }
 
+    // Convert seminarDate to WAT timezone
+    const watSeminarDate = seminarDate
+      ? moment.tz(seminarDate, "Africa/Lagos").toDate()
+      : moment.tz("Africa/Lagos").toDate(); // Default to now if not provided
+
     // Fetch OrderItems by name and prepare for Seminar creation
     const updatedOrderItems = await Promise.all(
       orderItems.map(async (item) => {
@@ -48,10 +265,10 @@ exports.createSeminar = async (req, res) => {
           throw new Error(`OrderItem with name ${item.itemName} not found`);
         }
         return {
-          itemId: orderItem._id, // Use itemId for linking
-          itemName: item.itemName, // Keep itemName for display
+          itemId: orderItem._id,
+          itemName: item.itemName,
           qty: item.qty,
-          unitPrice: orderItem.unitPrice, // Use the unitPrice from OrderItem for consistency
+          unitPrice: orderItem.unitPrice,
         };
       })
     );
@@ -67,8 +284,8 @@ exports.createSeminar = async (req, res) => {
     const newSeminar = await Seminar.create({
       organizationName,
       contactPhone,
-      seminarDate,
-      orderItems: updatedOrderItems, // Use the updated items with itemId
+      seminarDate: watSeminarDate,
+      orderItems: updatedOrderItems,
       address,
       eventType,
       paymentMethod,
@@ -76,10 +293,10 @@ exports.createSeminar = async (req, res) => {
       additionalNotes,
       discount,
       totalAmount: discountedTotal,
-      salesBy: req.user.userId, // Example: logged-in user's ID
+      salesBy: req.user.userId,
     });
 
-    // If you need to return populated data for immediate display:
+    // Populate data for response
     const populatedSeminar = await Seminar.findById(newSeminar._id)
       .populate("orderItems.itemId", "itemName unitPrice")
       .populate("paymentMethod", "name")
@@ -88,7 +305,7 @@ exports.createSeminar = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Seminar record created successfully",
-      data: populatedSeminar, // Send back the populated Seminar for immediate use
+      data: populatedSeminar,
     });
   } catch (error) {
     console.error("Error creating seminar record:", error);
@@ -98,13 +315,14 @@ exports.createSeminar = async (req, res) => {
     });
   }
 };
-// get all seminar
+
 exports.getAllSeminars = async (req, res) => {
   try {
     const seminars = await Seminar.find()
-      .populate("orderItems", "itemName unitPrice") // Assuming 'itemName' is the field name for the ObjectId reference to OrderItem
+      .populate("orderItems.itemId", "itemName unitPrice") // Corrected population
       .populate("paymentMethod", "name")
-      .populate("salesBy", "fullName");
+      .populate("salesBy", "fullName")
+      .sort({ seminarDate: -1 }); // Sort by transactionDate, descending
 
     res.status(200).json({
       success: true,
@@ -118,6 +336,7 @@ exports.getAllSeminars = async (req, res) => {
     });
   }
 };
+
 //get Seminar by id
 exports.getSeminarById = async (req, res) => {
   const { id } = req.params;
@@ -144,9 +363,101 @@ exports.getSeminarById = async (req, res) => {
   }
 };
 //update Seminar
+// exports.updateSeminar = async (req, res) => {
+//   try {
+//     // Validate request body
+//     console.log("Request Body Before Validation:", req.body);
+//     const { error, value } = updateSeminarSchema.validate(req.body);
+//     console.log("Validated value:", value);
+//     if (error) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: error.details[0].message });
+//     }
+
+//     const {
+//       orderItems,
+//       discount,
+//       status,
+//       paymentMethod,
+//       additionalNotes,
+//       organizationName,
+//       contactPhone,
+//       seminarDate,
+//       address,
+//       eventType,
+//     } = value;
+
+//     // Fetch existing seminar record
+//     const seminar = await Seminar.findById(req.params.id);
+//     if (!seminar) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Seminar record not found",
+//       });
+//     }
+
+//     // Fetch OrderItems by name and prepare for Seminar update
+//     const updatedOrderItems = await Promise.all(
+//       orderItems.map(async (item) => {
+//         const orderItem = await OrderItem.findOne({ itemName: item.itemName });
+//         if (!orderItem) {
+//           throw new Error(`OrderItem with name ${item.itemName} not found`);
+//         }
+//         return {
+//           itemId: orderItem._id,
+//           itemName: item.itemName,
+//           qty: item.qty,
+//           unitPrice: orderItem.unitPrice,
+//         };
+//       })
+//     );
+
+//     // Calculate total amount based on updated order items
+//     const totalAmount = updatedOrderItems.reduce((sum, item) => {
+//       return sum + item.qty * item.unitPrice;
+//     }, 0);
+
+//     const discountedTotal = totalAmount - totalAmount * (discount / 100);
+
+//     // Update Seminar record, excluding salesBy
+//     const updateData = {
+//       organizationName,
+//       contactPhone,
+//       seminarDate,
+//       orderItems: updatedOrderItems,
+//       address,
+//       eventType,
+//       paymentMethod,
+//       status,
+//       additionalNotes,
+//       discount,
+//       totalAmount: discountedTotal,
+//     };
+
+//     const updatedSeminar = await Seminar.findByIdAndUpdate(
+//       req.params.id,
+//       updateData,
+//       { new: true, runValidators: true }
+//     )
+//       .populate("orderItems.itemId", "itemName unitPrice")
+//       .populate("paymentMethod", "name");
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Seminar record updated successfully",
+//       data: updatedSeminar,
+//     });
+//   } catch (error) {
+//     console.error("Error updating seminar record:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Error updating seminar record: " + error.message,
+//     });
+//   }
+// };
 exports.updateSeminar = async (req, res) => {
   try {
-    // Validate request body
     console.log("Request Body Before Validation:", req.body);
     const { error, value } = updateSeminarSchema.validate(req.body);
     console.log("Validated value:", value);
@@ -178,6 +489,11 @@ exports.updateSeminar = async (req, res) => {
       });
     }
 
+    // Convert seminarDate to WAT timezone
+    const watSeminarDate = seminarDate
+      ? moment.tz(seminarDate, "Africa/Lagos").toDate()
+      : seminar.seminarDate; // Keep existing date if not provided
+
     // Fetch OrderItems by name and prepare for Seminar update
     const updatedOrderItems = await Promise.all(
       orderItems.map(async (item) => {
@@ -201,11 +517,11 @@ exports.updateSeminar = async (req, res) => {
 
     const discountedTotal = totalAmount - totalAmount * (discount / 100);
 
-    // Update Seminar record, excluding salesBy
+    // Update Seminar record
     const updateData = {
       organizationName,
       contactPhone,
-      seminarDate,
+      seminarDate: watSeminarDate,
       orderItems: updatedOrderItems,
       address,
       eventType,
@@ -238,7 +554,6 @@ exports.updateSeminar = async (req, res) => {
   }
 };
 //void Seminar
-const mongoose = require("mongoose");
 
 exports.voidSeminar = async (req, res) => {
   const { id } = req.params;
@@ -498,7 +813,13 @@ exports.getSalesData = async (req, res) => {
     }
     // initialize event sales if it's empty
     // Initialize eventSales with all event types and default values of 0
-    const allEventTypes = ["conference", "workshop", "webinar", "Wedding"]; //  enum values
+    const allEventTypes = [
+      "conference",
+      "workshop",
+      "webinar",
+      "Wedding",
+      "Outdoor Catering",
+    ]; //  enum values
     allEventTypes.forEach((type) => {
       if (!result.eventSales[type]) {
         result.eventSales[type] = 0;

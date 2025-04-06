@@ -1,393 +1,4 @@
 // import React, { useEffect, useState } from "react";
-// import MUIDataTable from "mui-datatables";
-// import { createTheme, ThemeProvider } from "@mui/material/styles";
-// import {
-//   Button,
-//   CircularProgress,
-//   Box,
-//   Dialog,
-//   DialogActions,
-//   DialogContent,
-//   DialogContentText,
-//   DialogTitle,
-//   Tabs,
-//   Tab,
-// } from "@mui/material";
-// import { TabContext, TabList, TabPanel } from "@mui/lab";
-// import "boxicons";
-// import { useDispatch, useSelector } from "react-redux";
-// import {
-//   fetchHallTransactions,
-//   voidHallTransaction,
-// } from "../../redux/slices/hallSlice";
-// import { fetchPaymentMethods } from "../../redux/slices/paymentMethodsSlice";
-// import { hasPermission } from "../../utils/authUtils";
-// import AddNewHallDrawer from "../AddDrawerSection/AddNewHallDrawer";
-// import { Toaster, toast } from "react-hot-toast";
-// import HallReports from "./Reports/HallReports";
-
-// const Hall = () => {
-//   const dispatch = useDispatch();
-//   const {
-//     transactions: hallTransactions = [],
-//     isLoading,
-//     error,
-//   } = useSelector((state) => state.hallTransactions || {});
-//   const { paymentMethods } = useSelector((state) => state.paymentMethods);
-//   const { user } = useSelector((state) => state.auth);
-//   const [data, setData] = useState([]);
-//   const [totalAmountSum, setTotalAmountSum] = useState(0);
-//   const [drawerOpen, setDrawerOpen] = useState(false);
-//   const [editData, setEditData] = useState(null);
-//   const [openVoidDialog, setOpenVoidDialog] = useState(false); // State for voiding confirmation dialog
-//   const [hallToVoid, setHallToVoid] = useState(null); // State to hold the hall transaction to void
-//   const [value, setValue] = useState("0");
-
-//   const formatDate = (isoDate) => {
-//     if (!isoDate) return "N/A";
-//     const date = new Date(isoDate);
-//     return !isNaN(date.getTime())
-//       ? date.toLocaleString("en-US", {
-//           dateStyle: "medium",
-//           timeStyle: "short",
-//         })
-//       : "N/A";
-//   };
-
-//   useEffect(() => {
-//     dispatch(fetchHallTransactions());
-//     dispatch(fetchPaymentMethods());
-//   }, [dispatch]);
-
-//   useEffect(() => {
-//     if (
-//       hallTransactions &&
-//       Array.isArray(hallTransactions) &&
-//       hallTransactions.length > 0
-//     ) {
-//       const sum = hallTransactions.reduce(
-//         (sum, transaction) => sum + parseFloat(transaction.totalAmount || 0),
-//         0
-//       );
-
-//       const formattedData = hallTransactions.map((transaction) => {
-//         const staffInvolved = transaction.staffInvolved
-//           ? transaction.staffInvolved.fullName
-//           : "N/A";
-//         const paymentMethod = transaction.paymentMethod
-//           ? paymentMethods.find(
-//               (pm) => pm._id === transaction.paymentMethod._id
-//             )
-//           : null;
-//         return [
-//           transaction.customerName || "N/A",
-//           transaction.contactPhone || "N/A",
-//           transaction.startTime ? formatDate(transaction.startTime) : "N/A",
-//           transaction.endTime ? formatDate(transaction.endTime) : "N/A",
-//           staffInvolved,
-//           transaction.eventType || "N/A",
-//           paymentMethod ? paymentMethod.name : "N/A",
-//           transaction.paymentStatus || "N/A",
-//           transaction.notes || "N/A",
-//           transaction.isVoided ? "Yes" : "No",
-//           transaction.totalAmount !== undefined
-//             ? `₦${parseFloat(transaction.totalAmount).toFixed(2)}`
-//             : "₦0.00",
-//         ];
-//       });
-
-//       formattedData.push([
-//         "",
-//         "",
-//         "",
-//         "",
-//         "",
-//         "",
-//         "",
-//         "",
-//         "",
-//         "Grand Total:",
-//         <strong key="grand-total">₦{sum.toFixed(2)}</strong>,
-//       ]);
-
-//       setData(formattedData);
-//       setTotalAmountSum(sum);
-//     } else {
-//       setData([]);
-//       setTotalAmountSum(0);
-//     }
-//   }, [hallTransactions, paymentMethods]);
-
-//   const handleEditClick = (index) => {
-//     const transaction = hallTransactions[index];
-//     if (!transaction) {
-//       console.error("Invalid transaction data at index:", index);
-//       return;
-//     }
-//     setEditData(transaction);
-//     setDrawerOpen(true);
-//   };
-
-//   const handleVoidClick = (index) => {
-//     const transaction = hallTransactions[index];
-//     if (!transaction) {
-//       console.error("Invalid transaction data at index:", index);
-//       return;
-//     }
-//     setHallToVoid(transaction);
-//     setOpenVoidDialog(true); // Open the void confirmation dialog
-//   };
-
-//   const handleConfirmVoid = async () => {
-//     if (hallToVoid) {
-//       try {
-//         const response = await dispatch(
-//           voidHallTransaction(hallToVoid._id)
-//         ).unwrap();
-//         if (response.success) {
-//           toast.success("Hall transaction successfully voided");
-//           dispatch(fetchHallTransactions()); // Refresh the table
-//         } else {
-//           toast.error(response.message || "Failed to void hall transaction");
-//         }
-//       } catch (error) {
-//         if (error.message === "This transaction has already been voided") {
-//           toast.error("This hall transaction has already been voided.");
-//         } else {
-//           toast.error(error.message || "Failed to void hall transaction");
-//         }
-//       } finally {
-//         setOpenVoidDialog(false);
-//       }
-//     }
-//   };
-
-//   const handleChange = (event, newValue) => {
-//     setValue(newValue);
-//   };
-
-//   const columns = [
-//     { name: "Customer Name", options: { filter: true, sort: true } },
-//     { name: "Contact Phone", options: { filter: true, sort: false } },
-//     { name: "Start Time", options: { filter: true, sort: true } },
-//     { name: "End Time", options: { filter: true, sort: true } },
-//     { name: "Staff Involved", options: { filter: true, sort: false } },
-//     { name: "Event Type", options: { filter: true, sort: false } },
-//     { name: "Payment Method", options: { filter: true, sort: false } },
-//     { name: "Payment Status", options: { filter: true, sort: false } },
-//     { name: "Notes", options: { filter: true, sort: false } },
-//     { name: "Voided", options: { filter: true, sort: false } },
-//     { name: "Total Amount", options: { filter: true, sort: true } },
-//     {
-//       name: "Action",
-//       options: {
-//         filter: false,
-//         sort: false,
-//         customBodyRender: (_, tableMeta) => {
-//           const transaction = hallTransactions[tableMeta.rowIndex];
-//           if (!transaction) return null;
-//           return (
-//             <>
-//               {hasPermission(user, "write:hall") && (
-//                 <i
-//                   className="bx bx-pencil"
-//                   style={{
-//                     color: "#fe6c00",
-//                     cursor: "pointer",
-//                     marginRight: "12px",
-//                   }}
-//                   onClick={() => handleEditClick(tableMeta.rowIndex)}
-//                 ></i>
-//               )}
-
-//               {hasPermission(user, "delete:hall") && (
-//                 <i
-//                   className="bx bx-trash"
-//                   style={{
-//                     color: "#fe1e00",
-//                     cursor: transaction.isVoided ? "not-allowed" : "pointer",
-//                     opacity: transaction.isVoided ? 0.5 : 1,
-//                   }}
-//                   onClick={() =>
-//                     !transaction.isVoided && handleVoidClick(tableMeta.rowIndex)
-//                   }
-//                 ></i>
-//               )}
-//             </>
-//           );
-//         },
-//       },
-//     },
-//   ];
-
-//   const theme = createTheme({
-//     components: {
-//       MUIDataTable: {
-//         styleOverrides: {
-//           root: {
-//             "& .MuiPaper-root": { backgroundColor: "#f0f0f0" },
-//             "& .MuiTableRow-root": {
-//               backgroundColor: "#29221d",
-//               "&:hover": {
-//                 backgroundColor: "#1e1611",
-//                 "& .MuiTableCell-root": { color: "#bdbabb" },
-//               },
-//             },
-//             "& .MuiTableCell-root": { color: "#fff", fontSize: "18px" },
-//             "& .MuiTableRow-head": {
-//               backgroundColor: "#e0e0e0",
-//               "& .MuiTableCell-root": {
-//                 color: "#000",
-//                 fontSize: "18px",
-//                 fontWeight: "bold",
-//               },
-//             },
-//             "& .MuiToolbar-root": {
-//               backgroundColor: "#d0d0d0",
-//               "& .MuiTypography-root": { fontSize: "18px" },
-//               "& .MuiIconButton-root": { color: "#3f51b5" },
-//             },
-//           },
-//         },
-//       },
-//       MuiTab: {
-//         styleOverrides: {
-//           root: {
-//             color: "#fff", // Default color when not selected
-//             "&.Mui-selected": {
-//               color: "#fe6c00", // Color when selected
-//             },
-//             "&:hover": {
-//               color: "#fe6c00", // Color on hover
-//             },
-//           },
-//         },
-//       },
-//       MuiTabs: {
-//         styleOverrides: {
-//           indicator: {
-//             backgroundColor: "#fe6c00", // Color of the indicator when selected
-//           },
-//         },
-//       },
-//     },
-//   });
-
-//   const options = {
-//     filterType: "checkbox",
-//     rowsPerPage: 10,
-//     customToolbar: () =>
-//       hasPermission(user, "write:hall") ? (
-//         <Button
-//           variant="contained"
-//           size="small"
-//           onClick={() => {
-//             setEditData(null);
-//             setDrawerOpen(true);
-//           }}
-//           sx={{
-//             backgroundColor: "#fe6c00",
-//             color: "#fff",
-//             "&:hover": {
-//               backgroundColor: "#fec80a",
-//               color: "#bdbabb",
-//             },
-//           }}
-//         >
-//           Add New Hall Transaction
-//         </Button>
-//       ) : null,
-//   };
-
-//   const loadingData = [
-//     [
-//       <Box
-//         key="loading"
-//         sx={{
-//           display: "flex",
-//           justifyContent: "center",
-//           alignItems: "center",
-//           height: "200px",
-//           width: "100%",
-//         }}
-//       >
-//         <CircularProgress color="inherit" sx={{ color: "#fe6c00" }} />
-//       </Box>,
-//     ],
-//   ];
-
-//   return (
-//     <ThemeProvider theme={theme}>
-//       <TabContext value={value}>
-//         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-//           <TabList onChange={handleChange} aria-label="hall tabs">
-//             <Tab label="Transaction Records" value="0" />
-//             <Tab label="Reports" value="1" />
-//           </TabList>
-//         </Box>
-//         <TabPanel value="0">
-//           {error ? (
-//             <div>Error: {error.message || "An error occurred."}</div>
-//           ) : (
-//             <>
-//               <MUIDataTable
-//                 title={"Hall Transaction Records"}
-//                 data={isLoading ? loadingData : data}
-//                 columns={columns}
-//                 options={options}
-//               />
-//               <AddNewHallDrawer
-//                 open={drawerOpen}
-//                 onClose={() => {
-//                   setDrawerOpen(false);
-//                   setEditData(null);
-//                 }}
-//                 editMode={!!editData}
-//                 initialData={editData || {}}
-//                 onSaveSuccess={() => dispatch(fetchHallTransactions())}
-//               />
-//               <Dialog
-//                 open={openVoidDialog}
-//                 onClose={() => setOpenVoidDialog(false)}
-//                 aria-labelledby="void-dialog-title"
-//                 aria-describedby="void-dialog-description"
-//               >
-//                 <DialogTitle id="void-dialog-title">
-//                   {"Confirm Void Transaction"}
-//                 </DialogTitle>
-//                 <DialogContent>
-//                   <DialogContentText id="void-dialog-description">
-//                     Are you sure you want to void this transaction? This action
-//                     cannot be undone.
-//                   </DialogContentText>
-//                 </DialogContent>
-//                 <DialogActions>
-//                   <Button
-//                     onClick={() => setOpenVoidDialog(false)}
-//                     color="primary"
-//                   >
-//                     Cancel
-//                   </Button>
-//                   <Button onClick={handleConfirmVoid} color="error" autoFocus>
-//                     Void
-//                   </Button>
-//                 </DialogActions>
-//               </Dialog>
-//             </>
-//           )}
-//         </TabPanel>
-//         <TabPanel value="1">
-//           <HallReports />
-//         </TabPanel>
-//       </TabContext>
-//       <Toaster />
-//     </ThemeProvider>
-//   );
-// };
-
-// export default Hall;
-
-// import React, { useEffect, useState } from "react";
 // import { DataGrid } from "@mui/x-data-grid";
 // import { createTheme, ThemeProvider } from "@mui/material/styles";
 // import {
@@ -399,9 +10,13 @@
 //   DialogContent,
 //   DialogContentText,
 //   DialogTitle,
-//   Tabs,
+//   TextField,
+//   Typography,
+//   IconButton,
 //   Tab,
 // } from "@mui/material";
+// import GetAppIcon from "@mui/icons-material/GetApp";
+// import PrintIcon from "@mui/icons-material/Print";
 // import { TabContext, TabList, TabPanel } from "@mui/lab";
 // import "boxicons";
 // import { useDispatch, useSelector } from "react-redux";
@@ -428,15 +43,18 @@
 //   const [totalAmountSum, setTotalAmountSum] = useState(0);
 //   const [drawerOpen, setDrawerOpen] = useState(false);
 //   const [editData, setEditData] = useState(null);
-//   const [openVoidDialog, setOpenVoidDialog] = useState(false); // State for voiding confirmation dialog
-//   const [hallToVoid, setHallToVoid] = useState(null); // State to hold the hall transaction to void
+//   const [openVoidDialog, setOpenVoidDialog] = useState(false);
+//   const [hallToVoid, setHallToVoid] = useState(null);
 //   const [value, setValue] = useState("0");
+//   const [searchText, setSearchText] = useState("");
+//   const [filteredData, setFilteredData] = useState([]);
 
 //   const formatDate = (isoDate) => {
 //     if (!isoDate) return "N/A";
 //     const date = new Date(isoDate);
 //     return !isNaN(date.getTime())
-//       ? date.toLocaleString("en-US", {
+//       ? date.toLocaleString("en-NG", {
+//           timeZone: "Africa/Lagos", // WAT (UTC+1)
 //           dateStyle: "medium",
 //           timeStyle: "short",
 //         })
@@ -449,6 +67,7 @@
 //   }, [dispatch]);
 
 //   useEffect(() => {
+//     console.log("hallTransactions:", hallTransactions); // Debug log
 //     if (
 //       hallTransactions &&
 //       Array.isArray(hallTransactions) &&
@@ -471,6 +90,9 @@
 //         return {
 //           id: transaction._id || "N/A",
 //           customerName: transaction.customerName || "N/A",
+//           date: transaction.date ? formatDate(transaction.date) : "N/A",
+//           // date: formatDate(transaction.date), // Formatted for display
+//           // rawDate: transaction.date || null, // Raw ISO for sorting, fallback to null
 //           contactPhone: transaction.contactPhone || "N/A",
 //           startTime: transaction.startTime
 //             ? formatDate(transaction.startTime)
@@ -492,19 +114,68 @@
 //       });
 
 //       setData(formattedData);
+//       setFilteredData(formattedData);
 //       setTotalAmountSum(sum);
 //     } else {
 //       setData([]);
+//       setFilteredData([]);
 //       setTotalAmountSum(0);
 //     }
 //   }, [hallTransactions, paymentMethods]);
+
+//   const handleSearch = (searchVal) => {
+//     setSearchText(searchVal);
+//     if (searchVal.trim() === "") {
+//       setFilteredData(data);
+//     } else {
+//       const filtered = data.filter((row) =>
+//         Object.values(row).some(
+//           (value) =>
+//             value &&
+//             value.toString().toLowerCase().includes(searchVal.toLowerCase())
+//         )
+//       );
+//       setFilteredData(filtered);
+//     }
+//   };
+
+//   const handleExport = () => {
+//     const headers = columns.map((col) => col.headerName).join(",");
+//     const csvRows = filteredData
+//       .map((row) =>
+//         columns
+//           .map(
+//             (col) =>
+//               `"${(row[col.field] || "").toString().replace(/"/g, '""')}"`
+//           )
+//           .join(",")
+//       )
+//       .join("\n");
+//     const csvContent = `${headers}\n${csvRows}`;
+//     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+//     const link = document.createElement("a");
+//     link.href = URL.createObjectURL(blob);
+//     link.download = "hall_transactions.csv";
+//     link.click();
+//   };
+
+//   const handlePrint = () => {
+//     window.print();
+//   };
 
 //   const handleEditClick = (transaction) => {
 //     if (!transaction) {
 //       console.error("Invalid transaction data:", transaction);
 //       return;
 //     }
-//     setEditData(transaction);
+//     const rawTransaction = hallTransactions.find(
+//       (t) => t._id === transaction.id
+//     );
+//     if (!rawTransaction) {
+//       console.error("Raw transaction not found for id:", transaction.id);
+//       return;
+//     }
+//     setEditData(rawTransaction);
 //     setDrawerOpen(true);
 //   };
 
@@ -514,18 +185,18 @@
 //       return;
 //     }
 //     setHallToVoid(transaction);
-//     setOpenVoidDialog(true); // Open the void confirmation dialog
+//     setOpenVoidDialog(true);
 //   };
 
 //   const handleConfirmVoid = async () => {
 //     if (hallToVoid) {
 //       try {
 //         const response = await dispatch(
-//           voidHallTransaction(hallToVoid._id)
+//           voidHallTransaction(hallToVoid.id)
 //         ).unwrap();
 //         if (response.success) {
 //           toast.success("Hall transaction successfully voided");
-//           dispatch(fetchHallTransactions()); // Refresh the table
+//           dispatch(fetchHallTransactions());
 //         } else {
 //           toast.error(response.message || "Failed to void hall transaction");
 //         }
@@ -537,6 +208,7 @@
 //         }
 //       } finally {
 //         setOpenVoidDialog(false);
+//         setHallToVoid(null);
 //       }
 //     }
 //   };
@@ -547,6 +219,21 @@
 
 //   const columns = [
 //     { field: "customerName", headerName: "Customer Name", flex: 1 },
+//     // {
+//     //   field: "date",
+//     //   headerName: "Transaction Date",
+//     //   flex: 1,
+//     //   type: "dateTime",
+//     //   valueGetter: (params) =>
+//     //     params.row.rawDate ? new Date(params.row.rawDate) : null, // Safe handling
+//     // },
+//     {
+//       field: "date", // Added transactionDate
+//       headerName: "Transaction Date",
+//       width: 180,
+//       filterable: true,
+//       sortable: true,
+//     },
 //     { field: "contactPhone", headerName: "Contact Phone", flex: 1 },
 //     { field: "startTime", headerName: "Start Time", flex: 1 },
 //     { field: "endTime", headerName: "End Time", flex: 1 },
@@ -615,9 +302,20 @@
 //                 fontWeight: "bold",
 //               },
 //             },
-//             "& .MuiDataGrid-toolbarContainer": {
-//               backgroundColor: "#d0d0d0",
-//               "& .MuiButton-root": { color: "#3f51b5" },
+//             "& .MuiDataGrid-footerContainer": {
+//               backgroundColor: "#29221d",
+//               color: "#fcfcfc",
+//               "& .MuiTablePagination-root": {
+//                 color: "#fcfcfc",
+//               },
+//               "& .MuiIconButton-root": {
+//                 color: "#fcfcfc",
+//               },
+//             },
+//             "@media print": {
+//               "& .MuiDataGrid-main": {
+//                 color: "#000",
+//               },
 //             },
 //           },
 //         },
@@ -625,21 +323,15 @@
 //       MuiTab: {
 //         styleOverrides: {
 //           root: {
-//             color: "#fff", // Default color when not selected
-//             "&.Mui-selected": {
-//               color: "#fe6c00", // Color when selected
-//             },
-//             "&:hover": {
-//               color: "#fe6c00", // Color on hover
-//             },
+//             color: "#fff",
+//             "&.Mui-selected": { color: "#fe6c00" },
+//             "&:hover": { color: "#fe6c00" },
 //           },
 //         },
 //       },
 //       MuiTabs: {
 //         styleOverrides: {
-//           indicator: {
-//             backgroundColor: "#fe6c00", // Color of the indicator when selected
-//           },
+//           indicator: { backgroundColor: "#fe6c00" },
 //         },
 //       },
 //     },
@@ -658,7 +350,74 @@
 //           {error ? (
 //             <div>Error: {error.message || "An error occurred."}</div>
 //           ) : (
-//             <>
+//             <Box sx={{ width: "100%" }}>
+//               <Box
+//                 sx={{
+//                   padding: "8px",
+//                   backgroundColor: "#d0d0d0",
+//                   display: "flex",
+//                   justifyContent: "space-between",
+//                   alignItems: "center",
+//                   marginBottom: "8px",
+//                   "@media print": {
+//                     display: "none",
+//                   },
+//                 }}
+//               >
+//                 <Typography variant="h6" sx={{ color: "#000" }}>
+//                   Hall Transactions
+//                 </Typography>
+//                 <Box sx={{ display: "flex", gap: "8px", alignItems: "center" }}>
+//                   <TextField
+//                     variant="outlined"
+//                     size="small"
+//                     placeholder="Search..."
+//                     value={searchText}
+//                     onChange={(e) => handleSearch(e.target.value)}
+//                     sx={{ backgroundColor: "#fff", borderRadius: "4px" }}
+//                   />
+//                   <IconButton
+//                     onClick={handleExport}
+//                     sx={{
+//                       color: "#473b33",
+//                       "&:hover": { color: "#fec80a" },
+//                     }}
+//                     title="Download CSV"
+//                   >
+//                     <GetAppIcon />
+//                   </IconButton>
+//                   <IconButton
+//                     onClick={handlePrint}
+//                     sx={{
+//                       color: "#302924",
+//                       "&:hover": { color: "#fec80a" },
+//                     }}
+//                     title="Print"
+//                   >
+//                     <PrintIcon />
+//                   </IconButton>
+//                   {hasPermission(user, "write:hall") && (
+//                     <Button
+//                       variant="contained"
+//                       size="small"
+//                       onClick={() => {
+//                         setEditData(null);
+//                         setDrawerOpen(true);
+//                       }}
+//                       sx={{
+//                         backgroundColor: "#fe6c00",
+//                         color: "#fff",
+//                         "&:hover": {
+//                           backgroundColor: "#fec80a",
+//                           color: "#bdbabb",
+//                         },
+//                       }}
+//                     >
+//                       Add New Hall Transaction
+//                     </Button>
+//                   )}
+//                 </Box>
+//               </Box>
 //               {isLoading ? (
 //                 <Box
 //                   sx={{
@@ -674,34 +433,16 @@
 //               ) : (
 //                 <Box sx={{ height: 600, width: "100%" }}>
 //                   <DataGrid
-//                     rows={data}
+//                     rows={filteredData}
 //                     columns={columns}
-//                     pageSize={10}
-//                     rowsPerPageOptions={[10]}
-//                     disableSelectionOnClick
-//                     components={{
-//                       Toolbar: () =>
-//                         hasPermission(user, "write:hall") ? (
-//                           <Button
-//                             variant="contained"
-//                             size="small"
-//                             onClick={() => {
-//                               setEditData(null);
-//                               setDrawerOpen(true);
-//                             }}
-//                             sx={{
-//                               backgroundColor: "#fe6c00",
-//                               color: "#fff",
-//                               "&:hover": {
-//                                 backgroundColor: "#fec80a",
-//                                 color: "#bdbabb",
-//                               },
-//                             }}
-//                           >
-//                             Add New Hall Transaction
-//                           </Button>
-//                         ) : null,
+//                     pageSizeOptions={[10, 20, 50]}
+//                     initialState={{
+//                       pagination: { paginationModel: { pageSize: 10 } },
+//                       sorting: {
+//                         sortModel: [{ field: "date", sort: "asc" }],
+//                       },
 //                     }}
+//                     disableSelectionOnClick
 //                   />
 //                 </Box>
 //               )}
@@ -742,7 +483,7 @@
 //                   </Button>
 //                 </DialogActions>
 //               </Dialog>
-//             </>
+//             </Box>
 //           )}
 //         </TabPanel>
 //         <TabPanel value="1">
@@ -756,9 +497,10 @@
 
 // export default Hall;
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { Toaster, toast } from "react-hot-toast";
 import {
   Button,
   CircularProgress,
@@ -773,8 +515,8 @@ import {
   IconButton,
   Tab,
 } from "@mui/material";
-import GetAppIcon from "@mui/icons-material/GetApp"; // Download icon
-import PrintIcon from "@mui/icons-material/Print"; // Print icon
+import GetAppIcon from "@mui/icons-material/GetApp";
+import PrintIcon from "@mui/icons-material/Print";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import "boxicons";
 import { useDispatch, useSelector } from "react-redux";
@@ -783,20 +525,23 @@ import {
   voidHallTransaction,
 } from "../../redux/slices/hallSlice";
 import { fetchPaymentMethods } from "../../redux/slices/paymentMethodsSlice";
+import { checkAuthStatus } from "../../redux/slices/authSlice";
 import { hasPermission } from "../../utils/authUtils";
 import AddNewHallDrawer from "../AddDrawerSection/AddNewHallDrawer";
-import { Toaster, toast } from "react-hot-toast";
 import HallReports from "./Reports/HallReports";
 
 const Hall = () => {
   const dispatch = useDispatch();
   const {
     transactions: hallTransactions = [],
-    isLoading,
+    isLoading = false,
     error,
   } = useSelector((state) => state.hallTransactions || {});
-  const { paymentMethods } = useSelector((state) => state.paymentMethods);
-  const { user } = useSelector((state) => state.auth);
+  const { paymentMethods = [] } = useSelector(
+    (state) => state.paymentMethods || {}
+  );
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
+
   const [data, setData] = useState([]);
   const [totalAmountSum, setTotalAmountSum] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -806,12 +551,14 @@ const Hall = () => {
   const [value, setValue] = useState("0");
   const [searchText, setSearchText] = useState("");
   const [filteredData, setFilteredData] = useState([]);
+  const [initialFetchDone, setInitialFetchDone] = useState(false);
 
   const formatDate = (isoDate) => {
     if (!isoDate) return "N/A";
     const date = new Date(isoDate);
     return !isNaN(date.getTime())
-      ? date.toLocaleString("en-US", {
+      ? date.toLocaleString("en-NG", {
+          timeZone: "Africa/Lagos",
           dateStyle: "medium",
           timeStyle: "short",
         })
@@ -819,11 +566,33 @@ const Hall = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchHallTransactions());
-    dispatch(fetchPaymentMethods());
-  }, [dispatch]);
+    //console.log("Hall - Mount check", { isAuthenticated, initialFetchDone });
+    if (!initialFetchDone) {
+      if (isAuthenticated) {
+        //console.log("Fetching hall transactions and payment methods...");
+        dispatch(fetchHallTransactions());
+        dispatch(fetchPaymentMethods());
+        setInitialFetchDone(true);
+      } else {
+        //console.log("Checking auth status...");
+        dispatch(checkAuthStatus())
+          .unwrap()
+          .then(() => {
+            //console.log("Auth succeeded, fetching data...");
+            dispatch(fetchHallTransactions());
+            dispatch(fetchPaymentMethods());
+            setInitialFetchDone(true);
+          })
+          .catch((err) => {
+            console.error("Auth check failed:", err);
+            setInitialFetchDone(true);
+          });
+      }
+    }
+  }, [dispatch, isAuthenticated, initialFetchDone]);
 
   useEffect(() => {
+    //console.log("Hall - Data update", { hallTransactions, paymentMethods });
     if (
       hallTransactions &&
       Array.isArray(hallTransactions) &&
@@ -846,6 +615,7 @@ const Hall = () => {
         return {
           id: transaction._id || "N/A",
           customerName: transaction.customerName || "N/A",
+          date: transaction.date ? formatDate(transaction.date) : "N/A",
           contactPhone: transaction.contactPhone || "N/A",
           startTime: transaction.startTime
             ? formatDate(transaction.startTime)
@@ -876,7 +646,6 @@ const Hall = () => {
     }
   }, [hallTransactions, paymentMethods]);
 
-  // Search functionality
   const handleSearch = (searchVal) => {
     setSearchText(searchVal);
     if (searchVal.trim() === "") {
@@ -893,7 +662,6 @@ const Hall = () => {
     }
   };
 
-  // CSV Export functionality
   const handleExport = () => {
     const headers = columns.map((col) => col.headerName).join(",");
     const csvRows = filteredData
@@ -914,38 +682,39 @@ const Hall = () => {
     link.click();
   };
 
-  // Print functionality
   const handlePrint = () => {
     window.print();
   };
 
-  const handleEditClick = (transaction) => {
-    if (!transaction) {
-      console.error("Invalid transaction data:", transaction);
-      return;
-    }
-    // Find the raw transaction from hallTransactions using the id
-    const rawTransaction = hallTransactions.find(
-      (t) => t._id === transaction.id
-    );
-    if (!rawTransaction) {
-      console.error("Raw transaction not found for id:", transaction.id);
-      return;
-    }
-    setEditData(rawTransaction);
-    setDrawerOpen(true);
-  };
+  const handleEditClick = useCallback(
+    (transaction) => {
+      if (!transaction) {
+        console.error("Invalid transaction data:", transaction);
+        return;
+      }
+      const rawTransaction = hallTransactions.find(
+        (t) => t._id === transaction.id
+      );
+      if (!rawTransaction) {
+        console.error("Raw transaction not found for id:", transaction.id);
+        return;
+      }
+      setEditData(rawTransaction);
+      setDrawerOpen(true);
+    },
+    [hallTransactions]
+  );
 
-  const handleVoidClick = (transaction) => {
+  const handleVoidClick = useCallback((transaction) => {
     if (!transaction) {
       console.error("Invalid transaction data:", transaction);
       return;
     }
     setHallToVoid(transaction);
     setOpenVoidDialog(true);
-  };
+  }, []);
 
-  const handleConfirmVoid = async () => {
+  const handleConfirmVoid = useCallback(async () => {
     if (hallToVoid) {
       try {
         const response = await dispatch(
@@ -958,69 +727,80 @@ const Hall = () => {
           toast.error(response.message || "Failed to void hall transaction");
         }
       } catch (error) {
-        if (error.message === "This transaction has already been voided") {
-          toast.error("This hall transaction has already been voided.");
-        } else {
-          toast.error(error.message || "Failed to void hall transaction");
-        }
+        toast.error(error.message || "Failed to void hall transaction");
       } finally {
         setOpenVoidDialog(false);
         setHallToVoid(null);
       }
     }
+  }, [dispatch, hallToVoid]);
+
+  const handleRetry = () => {
+    setInitialFetchDone(false);
+    dispatch(checkAuthStatus());
   };
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
-  const columns = [
-    { field: "customerName", headerName: "Customer Name", flex: 1 },
-    { field: "contactPhone", headerName: "Contact Phone", flex: 1 },
-    { field: "startTime", headerName: "Start Time", flex: 1 },
-    { field: "endTime", headerName: "End Time", flex: 1 },
-    { field: "staffInvolved", headerName: "Staff Involved", flex: 1 },
-    { field: "eventType", headerName: "Event Type", flex: 1 },
-    { field: "paymentMethod", headerName: "Payment Method", flex: 1 },
-    { field: "paymentStatus", headerName: "Payment Status", flex: 1 },
-    { field: "notes", headerName: "Notes", flex: 1 },
-    { field: "isVoided", headerName: "Voided", flex: 1 },
-    { field: "totalAmount", headerName: "Total Amount", flex: 1 },
-    {
-      field: "actions",
-      headerName: "Actions",
-      flex: 1,
-      renderCell: (params) => (
-        <>
-          {hasPermission(user, "write:hall") && (
-            <i
-              className="bx bx-pencil"
-              style={{
-                color: "#fe6c00",
-                cursor: "pointer",
-                marginRight: "12px",
-              }}
-              onClick={() => handleEditClick(params.row)}
-            ></i>
-          )}
-          {hasPermission(user, "delete:hall") && (
-            <i
-              className="bx bx-trash"
-              style={{
-                color: "#fe1e00",
-                cursor:
-                  params.row.isVoided === "Yes" ? "not-allowed" : "pointer",
-                opacity: params.row.isVoided === "Yes" ? 0.5 : 1,
-              }}
-              onClick={() =>
-                params.row.isVoided !== "Yes" && handleVoidClick(params.row)
-              }
-            ></i>
-          )}
-        </>
-      ),
-    },
-  ];
+  const columns = useMemo(
+    () => [
+      { field: "customerName", headerName: "Customer Name", flex: 1 },
+      {
+        field: "date",
+        headerName: "Transaction Date",
+        width: 180,
+        filterable: true,
+        sortable: true,
+      },
+      { field: "contactPhone", headerName: "Contact Phone", flex: 1 },
+      { field: "startTime", headerName: "Start Time", flex: 1 },
+      { field: "endTime", headerName: "End Time", flex: 1 },
+      { field: "staffInvolved", headerName: "Staff Involved", flex: 1 },
+      { field: "eventType", headerName: "Event Type", flex: 1 },
+      { field: "paymentMethod", headerName: "Payment Method", flex: 1 },
+      { field: "paymentStatus", headerName: "Payment Status", flex: 1 },
+      { field: "notes", headerName: "Notes", flex: 1 },
+      { field: "isVoided", headerName: "Voided", flex: 1 },
+      { field: "totalAmount", headerName: "Total Amount", flex: 1 },
+      {
+        field: "actions",
+        headerName: "Actions",
+        flex: 1,
+        renderCell: (params) => (
+          <>
+            {hasPermission(user, "write:hall") && (
+              <i
+                className="bx bx-pencil"
+                style={{
+                  color: "#fe6c00",
+                  cursor: "pointer",
+                  marginRight: "12px",
+                }}
+                onClick={() => handleEditClick(params.row)}
+              ></i>
+            )}
+            {hasPermission(user, "delete:hall") && (
+              <i
+                className="bx bx-trash"
+                style={{
+                  color: "#fe1e00",
+                  cursor:
+                    params.row.isVoided === "Yes" ? "not-allowed" : "pointer",
+                  opacity: params.row.isVoided === "Yes" ? 0.5 : 1,
+                }}
+                onClick={() =>
+                  params.row.isVoided !== "Yes" && handleVoidClick(params.row)
+                }
+              ></i>
+            )}
+          </>
+        ),
+      },
+    ],
+    [user, handleEditClick, handleVoidClick]
+  );
 
   const theme = createTheme({
     components: {
@@ -1047,18 +827,10 @@ const Hall = () => {
             "& .MuiDataGrid-footerContainer": {
               backgroundColor: "#29221d",
               color: "#fcfcfc",
-              "& .MuiTablePagination-root": {
-                color: "#fcfcfc",
-              },
-              "& .MuiIconButton-root": {
-                color: "#fcfcfc",
-              },
+              "& .MuiTablePagination-root": { color: "#fcfcfc" },
+              "& .MuiIconButton-root": { color: "#fcfcfc" },
             },
-            "@media print": {
-              "& .MuiDataGrid-main": {
-                color: "#000",
-              },
-            },
+            "@media print": { "& .MuiDataGrid-main": { color: "#000" } },
           },
         },
       },
@@ -1089,8 +861,54 @@ const Hall = () => {
           </TabList>
         </Box>
         <TabPanel value="0">
-          {error ? (
-            <div>Error: {error.message || "An error occurred."}</div>
+          {isLoading ? (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "200px",
+                width: "100%",
+              }}
+            >
+              <CircularProgress color="inherit" sx={{ color: "#fe6c00" }} />
+            </Box>
+          ) : error ? (
+            <Box
+              sx={{
+                position: "fixed",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                backgroundColor: "#302924",
+                color: "#fff",
+                padding: "24px 32px",
+                borderRadius: "8px",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                textAlign: "center",
+                zIndex: 1300,
+              }}
+            >
+              <Typography
+                variant="h6"
+                sx={{ color: "#fe1e00", mb: 2, fontWeight: "bold" }}
+              >
+                Error: {error.message || "An error occurred"}
+              </Typography>
+              <Button
+                variant="contained"
+                onClick={handleRetry}
+                sx={{
+                  backgroundColor: "#fe6c00",
+                  color: "#fff",
+                  padding: "8px 16px",
+                  borderRadius: "4px",
+                  "&:hover": { backgroundColor: "#fec80a", color: "#000" },
+                }}
+              >
+                Retry
+              </Button>
+            </Box>
           ) : (
             <Box sx={{ width: "100%" }}>
               <Box
@@ -1101,9 +919,7 @@ const Hall = () => {
                   justifyContent: "space-between",
                   alignItems: "center",
                   marginBottom: "8px",
-                  "@media print": {
-                    display: "none",
-                  },
+                  "@media print": { display: "none" },
                 }}
               >
                 <Typography variant="h6" sx={{ color: "#000" }}>
@@ -1120,20 +936,14 @@ const Hall = () => {
                   />
                   <IconButton
                     onClick={handleExport}
-                    sx={{
-                      color: "#473b33",
-                      "&:hover": { color: "#fec80a" },
-                    }}
+                    sx={{ color: "#473b33", "&:hover": { color: "#fec80a" } }}
                     title="Download CSV"
                   >
                     <GetAppIcon />
                   </IconButton>
                   <IconButton
                     onClick={handlePrint}
-                    sx={{
-                      color: "#302924",
-                      "&:hover": { color: "#fec80a" },
-                    }}
+                    sx={{ color: "#302924", "&:hover": { color: "#fec80a" } }}
                     title="Print"
                   >
                     <PrintIcon />
@@ -1160,31 +970,18 @@ const Hall = () => {
                   )}
                 </Box>
               </Box>
-              {isLoading ? (
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "200px",
-                    width: "100%",
+              <Box sx={{ height: 600, width: "100%" }}>
+                <DataGrid
+                  rows={filteredData}
+                  columns={columns}
+                  pageSizeOptions={[10, 20, 50]}
+                  initialState={{
+                    pagination: { paginationModel: { pageSize: 10 } },
+                    sorting: { sortModel: [{ field: "date", sort: "asc" }] },
                   }}
-                >
-                  <CircularProgress color="inherit" sx={{ color: "#fe6c00" }} />
-                </Box>
-              ) : (
-                <Box sx={{ height: 600, width: "100%" }}>
-                  <DataGrid
-                    rows={filteredData}
-                    columns={columns}
-                    pageSizeOptions={[10, 20, 50]}
-                    initialState={{
-                      pagination: { paginationModel: { pageSize: 10 } },
-                    }}
-                    disableSelectionOnClick
-                  />
-                </Box>
-              )}
+                  disableSelectionOnClick
+                />
+              </Box>
               <AddNewHallDrawer
                 open={drawerOpen}
                 onClose={() => {
@@ -1202,7 +999,7 @@ const Hall = () => {
                 aria-describedby="void-dialog-description"
               >
                 <DialogTitle id="void-dialog-title">
-                  {"Confirm Void Transaction"}
+                  Confirm Void Transaction
                 </DialogTitle>
                 <DialogContent>
                   <DialogContentText id="void-dialog-description">

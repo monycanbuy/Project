@@ -794,7 +794,996 @@
 
 // export default Seminar;
 
-import React, { useEffect, useState } from "react";
+// import React, { useEffect, useState } from "react";
+// import { DataGrid } from "@mui/x-data-grid";
+// import { createTheme, ThemeProvider } from "@mui/material/styles";
+// import {
+//   Button,
+//   CircularProgress,
+//   Box,
+//   Dialog,
+//   DialogActions,
+//   DialogContent,
+//   DialogContentText,
+//   DialogTitle,
+//   TextField,
+//   Typography,
+//   IconButton,
+//   Tabs,
+//   Tab,
+// } from "@mui/material";
+// import { TabContext, TabList, TabPanel } from "@mui/lab";
+// import GetAppIcon from "@mui/icons-material/GetApp"; // Download icon
+// import PrintIcon from "@mui/icons-material/Print"; // Print icon
+// import "boxicons";
+// import { useDispatch, useSelector } from "react-redux";
+// import { fetchSeminars, voidSeminar } from "../../redux/slices/seminarSlice";
+// import { fetchPaymentMethods } from "../../redux/slices/paymentMethodsSlice";
+// import AddNewSeminarDrawer from "../AddDrawerSection/AddNewSeminarDrawer";
+// import { Toaster, toast } from "react-hot-toast";
+// import SeminarReports from "./Reports/SeminarReports";
+// import { hasPermission } from "../../utils/authUtils";
+
+// const Seminar = () => {
+//   const dispatch = useDispatch();
+//   const { seminars, isLoading, error } = useSelector((state) => state.seminar);
+//   const { paymentMethods } = useSelector((state) => state.paymentMethods);
+//   const { user } = useSelector((state) => state.auth);
+//   const [data, setData] = useState([]);
+//   const [filteredData, setFilteredData] = useState([]);
+//   const [searchText, setSearchText] = useState("");
+//   const [totalAmountSum, setTotalAmountSum] = useState(0);
+//   const [drawerOpen, setDrawerOpen] = useState(false);
+//   const [editData, setEditData] = useState(null);
+//   const [openVoidDialog, setOpenVoidDialog] = useState(false);
+//   const [seminarToVoid, setSeminarToVoid] = useState(null);
+//   const [value, setValue] = useState("0");
+
+//   const formatDate = (isoDate) => {
+//     if (!isoDate) return "N/A";
+//     const date = new Date(isoDate);
+//     return !isNaN(date.getTime())
+//       ? date.toLocaleString("en-US", {
+//           dateStyle: "medium",
+//           timeStyle: "short",
+//         })
+//       : "N/A";
+//   };
+
+//   useEffect(() => {
+//     dispatch(fetchSeminars());
+//     dispatch(fetchPaymentMethods());
+//   }, [dispatch]);
+
+//   // useEffect(() => {
+//   //   if (seminars && Array.isArray(seminars) && seminars.length > 0) {
+//   //     const sum = seminars.reduce(
+//   //       (sum, seminar) => sum + parseFloat(seminar.totalAmount || 0),
+//   //       0
+//   //     );
+
+//   //     const formattedData = seminars.map((seminar) => {
+//   //       const soldBy = seminar.salesBy ? seminar.salesBy.fullName : "N/A";
+//   //       const paymentMethodName = seminar.paymentMethod
+//   //         ? seminar.paymentMethod.name
+//   //         : "N/A";
+//   //       return {
+//   //         id: seminar._id,
+//   //         organizationName: seminar.organizationName || "N/A",
+//   //         contactPhone: seminar.contactPhone || "N/A",
+//   //         seminarDate: seminar.seminarDate
+//   //           ? formatDate(seminar.seminarDate)
+//   //           : "N/A",
+//   //         soldBy,
+//   //         address: seminar.address || "N/A",
+//   //         eventType: seminar.eventType || "N/A",
+//   //         paymentMethodName,
+//   //         status: seminar.status || "N/A",
+//   //         additionalNotes: seminar.additionalNotes || "N/A",
+//   //         isVoided: seminar.isVoided ? "Yes" : "No",
+//   //         totalAmount:
+//   //           seminar.totalAmount !== undefined
+//   //             ? `₦${parseFloat(seminar.totalAmount).toFixed(2)}`
+//   //             : "₦0.00",
+//   //       };
+//   //     });
+
+//   //     setData(formattedData);
+//   //     setFilteredData(formattedData); // Initialize filtered data
+//   //     setTotalAmountSum(sum);
+//   //   } else {
+//   //     setData([]);
+//   //     setFilteredData([]);
+//   //     setTotalAmountSum(0);
+//   //   }
+//   // }, [seminars, paymentMethods]);
+
+//   // Search functionality
+//   useEffect(() => {
+//     console.log("Seminars from Redux:", seminars); // Debug log
+//     if (seminars && Array.isArray(seminars) && seminars.length > 0) {
+//       const validSeminars = seminars.filter((seminar) => seminar._id); // Filter out seminars without _id
+//       const sum = validSeminars.reduce(
+//         (sum, seminar) => sum + parseFloat(seminar.totalAmount || 0),
+//         0
+//       );
+
+//       const formattedData = validSeminars.map((seminar) => {
+//         const soldBy = seminar.salesBy ? seminar.salesBy.fullName : "N/A";
+//         const paymentMethodName = seminar.paymentMethod
+//           ? seminar.paymentMethod.name
+//           : "N/A";
+//         return {
+//           id: seminar._id, // Already correct
+//           organizationName: seminar.organizationName || "N/A",
+//           contactPhone: seminar.contactPhone || "N/A",
+//           seminarDate: seminar.seminarDate
+//             ? formatDate(seminar.seminarDate)
+//             : "N/A",
+//           soldBy,
+//           address: seminar.address || "N/A",
+//           eventType: seminar.eventType || "N/A",
+//           paymentMethodName,
+//           status: seminar.status || "N/A",
+//           additionalNotes: seminar.additionalNotes || "N/A",
+//           isVoided: seminar.isVoided ? "Yes" : "No",
+//           totalAmount:
+//             seminar.totalAmount !== undefined
+//               ? `₦${parseFloat(seminar.totalAmount).toFixed(2)}`
+//               : "₦0.00",
+//         };
+//       });
+
+//       console.log("Formatted data:", formattedData); // Debug log
+//       setData(formattedData);
+//       setFilteredData(formattedData);
+//       setTotalAmountSum(sum);
+//     } else {
+//       setData([]);
+//       setFilteredData([]);
+//       setTotalAmountSum(0);
+//     }
+//   }, [seminars, paymentMethods]);
+
+//   const handleSearch = (searchVal) => {
+//     setSearchText(searchVal);
+//     if (searchVal.trim() === "") {
+//       setFilteredData(data);
+//     } else {
+//       const filtered = data.filter((row) =>
+//         Object.values(row).some(
+//           (value) =>
+//             value &&
+//             value.toString().toLowerCase().includes(searchVal.toLowerCase())
+//         )
+//       );
+//       setFilteredData(filtered);
+//     }
+//   };
+
+//   // CSV Export functionality
+//   const handleExport = () => {
+//     const headers = columns.map((col) => col.headerName).join(",");
+//     const csvRows = filteredData
+//       .map((row) =>
+//         columns
+//           .map(
+//             (col) =>
+//               `"${(row[col.field] || "").toString().replace(/"/g, '""')}"`
+//           )
+//           .join(",")
+//       )
+//       .join("\n");
+//     const csvContent = `${headers}\n${csvRows}`;
+//     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+//     const link = document.createElement("a");
+//     link.href = URL.createObjectURL(blob);
+//     link.download = "seminars.csv";
+//     link.click();
+//   };
+
+//   // Print functionality
+//   const handlePrint = () => {
+//     window.print();
+//   };
+
+//   const handleEditClick = (seminar) => {
+//     // Find the original seminar object from Redux state using the ID from params.row
+//     const originalSeminar = seminars.find((s) => s._id === seminar.id);
+//     setEditData(originalSeminar);
+//     setDrawerOpen(true);
+//   };
+
+//   const handleVoidClick = (seminar) => {
+//     console.log("Seminar to void:", seminar);
+//     setSeminarToVoid({ _id: seminar.id, ...seminar }); // Use `id` from DataGrid
+//     setOpenVoidDialog(true);
+//   };
+
+//   const handleConfirmVoid = async () => {
+//     if (seminarToVoid) {
+//       console.log("Voiding seminar with ID:", seminarToVoid._id);
+//       try {
+//         const response = await dispatch(
+//           voidSeminar(seminarToVoid._id)
+//         ).unwrap();
+//         if (response.success) {
+//           toast.success("Seminar record successfully voided");
+//           dispatch(fetchSeminars());
+//         } else {
+//           toast.error(response.message || "Failed to void seminar record");
+//         }
+//       } catch (error) {
+//         toast.error(error.message || "Failed to void seminar record");
+//       } finally {
+//         setOpenVoidDialog(false);
+//       }
+//     }
+//   };
+
+//   const handleChange = (event, newValue) => {
+//     setValue(newValue);
+//   };
+
+//   const columns = [
+//     { field: "organizationName", headerName: "Organization", flex: 1 },
+//     { field: "contactPhone", headerName: "Contact Phone", flex: 1 },
+//     { field: "seminarDate", headerName: "Date", flex: 1 },
+//     { field: "soldBy", headerName: "Sold By", flex: 1 },
+//     { field: "address", headerName: "Address", flex: 1 },
+//     { field: "eventType", headerName: "Event Type", flex: 1 },
+//     { field: "paymentMethodName", headerName: "Payment Method", flex: 1 },
+//     { field: "status", headerName: "Status", flex: 1 },
+//     { field: "additionalNotes", headerName: "Notes", flex: 1 },
+//     { field: "isVoided", headerName: "Voided", flex: 1 },
+//     { field: "totalAmount", headerName: "Total Amount", flex: 1 },
+//     {
+//       field: "actions",
+//       headerName: "Actions",
+//       flex: 1,
+//       renderCell: (params) => (
+//         <>
+//           {hasPermission(user, "update:seminars") && (
+//             <i
+//               className="bx bx-pencil"
+//               style={{
+//                 color: "#fe6c00",
+//                 cursor: "pointer",
+//                 marginRight: "12px",
+//               }}
+//               onClick={() => handleEditClick(params.row)}
+//             ></i>
+//           )}
+//           {hasPermission(user, "delete:seminars") && (
+//             <i
+//               className="bx bx-trash"
+//               style={{
+//                 color: "#fe1e00",
+//                 cursor:
+//                   params.row.isVoided === "Yes" ? "not-allowed" : "pointer",
+//                 opacity: params.row.isVoided === "Yes" ? 0.5 : 1,
+//                 marginRight: "12px",
+//               }}
+//               onClick={() =>
+//                 params.row.isVoided !== "Yes" && handleVoidClick(params.row)
+//               }
+//             ></i>
+//           )}
+//         </>
+//       ),
+//     },
+//   ];
+
+//   const theme = createTheme({
+//     components: {
+//       MuiDataGrid: {
+//         styleOverrides: {
+//           root: {
+//             backgroundColor: "#f0f0f0",
+//             "& .MuiDataGrid-row": {
+//               backgroundColor: "#29221d",
+//               "&:hover": {
+//                 backgroundColor: "#1e1611",
+//                 "& .MuiDataGrid-cell": { color: "#bdbabb" },
+//               },
+//             },
+//             "& .MuiDataGrid-cell": { color: "#fff", fontSize: "18px" },
+//             "& .MuiDataGrid-columnHeaders": {
+//               backgroundColor: "#e0e0e0",
+//               "& .MuiDataGrid-columnHeaderTitle": {
+//                 color: "#000",
+//                 fontSize: "18px",
+//                 fontWeight: "bold",
+//               },
+//             },
+//             "& .MuiDataGrid-toolbarContainer": {
+//               backgroundColor: "#d0d0d0",
+//               "& .MuiButton-root": { color: "#3f51b5" },
+//             },
+//           },
+//         },
+//       },
+//       MuiTab: {
+//         styleOverrides: {
+//           root: {
+//             color: "#fff",
+//             "&.Mui-selected": { color: "#fe6c00" },
+//             "&:hover": { color: "#fe6c00" },
+//           },
+//         },
+//       },
+//       MuiTabs: {
+//         styleOverrides: {
+//           indicator: { backgroundColor: "#fe6c00" },
+//         },
+//       },
+//     },
+//   });
+
+//   return (
+//     <ThemeProvider theme={theme}>
+//       <TabContext value={value}>
+//         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+//           <TabList onChange={handleChange} aria-label="seminar tabs">
+//             <Tab label="Sales Records" value="0" />
+//             <Tab label="Reports" value="1" />
+//           </TabList>
+//         </Box>
+//         <TabPanel value="0">
+//           {error ? (
+//             <div>Error: {error.message || "An error occurred."}</div>
+//           ) : (
+//             <>
+//               <Box
+//                 sx={{
+//                   padding: "8px",
+//                   backgroundColor: "#d0d0d0",
+//                   display: "flex",
+//                   justifyContent: "space-between",
+//                   alignItems: "center",
+//                   marginBottom: "8px",
+//                   "@media print": {
+//                     display: "none",
+//                   },
+//                 }}
+//               >
+//                 <Typography variant="h6" sx={{ color: "#000" }}>
+//                   Seminar Records
+//                 </Typography>
+//                 <Box sx={{ display: "flex", gap: "8px", alignItems: "center" }}>
+//                   <TextField
+//                     variant="outlined"
+//                     size="small"
+//                     placeholder="Search..."
+//                     value={searchText}
+//                     onChange={(e) => handleSearch(e.target.value)}
+//                     sx={{ backgroundColor: "#fff", borderRadius: "4px" }}
+//                   />
+//                   <IconButton
+//                     onClick={handleExport}
+//                     sx={{
+//                       color: "#473b33",
+//                       "&:hover": { color: "#fec80a" },
+//                     }}
+//                     title="Download CSV"
+//                   >
+//                     <GetAppIcon />
+//                   </IconButton>
+//                   <IconButton
+//                     onClick={handlePrint}
+//                     sx={{
+//                       color: "#302924",
+//                       "&:hover": { color: "#fec80a" },
+//                     }}
+//                     title="Print"
+//                   >
+//                     <PrintIcon />
+//                   </IconButton>
+//                   {hasPermission(user, "write:seminars") && (
+//                     <Button
+//                       variant="contained"
+//                       size="small"
+//                       onClick={() => {
+//                         setEditData(null);
+//                         setDrawerOpen(true);
+//                       }}
+//                       sx={{
+//                         backgroundColor: "#fe6c00",
+//                         color: "#fff",
+//                         "&:hover": {
+//                           backgroundColor: "#fec80a",
+//                           color: "#bdbabb",
+//                         },
+//                       }}
+//                     >
+//                       Add New Seminar
+//                     </Button>
+//                   )}
+//                 </Box>
+//               </Box>
+//               {isLoading ? (
+//                 <Box
+//                   sx={{
+//                     display: "flex",
+//                     justifyContent: "center",
+//                     alignItems: "center",
+//                     height: "200px",
+//                     width: "100%",
+//                   }}
+//                 >
+//                   <CircularProgress color="inherit" sx={{ color: "#fe6c00" }} />
+//                 </Box>
+//               ) : (
+//                 <Box sx={{ height: 600, width: "100%" }}>
+//                   <DataGrid
+//                     rows={filteredData}
+//                     columns={columns}
+//                     pageSizeOptions={[10, 20, 50]}
+//                     initialState={{
+//                       pagination: { paginationModel: { pageSize: 10 } },
+//                     }}
+//                     disableSelectionOnClick
+//                   />
+//                 </Box>
+//               )}
+//               <AddNewSeminarDrawer
+//                 open={drawerOpen}
+//                 onClose={() => {
+//                   setDrawerOpen(false);
+//                   setEditData(null);
+//                 }}
+//                 editMode={!!editData}
+//                 initialData={editData || {}}
+//                 onSaveSuccess={() => dispatch(fetchSeminars())}
+//               />
+//               <Dialog
+//                 open={openVoidDialog}
+//                 onClose={() => setOpenVoidDialog(false)}
+//                 aria-labelledby="void-dialog-title"
+//                 aria-describedby="void-dialog-description"
+//               >
+//                 <DialogTitle id="void-dialog-title">
+//                   {"Confirm Void Transaction"}
+//                 </DialogTitle>
+//                 <DialogContent>
+//                   <DialogContentText id="void-dialog-description">
+//                     Are you sure you want to void this transaction? This action
+//                     cannot be undone.
+//                   </DialogContentText>
+//                 </DialogContent>
+//                 <DialogActions>
+//                   <Button
+//                     onClick={() => setOpenVoidDialog(false)}
+//                     color="primary"
+//                   >
+//                     Cancel
+//                   </Button>
+//                   <Button onClick={handleConfirmVoid} color="error" autoFocus>
+//                     Void
+//                   </Button>
+//                 </DialogActions>
+//               </Dialog>
+//             </>
+//           )}
+//         </TabPanel>
+//         <TabPanel value="1">
+//           <SeminarReports />
+//         </TabPanel>
+//       </TabContext>
+//       <Toaster />
+//     </ThemeProvider>
+//   );
+// };
+
+// export default Seminar;
+
+// import React, { useEffect, useState } from "react";
+// import { DataGrid } from "@mui/x-data-grid";
+// import { createTheme, ThemeProvider } from "@mui/material/styles";
+// import {
+//   Button,
+//   CircularProgress,
+//   Box,
+//   Dialog,
+//   DialogActions,
+//   DialogContent,
+//   DialogContentText,
+//   DialogTitle,
+//   TextField,
+//   Typography,
+//   IconButton,
+//   Tabs,
+//   Tab,
+// } from "@mui/material";
+// import { TabContext, TabList, TabPanel } from "@mui/lab";
+// import GetAppIcon from "@mui/icons-material/GetApp";
+// import PrintIcon from "@mui/icons-material/Print";
+// import "boxicons";
+// import { useDispatch, useSelector } from "react-redux";
+// import { fetchSeminars, voidSeminar } from "../../redux/slices/seminarSlice";
+// import { fetchPaymentMethods } from "../../redux/slices/paymentMethodsSlice";
+// import { checkAuthStatus } from "../../redux/slices/authSlice"; // For Retry
+// import AddNewSeminarDrawer from "../AddDrawerSection/AddNewSeminarDrawer";
+// import { Toaster, toast } from "react-hot-toast";
+// import SeminarReports from "./Reports/SeminarReports";
+// import { hasPermission } from "../../utils/authUtils";
+
+// const Seminar = () => {
+//   const dispatch = useDispatch();
+//   const { seminars, status, error } = useSelector(
+//     (state) => state.seminar || {}
+//   );
+//   const { paymentMethods } = useSelector((state) => state.paymentMethods);
+//   const { user } = useSelector((state) => state.auth);
+//   const [data, setData] = useState([]);
+//   const [filteredData, setFilteredData] = useState([]);
+//   const [searchText, setSearchText] = useState("");
+//   const [totalAmountSum, setTotalAmountSum] = useState(0);
+//   const [drawerOpen, setDrawerOpen] = useState(false);
+//   const [editData, setEditData] = useState(null);
+//   const [openVoidDialog, setOpenVoidDialog] = useState(false);
+//   const [seminarToVoid, setSeminarToVoid] = useState(null);
+//   const [value, setValue] = useState("0");
+
+//   const formatDate = (isoDate) => {
+//     if (!isoDate) return "N/A";
+//     const date = new Date(isoDate);
+//     return !isNaN(date.getTime())
+//       ? date.toLocaleString("en-US", {
+//           dateStyle: "medium",
+//           timeStyle: "short",
+//         })
+//       : "N/A";
+//   };
+
+//   useEffect(() => {
+//     console.log("Fetching seminars and payment methods...");
+//     if (status === "idle") {
+//       dispatch(fetchSeminars())
+//         .unwrap()
+//         .catch((err) => {
+//           console.error("Fetch seminars failed:", err);
+//           if (err.status === 401) {
+//             console.log("401 detected in Seminar component");
+//           }
+//         });
+//       dispatch(fetchPaymentMethods());
+//     }
+//   }, [dispatch, status]);
+
+//   useEffect(() => {
+//     console.log("Seminars from Redux:", seminars);
+//     if (seminars && Array.isArray(seminars) && status === "succeeded") {
+//       const validSeminars = seminars.filter((seminar) => seminar._id);
+//       const sum = validSeminars.reduce(
+//         (sum, seminar) => sum + parseFloat(seminar.totalAmount || 0),
+//         0
+//       );
+
+//       const formattedData = validSeminars.map((seminar) => {
+//         const soldBy = seminar.salesBy ? seminar.salesBy.fullName : "N/A";
+//         const paymentMethodName = seminar.paymentMethod
+//           ? seminar.paymentMethod.name
+//           : "N/A";
+//         return {
+//           id: seminar._id,
+//           organizationName: seminar.organizationName || "N/A",
+//           contactPhone: seminar.contactPhone || "N/A",
+//           seminarDate: seminar.seminarDate
+//             ? formatDate(seminar.seminarDate)
+//             : "N/A",
+//           soldBy,
+//           address: seminar.address || "N/A",
+//           eventType: seminar.eventType || "N/A",
+//           paymentMethodName,
+//           status: seminar.status || "N/A",
+//           additionalNotes: seminar.additionalNotes || "N/A",
+//           isVoided: seminar.isVoided ? "Yes" : "No",
+//           totalAmount:
+//             seminar.totalAmount !== undefined
+//               ? `₦${parseFloat(seminar.totalAmount).toFixed(2)}`
+//               : "₦0.00",
+//         };
+//       });
+
+//       console.log("Formatted data:", formattedData);
+//       setData(formattedData);
+//       setFilteredData(formattedData);
+//       setTotalAmountSum(sum);
+//     } else if (status === "failed") {
+//       setData([]);
+//       setFilteredData([]);
+//       setTotalAmountSum(0);
+//     }
+//   }, [seminars, status]);
+
+//   const handleSearch = (searchVal) => {
+//     setSearchText(searchVal);
+//     if (searchVal.trim() === "") {
+//       setFilteredData(data);
+//     } else {
+//       const filtered = data.filter((row) =>
+//         Object.values(row).some(
+//           (value) =>
+//             value &&
+//             value.toString().toLowerCase().includes(searchVal.toLowerCase())
+//         )
+//       );
+//       setFilteredData(filtered);
+//     }
+//   };
+
+//   const handleExport = () => {
+//     const headers = columns.map((col) => col.headerName).join(",");
+//     const csvRows = filteredData
+//       .map((row) =>
+//         columns
+//           .map(
+//             (col) =>
+//               `"${(row[col.field] || "").toString().replace(/"/g, '""')}"`
+//           )
+//           .join(",")
+//       )
+//       .join("\n");
+//     const csvContent = `${headers}\n${csvRows}`;
+//     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+//     const link = document.createElement("a");
+//     link.href = URL.createObjectURL(blob);
+//     link.download = "seminars.csv";
+//     link.click();
+//   };
+
+//   const handlePrint = () => {
+//     window.print();
+//   };
+
+//   const handleEditClick = (seminar) => {
+//     const originalSeminar = seminars.find((s) => s._id === seminar.id);
+//     setEditData(originalSeminar);
+//     setDrawerOpen(true);
+//   };
+
+//   const handleVoidClick = (seminar) => {
+//     console.log("Seminar to void:", seminar);
+//     setSeminarToVoid({ _id: seminar.id, ...seminar });
+//     setOpenVoidDialog(true);
+//   };
+
+//   const handleConfirmVoid = async () => {
+//     if (seminarToVoid) {
+//       console.log("Voiding seminar with ID:", seminarToVoid._id);
+//       try {
+//         const response = await dispatch(
+//           voidSeminar(seminarToVoid._id)
+//         ).unwrap();
+//         if (response.success) {
+//           toast.success("Seminar record successfully voided");
+//           dispatch(fetchSeminars());
+//         } else {
+//           toast.error(response.message || "Failed to void seminar record");
+//         }
+//       } catch (error) {
+//         toast.error(error.message || "Failed to void seminar record");
+//       } finally {
+//         setOpenVoidDialog(false);
+//         setSeminarToVoid(null);
+//       }
+//     }
+//   };
+
+//   const handleChange = (event, newValue) => {
+//     setValue(newValue);
+//   };
+
+//   const handleRetry = () => {
+//     dispatch(checkAuthStatus()).then(() => {
+//       dispatch(fetchSeminars());
+//     });
+//   };
+
+//   const columns = [
+//     { field: "organizationName", headerName: "Organization", flex: 1 },
+//     { field: "contactPhone", headerName: "Contact Phone", flex: 1 },
+//     { field: "seminarDate", headerName: "Date", flex: 1 },
+//     { field: "soldBy", headerName: "Sold By", flex: 1 },
+//     { field: "address", headerName: "Address", flex: 1 },
+//     { field: "eventType", headerName: "Event Type", flex: 1 },
+//     { field: "paymentMethodName", headerName: "Payment Method", flex: 1 },
+//     { field: "status", headerName: "Status", flex: 1 },
+//     { field: "additionalNotes", headerName: "Notes", flex: 1 },
+//     { field: "isVoided", headerName: "Voided", flex: 1 },
+//     { field: "totalAmount", headerName: "Total Amount", flex: 1 },
+//     {
+//       field: "actions",
+//       headerName: "Actions",
+//       flex: 1,
+//       renderCell: (params) => (
+//         <>
+//           {hasPermission(user, "update:seminars") && (
+//             <i
+//               className="bx bx-pencil"
+//               style={{
+//                 color: "#fe6c00",
+//                 cursor: "pointer",
+//                 marginRight: "12px",
+//               }}
+//               onClick={() => handleEditClick(params.row)}
+//             ></i>
+//           )}
+//           {hasPermission(user, "delete:seminars") && (
+//             <i
+//               className="bx bx-trash"
+//               style={{
+//                 color: "#fe1e00",
+//                 cursor:
+//                   params.row.isVoided === "Yes" ? "not-allowed" : "pointer",
+//                 opacity: params.row.isVoided === "Yes" ? 0.5 : 1,
+//                 marginRight: "12px",
+//               }}
+//               onClick={() =>
+//                 params.row.isVoided !== "Yes" && handleVoidClick(params.row)
+//               }
+//             ></i>
+//           )}
+//         </>
+//       ),
+//     },
+//   ];
+
+//   const theme = createTheme({
+//     components: {
+//       MuiDataGrid: {
+//         styleOverrides: {
+//           root: {
+//             backgroundColor: "#f0f0f0",
+//             "& .MuiDataGrid-row": {
+//               backgroundColor: "#29221d",
+//               "&:hover": {
+//                 backgroundColor: "#1e1611",
+//                 "& .MuiDataGrid-cell": { color: "#bdbabb" },
+//               },
+//             },
+//             "& .MuiDataGrid-cell": { color: "#fff", fontSize: "18px" },
+//             "& .MuiDataGrid-columnHeaders": {
+//               backgroundColor: "#e0e0e0",
+//               "& .MuiDataGrid-columnHeaderTitle": {
+//                 color: "#000",
+//                 fontSize: "18px",
+//                 fontWeight: "bold",
+//               },
+//             },
+//             "& .MuiDataGrid-footerContainer": {
+//               backgroundColor: "#29221d",
+//               color: "#fcfcfc",
+//               "& .MuiTablePagination-root": {
+//                 color: "#fcfcfc",
+//               },
+//               "& .MuiIconButton-root": {
+//                 color: "#fcfcfc",
+//               },
+//             },
+//           },
+//         },
+//       },
+//       MuiTab: {
+//         styleOverrides: {
+//           root: {
+//             color: "#fff",
+//             "&.Mui-selected": { color: "#fe6c00" },
+//             "&:hover": { color: "#fe6c00" },
+//           },
+//         },
+//       },
+//       MuiTabs: {
+//         styleOverrides: {
+//           indicator: { backgroundColor: "#fe6c00" },
+//         },
+//       },
+//     },
+//   });
+
+//   return (
+//     <ThemeProvider theme={theme}>
+//       <TabContext value={value}>
+//         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+//           <TabList onChange={handleChange} aria-label="seminar tabs">
+//             <Tab label="Sales Records" value="0" />
+//             <Tab label="Reports" value="1" />
+//           </TabList>
+//         </Box>
+//         <TabPanel value="0">
+//           <Box sx={{ width: "100%", minHeight: "100vh", position: "relative" }}>
+//             {status === "failed" && error ? (
+//               <Box
+//                 sx={{
+//                   position: "fixed",
+//                   top: "50%",
+//                   left: "50%",
+//                   transform: "translate(-50%, -50%)",
+//                   backgroundColor: "#302924",
+//                   color: "#fff",
+//                   padding: "24px 32px",
+//                   borderRadius: "8px",
+//                   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+//                   textAlign: "center",
+//                   zIndex: 1300,
+//                 }}
+//               >
+//                 <Typography
+//                   variant="h6"
+//                   sx={{ color: "#fe1e00", mb: 2, fontWeight: "bold" }}
+//                 >
+//                   Error: {error || "An error occurred"}
+//                 </Typography>
+//                 <Button
+//                   variant="contained"
+//                   onClick={handleRetry}
+//                   sx={{
+//                     backgroundColor: "#fe6c00",
+//                     color: "#fff",
+//                     padding: "8px 16px",
+//                     borderRadius: "4px",
+//                     "&:hover": {
+//                       backgroundColor: "#fec80a",
+//                       color: "#000",
+//                     },
+//                   }}
+//                 >
+//                   Retry
+//                 </Button>
+//               </Box>
+//             ) : (
+//               <>
+//                 <Box
+//                   sx={{
+//                     padding: "8px",
+//                     backgroundColor: "#d0d0d0",
+//                     display: "flex",
+//                     justifyContent: "space-between",
+//                     alignItems: "center",
+//                     marginBottom: "8px",
+//                     "@media print": {
+//                       display: "none",
+//                     },
+//                   }}
+//                 >
+//                   <Typography variant="h6" sx={{ color: "#000" }}>
+//                     Seminar Records
+//                   </Typography>
+//                   <Box
+//                     sx={{ display: "flex", gap: "8px", alignItems: "center" }}
+//                   >
+//                     <TextField
+//                       variant="outlined"
+//                       size="small"
+//                       placeholder="Search..."
+//                       value={searchText}
+//                       onChange={(e) => handleSearch(e.target.value)}
+//                       sx={{ backgroundColor: "#fff", borderRadius: "4px" }}
+//                     />
+//                     <IconButton
+//                       onClick={handleExport}
+//                       sx={{
+//                         color: "#473b33",
+//                         "&:hover": { color: "#fec80a" },
+//                       }}
+//                       title="Download CSV"
+//                     >
+//                       <GetAppIcon />
+//                     </IconButton>
+//                     <IconButton
+//                       onClick={handlePrint}
+//                       sx={{
+//                         color: "#302924",
+//                         "&:hover": { color: "#fec80a" },
+//                       }}
+//                       title="Print"
+//                     >
+//                       <PrintIcon />
+//                     </IconButton>
+//                     {hasPermission(user, "write:seminars") && (
+//                       <Button
+//                         variant="contained"
+//                         size="small"
+//                         onClick={() => {
+//                           setEditData(null);
+//                           setDrawerOpen(true);
+//                         }}
+//                         sx={{
+//                           backgroundColor: "#fe6c00",
+//                           color: "#fff",
+//                           "&:hover": {
+//                             backgroundColor: "#fec80a",
+//                             color: "#bdbabb",
+//                           },
+//                         }}
+//                       >
+//                         Add New Seminar
+//                       </Button>
+//                     )}
+//                   </Box>
+//                 </Box>
+//                 {status === "loading" ? (
+//                   <Box
+//                     sx={{
+//                       display: "flex",
+//                       justifyContent: "center",
+//                       alignItems: "center",
+//                       height: "200px",
+//                       width: "100%",
+//                     }}
+//                   >
+//                     <CircularProgress
+//                       color="inherit"
+//                       sx={{ color: "#fe6c00" }}
+//                     />
+//                   </Box>
+//                 ) : (
+//                   <Box sx={{ height: 600, width: "100%" }}>
+//                     <DataGrid
+//                       rows={filteredData}
+//                       columns={columns}
+//                       pageSizeOptions={[10, 20, 50]}
+//                       initialState={{
+//                         pagination: { paginationModel: { pageSize: 10 } },
+//                       }}
+//                       disableSelectionOnClick
+//                     />
+//                   </Box>
+//                 )}
+//                 <AddNewSeminarDrawer
+//                   open={drawerOpen}
+//                   onClose={() => {
+//                     setDrawerOpen(false);
+//                     setEditData(null);
+//                   }}
+//                   editMode={!!editData}
+//                   initialData={editData || {}}
+//                   onSaveSuccess={() => dispatch(fetchSeminars())}
+//                 />
+//                 <Dialog
+//                   open={openVoidDialog}
+//                   onClose={() => setOpenVoidDialog(false)}
+//                   aria-labelledby="void-dialog-title"
+//                   aria-describedby="void-dialog-description"
+//                 >
+//                   <DialogTitle id="void-dialog-title">
+//                     {"Confirm Void Transaction"}
+//                   </DialogTitle>
+//                   <DialogContent>
+//                     <DialogContentText id="void-dialog-description">
+//                       Are you sure you want to void this transaction? This
+//                       action cannot be undone.
+//                     </DialogContentText>
+//                   </DialogContent>
+//                   <DialogActions>
+//                     <Button
+//                       onClick={() => setOpenVoidDialog(false)}
+//                       color="primary"
+//                     >
+//                       Cancel
+//                     </Button>
+//                     <Button onClick={handleConfirmVoid} color="error" autoFocus>
+//                       Void
+//                     </Button>
+//                   </DialogActions>
+//                 </Dialog>
+//               </>
+//             )}
+//           </Box>
+//         </TabPanel>
+//         <TabPanel value="1">
+//           <SeminarReports />
+//         </TabPanel>
+//       </TabContext>
+//       <Toaster />
+//     </ThemeProvider>
+//   );
+// };
+
+// export default Seminar;
+
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
@@ -809,16 +1798,16 @@ import {
   TextField,
   Typography,
   IconButton,
-  Tabs,
   Tab,
 } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import GetAppIcon from "@mui/icons-material/GetApp"; // Download icon
-import PrintIcon from "@mui/icons-material/Print"; // Print icon
+import GetAppIcon from "@mui/icons-material/GetApp";
+import PrintIcon from "@mui/icons-material/Print";
 import "boxicons";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchSeminars, voidSeminar } from "../../redux/slices/seminarSlice";
 import { fetchPaymentMethods } from "../../redux/slices/paymentMethodsSlice";
+import { checkAuthStatus } from "../../redux/slices/authSlice";
 import AddNewSeminarDrawer from "../AddDrawerSection/AddNewSeminarDrawer";
 import { Toaster, toast } from "react-hot-toast";
 import SeminarReports from "./Reports/SeminarReports";
@@ -826,9 +1815,16 @@ import { hasPermission } from "../../utils/authUtils";
 
 const Seminar = () => {
   const dispatch = useDispatch();
-  const { seminars, isLoading, error } = useSelector((state) => state.seminar);
-  const { paymentMethods } = useSelector((state) => state.paymentMethods);
-  const { user } = useSelector((state) => state.auth);
+  const {
+    seminars = [],
+    status = "idle",
+    error,
+  } = useSelector((state) => state.seminar || {});
+  const { paymentMethods = [] } = useSelector(
+    (state) => state.paymentMethods || {}
+  );
+  const { isAuthenticated, user } = useSelector((state) => state.auth || {});
+
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchText, setSearchText] = useState("");
@@ -838,8 +1834,9 @@ const Seminar = () => {
   const [openVoidDialog, setOpenVoidDialog] = useState(false);
   const [seminarToVoid, setSeminarToVoid] = useState(null);
   const [value, setValue] = useState("0");
+  const [initialFetchDone, setInitialFetchDone] = useState(false);
 
-  const formatDate = (isoDate) => {
+  const formatDate = useCallback((isoDate) => {
     if (!isoDate) return "N/A";
     const date = new Date(isoDate);
     return !isNaN(date.getTime())
@@ -848,61 +1845,40 @@ const Seminar = () => {
           timeStyle: "short",
         })
       : "N/A";
-  };
+  }, []);
 
   useEffect(() => {
-    dispatch(fetchSeminars());
-    dispatch(fetchPaymentMethods());
-  }, [dispatch]);
+    //console.log("Seminar - Mount check", { isAuthenticated, initialFetchDone });
+    if (!initialFetchDone) {
+      if (isAuthenticated) {
+        console.log("Fetching seminars and payment methods...");
+        dispatch(fetchSeminars());
+        dispatch(fetchPaymentMethods());
+        setInitialFetchDone(true);
+      } else {
+        //console.log("Checking auth status...");
+        dispatch(checkAuthStatus())
+          .unwrap()
+          .then(() => {
+            // console.log(
+            //   "Auth succeeded, fetching seminars and payment methods..."
+            // );
+            dispatch(fetchSeminars());
+            dispatch(fetchPaymentMethods());
+            setInitialFetchDone(true);
+          })
+          .catch((err) => {
+            console.error("Auth check failed:", err);
+            setInitialFetchDone(true);
+          });
+      }
+    }
+  }, [dispatch, isAuthenticated, initialFetchDone]);
 
-  // useEffect(() => {
-  //   if (seminars && Array.isArray(seminars) && seminars.length > 0) {
-  //     const sum = seminars.reduce(
-  //       (sum, seminar) => sum + parseFloat(seminar.totalAmount || 0),
-  //       0
-  //     );
-
-  //     const formattedData = seminars.map((seminar) => {
-  //       const soldBy = seminar.salesBy ? seminar.salesBy.fullName : "N/A";
-  //       const paymentMethodName = seminar.paymentMethod
-  //         ? seminar.paymentMethod.name
-  //         : "N/A";
-  //       return {
-  //         id: seminar._id,
-  //         organizationName: seminar.organizationName || "N/A",
-  //         contactPhone: seminar.contactPhone || "N/A",
-  //         seminarDate: seminar.seminarDate
-  //           ? formatDate(seminar.seminarDate)
-  //           : "N/A",
-  //         soldBy,
-  //         address: seminar.address || "N/A",
-  //         eventType: seminar.eventType || "N/A",
-  //         paymentMethodName,
-  //         status: seminar.status || "N/A",
-  //         additionalNotes: seminar.additionalNotes || "N/A",
-  //         isVoided: seminar.isVoided ? "Yes" : "No",
-  //         totalAmount:
-  //           seminar.totalAmount !== undefined
-  //             ? `₦${parseFloat(seminar.totalAmount).toFixed(2)}`
-  //             : "₦0.00",
-  //       };
-  //     });
-
-  //     setData(formattedData);
-  //     setFilteredData(formattedData); // Initialize filtered data
-  //     setTotalAmountSum(sum);
-  //   } else {
-  //     setData([]);
-  //     setFilteredData([]);
-  //     setTotalAmountSum(0);
-  //   }
-  // }, [seminars, paymentMethods]);
-
-  // Search functionality
   useEffect(() => {
-    console.log("Seminars from Redux:", seminars); // Debug log
-    if (seminars && Array.isArray(seminars) && seminars.length > 0) {
-      const validSeminars = seminars.filter((seminar) => seminar._id); // Filter out seminars without _id
+    //console.log("Seminar - Data update", { seminars, status });
+    if (seminars && Array.isArray(seminars) && status === "succeeded") {
+      const validSeminars = seminars.filter((seminar) => seminar._id);
       const sum = validSeminars.reduce(
         (sum, seminar) => sum + parseFloat(seminar.totalAmount || 0),
         0
@@ -914,12 +1890,10 @@ const Seminar = () => {
           ? seminar.paymentMethod.name
           : "N/A";
         return {
-          id: seminar._id, // Already correct
+          id: seminar._id,
           organizationName: seminar.organizationName || "N/A",
           contactPhone: seminar.contactPhone || "N/A",
-          seminarDate: seminar.seminarDate
-            ? formatDate(seminar.seminarDate)
-            : "N/A",
+          seminarDate: formatDate(seminar.seminarDate),
           soldBy,
           address: seminar.address || "N/A",
           eventType: seminar.eventType || "N/A",
@@ -934,7 +1908,7 @@ const Seminar = () => {
         };
       });
 
-      console.log("Formatted data:", formattedData); // Debug log
+      //console.log("Formatted data:", formattedData);
       setData(formattedData);
       setFilteredData(formattedData);
       setTotalAmountSum(sum);
@@ -942,27 +1916,30 @@ const Seminar = () => {
       setData([]);
       setFilteredData([]);
       setTotalAmountSum(0);
+      //console.log("No valid seminars data or status not succeeded");
     }
-  }, [seminars, paymentMethods]);
+  }, [seminars, status, formatDate]);
 
-  const handleSearch = (searchVal) => {
-    setSearchText(searchVal);
-    if (searchVal.trim() === "") {
-      setFilteredData(data);
-    } else {
-      const filtered = data.filter((row) =>
-        Object.values(row).some(
-          (value) =>
-            value &&
-            value.toString().toLowerCase().includes(searchVal.toLowerCase())
-        )
-      );
-      setFilteredData(filtered);
-    }
-  };
+  const handleSearch = useCallback(
+    (searchVal) => {
+      setSearchText(searchVal);
+      if (searchVal.trim() === "") {
+        setFilteredData(data);
+      } else {
+        const filtered = data.filter((row) =>
+          Object.values(row).some(
+            (value) =>
+              value &&
+              value.toString().toLowerCase().includes(searchVal.toLowerCase())
+          )
+        );
+        setFilteredData(filtered);
+      }
+    },
+    [data]
+  );
 
-  // CSV Export functionality
-  const handleExport = () => {
+  const handleExport = useCallback(() => {
     const headers = columns.map((col) => col.headerName).join(",");
     const csvRows = filteredData
       .map((row) =>
@@ -980,106 +1957,128 @@ const Seminar = () => {
     link.href = URL.createObjectURL(blob);
     link.download = "seminars.csv";
     link.click();
-  };
+  }, [filteredData]);
 
-  // Print functionality
-  const handlePrint = () => {
+  const handlePrint = useCallback(() => {
     window.print();
-  };
+  }, []);
 
-  const handleEditClick = (seminar) => {
-    // Find the original seminar object from Redux state using the ID from params.row
-    const originalSeminar = seminars.find((s) => s._id === seminar.id);
-    setEditData(originalSeminar);
-    setDrawerOpen(true);
-  };
-
-  const handleVoidClick = (seminar) => {
-    console.log("Seminar to void:", seminar);
-    setSeminarToVoid({ _id: seminar.id, ...seminar }); // Use `id` from DataGrid
-    setOpenVoidDialog(true);
-  };
-
-  const handleConfirmVoid = async () => {
-    if (seminarToVoid) {
-      console.log("Voiding seminar with ID:", seminarToVoid._id);
-      try {
-        const response = await dispatch(
-          voidSeminar(seminarToVoid._id)
-        ).unwrap();
-        if (response.success) {
-          toast.success("Seminar record successfully voided");
-          dispatch(fetchSeminars());
-        } else {
-          toast.error(response.message || "Failed to void seminar record");
-        }
-      } catch (error) {
-        toast.error(error.message || "Failed to void seminar record");
-      } finally {
-        setOpenVoidDialog(false);
-      }
-    }
-  };
-
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
-
-  const columns = [
-    { field: "organizationName", headerName: "Organization", flex: 1 },
-    { field: "contactPhone", headerName: "Contact Phone", flex: 1 },
-    { field: "seminarDate", headerName: "Date", flex: 1 },
-    { field: "soldBy", headerName: "Sold By", flex: 1 },
-    { field: "address", headerName: "Address", flex: 1 },
-    { field: "eventType", headerName: "Event Type", flex: 1 },
-    { field: "paymentMethodName", headerName: "Payment Method", flex: 1 },
-    { field: "status", headerName: "Status", flex: 1 },
-    { field: "additionalNotes", headerName: "Notes", flex: 1 },
-    { field: "isVoided", headerName: "Voided", flex: 1 },
-    { field: "totalAmount", headerName: "Total Amount", flex: 1 },
-    {
-      field: "actions",
-      headerName: "Actions",
-      flex: 1,
-      renderCell: (params) => (
-        <>
-          {hasPermission(user, "update:seminars") && (
-            <i
-              className="bx bx-pencil"
-              style={{
-                color: "#fe6c00",
-                cursor: "pointer",
-                marginRight: "12px",
-              }}
-              onClick={() => handleEditClick(params.row)}
-            ></i>
-          )}
-          {hasPermission(user, "delete:seminars") && (
-            <i
-              className="bx bx-trash"
-              style={{
-                color: "#fe1e00",
-                cursor:
-                  params.row.isVoided === "Yes" ? "not-allowed" : "pointer",
-                opacity: params.row.isVoided === "Yes" ? 0.5 : 1,
-                marginRight: "12px",
-              }}
-              onClick={() =>
-                params.row.isVoided !== "Yes" && handleVoidClick(params.row)
-              }
-            ></i>
-          )}
-        </>
-      ),
+  const handleEditClick = useCallback(
+    (seminar) => {
+      const originalSeminar = seminars.find((s) => s._id === seminar.id);
+      setEditData(originalSeminar);
+      setDrawerOpen(true);
     },
-  ];
+    [seminars]
+  );
+
+  const handleVoidClick = useCallback((seminar) => {
+    //console.log("Seminar to void:", seminar);
+    setSeminarToVoid({ _id: seminar.id, ...seminar });
+    setOpenVoidDialog(true);
+  }, []);
+
+  const handleConfirmVoid = useCallback(() => {
+    if (seminarToVoid) {
+      //console.log("Voiding seminar with ID:", seminarToVoid._id);
+      dispatch(voidSeminar(seminarToVoid._id))
+        .unwrap()
+        .then((response) => {
+          if (response.success) {
+            toast.success("Seminar record successfully voided", {
+              duration: 5000,
+            });
+            dispatch(fetchSeminars());
+          } else {
+            toast.error(response.message || "Failed to void seminar record", {
+              duration: 5000,
+            });
+          }
+        })
+        .catch((error) => {
+          toast.error(error.message || "Failed to void seminar record", {
+            duration: 5000,
+          });
+        })
+        .finally(() => {
+          setOpenVoidDialog(false);
+          setSeminarToVoid(null);
+        });
+    }
+  }, [dispatch, seminarToVoid]);
+
+  const handleCloseVoidDialog = useCallback(() => {
+    setOpenVoidDialog(false);
+    setSeminarToVoid(null);
+  }, []);
+
+  const handleChange = useCallback((event, newValue) => {
+    setValue(newValue);
+  }, []);
+
+  const handleRetry = useCallback(() => {
+    setInitialFetchDone(false);
+    dispatch(checkAuthStatus());
+  }, [dispatch]);
+
+  const columns = useMemo(
+    () => [
+      { field: "organizationName", headerName: "Organization", flex: 1 },
+      { field: "contactPhone", headerName: "Contact Phone", flex: 1 },
+      { field: "seminarDate", headerName: "Date", flex: 1 },
+      { field: "soldBy", headerName: "Sold By", flex: 1 },
+      { field: "address", headerName: "Address", flex: 1 },
+      { field: "eventType", headerName: "Event Type", flex: 1 },
+      { field: "paymentMethodName", headerName: "Payment Method", flex: 1 },
+      { field: "status", headerName: "Status", flex: 1 },
+      { field: "additionalNotes", headerName: "Notes", flex: 1 },
+      { field: "isVoided", headerName: "Voided", flex: 1 },
+      { field: "totalAmount", headerName: "Total Amount", flex: 1 },
+      {
+        field: "actions",
+        headerName: "Actions",
+        flex: 1,
+        renderCell: (params) => (
+          <>
+            {hasPermission(user, "update:seminars") && (
+              <i
+                className="bx bx-pencil"
+                style={{
+                  color: "#fe6c00",
+                  cursor: "pointer",
+                  marginRight: "12px",
+                }}
+                onClick={() => handleEditClick(params.row)}
+              ></i>
+            )}
+            {hasPermission(user, "delete:seminars") && (
+              <i
+                className="bx bx-trash"
+                style={{
+                  color: "#fe1e00",
+                  cursor:
+                    params.row.isVoided === "Yes" ? "not-allowed" : "pointer",
+                  opacity: params.row.isVoided === "Yes" ? 0.5 : 1,
+                  marginRight: "12px",
+                }}
+                onClick={() =>
+                  params.row.isVoided !== "Yes" && handleVoidClick(params.row)
+                }
+              ></i>
+            )}
+          </>
+        ),
+      },
+    ],
+    [user, handleEditClick, handleVoidClick]
+  );
 
   const theme = createTheme({
     components: {
       MuiDataGrid: {
         styleOverrides: {
           root: {
-            "& .MuiPaper-root": { backgroundColor: "#f0f0f0" },
+            backgroundColor: "#f0f0f0",
             "& .MuiDataGrid-row": {
               backgroundColor: "#29221d",
               "&:hover": {
@@ -1096,9 +2095,11 @@ const Seminar = () => {
                 fontWeight: "bold",
               },
             },
-            "& .MuiDataGrid-toolbarContainer": {
-              backgroundColor: "#d0d0d0",
-              "& .MuiButton-root": { color: "#3f51b5" },
+            "& .MuiDataGrid-footerContainer": {
+              backgroundColor: "#29221d",
+              color: "#fcfcfc",
+              "& .MuiTablePagination-root": { color: "#fcfcfc" },
+              "& .MuiIconButton-root": { color: "#fcfcfc" },
             },
           },
         },
@@ -1120,6 +2121,14 @@ const Seminar = () => {
     },
   });
 
+  if (!isAuthenticated) {
+    return (
+      <Box sx={{ textAlign: "center", padding: "20px" }}>
+        <Typography variant="h6">Please log in to view seminars.</Typography>
+      </Box>
+    );
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <TabContext value={value}>
@@ -1130,90 +2139,118 @@ const Seminar = () => {
           </TabList>
         </Box>
         <TabPanel value="0">
-          {error ? (
-            <div>Error: {error.message || "An error occurred."}</div>
-          ) : (
-            <>
+          <Box sx={{ width: "100%", position: "relative" }}>
+            {status === "loading" && filteredData.length === 0 ? (
               <Box
                 sx={{
-                  padding: "8px",
-                  backgroundColor: "#d0d0d0",
                   display: "flex",
-                  justifyContent: "space-between",
+                  justifyContent: "center",
                   alignItems: "center",
-                  marginBottom: "8px",
-                  "@media print": {
-                    display: "none",
-                  },
+                  height: "200px",
+                  width: "100%",
                 }}
               >
-                <Typography variant="h6" sx={{ color: "#000" }}>
-                  Seminar Records
-                </Typography>
-                <Box sx={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                  <TextField
-                    variant="outlined"
-                    size="small"
-                    placeholder="Search..."
-                    value={searchText}
-                    onChange={(e) => handleSearch(e.target.value)}
-                    sx={{ backgroundColor: "#fff", borderRadius: "4px" }}
-                  />
-                  <IconButton
-                    onClick={handleExport}
-                    sx={{
-                      color: "#473b33",
-                      "&:hover": { color: "#fec80a" },
-                    }}
-                    title="Download CSV"
-                  >
-                    <GetAppIcon />
-                  </IconButton>
-                  <IconButton
-                    onClick={handlePrint}
-                    sx={{
-                      color: "#302924",
-                      "&:hover": { color: "#fec80a" },
-                    }}
-                    title="Print"
-                  >
-                    <PrintIcon />
-                  </IconButton>
-                  {hasPermission(user, "write:seminars") && (
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={() => {
-                        setEditData(null);
-                        setDrawerOpen(true);
-                      }}
-                      sx={{
-                        backgroundColor: "#fe6c00",
-                        color: "#fff",
-                        "&:hover": {
-                          backgroundColor: "#fec80a",
-                          color: "#bdbabb",
-                        },
-                      }}
-                    >
-                      Add New Seminar
-                    </Button>
-                  )}
-                </Box>
+                <CircularProgress color="inherit" sx={{ color: "#fe6c00" }} />
               </Box>
-              {isLoading ? (
-                <Box
+            ) : status === "failed" || error ? (
+              <Box
+                sx={{
+                  position: "fixed",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  backgroundColor: "#302924",
+                  color: "#fff",
+                  padding: "24px 32px",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                  textAlign: "center",
+                  zIndex: 1300,
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{ color: "#fe1e00", mb: 2, fontWeight: "bold" }}
+                >
+                  Error: {error || "An error occurred"}
+                </Typography>
+                <Button
+                  variant="contained"
+                  onClick={handleRetry}
                   sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "200px",
-                    width: "100%",
+                    backgroundColor: "#fe6c00",
+                    color: "#fff",
+                    padding: "8px 16px",
+                    borderRadius: "4px",
+                    "&:hover": { backgroundColor: "#fec80a", color: "#000" },
                   }}
                 >
-                  <CircularProgress color="inherit" sx={{ color: "#fe6c00" }} />
+                  Retry
+                </Button>
+              </Box>
+            ) : (
+              <>
+                <Box
+                  sx={{
+                    padding: "8px",
+                    backgroundColor: "#d0d0d0",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "8px",
+                    "@media print": { display: "none" },
+                  }}
+                >
+                  <Typography variant="h6" sx={{ color: "#000" }}>
+                    Seminar Records (Total: ₦{totalAmountSum.toFixed(2)})
+                  </Typography>
+                  <Box
+                    sx={{ display: "flex", gap: "8px", alignItems: "center" }}
+                  >
+                    <TextField
+                      variant="outlined"
+                      size="small"
+                      placeholder="Search..."
+                      value={searchText}
+                      onChange={(e) => handleSearch(e.target.value)}
+                      sx={{ backgroundColor: "#fff", borderRadius: "4px" }}
+                    />
+                    <IconButton
+                      onClick={handleExport}
+                      sx={{ color: "#473b33", "&:hover": { color: "#fec80a" } }}
+                      title="Download CSV"
+                    >
+                      <GetAppIcon />
+                    </IconButton>
+                    <IconButton
+                      onClick={handlePrint}
+                      sx={{ color: "#302924", "&:hover": { color: "#fec80a" } }}
+                      title="Print"
+                    >
+                      <PrintIcon />
+                    </IconButton>
+                    {hasPermission(user, "write:seminars") && (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => {
+                          setEditData(null);
+                          setDrawerOpen(true);
+                        }}
+                        sx={{
+                          backgroundColor: "#fe6c00",
+                          color: "#fff",
+                          "&:hover": {
+                            backgroundColor: "#fec80a",
+                            color: "#bdbabb",
+                          },
+                        }}
+                      >
+                        Add New Seminar
+                      </Button>
+                    )}
+                  </Box>
                 </Box>
-              ) : (
                 <Box sx={{ height: 600, width: "100%" }}>
                   <DataGrid
                     rows={filteredData}
@@ -1225,46 +2262,43 @@ const Seminar = () => {
                     disableSelectionOnClick
                   />
                 </Box>
-              )}
-              <AddNewSeminarDrawer
-                open={drawerOpen}
-                onClose={() => {
-                  setDrawerOpen(false);
-                  setEditData(null);
-                }}
-                editMode={!!editData}
-                initialData={editData || {}}
-                onSaveSuccess={() => dispatch(fetchSeminars())}
-              />
-              <Dialog
-                open={openVoidDialog}
-                onClose={() => setOpenVoidDialog(false)}
-                aria-labelledby="void-dialog-title"
-                aria-describedby="void-dialog-description"
-              >
-                <DialogTitle id="void-dialog-title">
-                  {"Confirm Void Transaction"}
-                </DialogTitle>
-                <DialogContent>
-                  <DialogContentText id="void-dialog-description">
-                    Are you sure you want to void this transaction? This action
-                    cannot be undone.
-                  </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                  <Button
-                    onClick={() => setOpenVoidDialog(false)}
-                    color="primary"
-                  >
-                    Cancel
-                  </Button>
-                  <Button onClick={handleConfirmVoid} color="error" autoFocus>
-                    Void
-                  </Button>
-                </DialogActions>
-              </Dialog>
-            </>
-          )}
+                <AddNewSeminarDrawer
+                  open={drawerOpen}
+                  onClose={() => {
+                    setDrawerOpen(false);
+                    setEditData(null);
+                  }}
+                  editMode={!!editData}
+                  initialData={editData || {}}
+                  onSaveSuccess={() => dispatch(fetchSeminars())}
+                />
+                <Dialog
+                  open={openVoidDialog}
+                  onClose={handleCloseVoidDialog}
+                  aria-labelledby="void-dialog-title"
+                  aria-describedby="void-dialog-description"
+                >
+                  <DialogTitle id="void-dialog-title">
+                    Confirm Void Transaction
+                  </DialogTitle>
+                  <DialogContent>
+                    <DialogContentText id="void-dialog-description">
+                      Are you sure you want to void this transaction? This
+                      action cannot be undone.
+                    </DialogContentText>
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={handleCloseVoidDialog} color="primary">
+                      Cancel
+                    </Button>
+                    <Button onClick={handleConfirmVoid} color="error" autoFocus>
+                      Void
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+              </>
+            )}
+          </Box>
         </TabPanel>
         <TabPanel value="1">
           <SeminarReports />

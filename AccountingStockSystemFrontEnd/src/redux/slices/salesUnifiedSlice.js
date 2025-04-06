@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { apiClient } from "./authSlice";
+import { apiClient } from "../../utils/apiClient";
 
 const BASE_URL = "/anotherunifiedsales"; // Your API base URL
 
@@ -79,7 +79,6 @@ export const fetchAnotherUnifiedSalesSummary = createAsyncThunk(
       const response = await apiClient.get(`${BASE_URL}/summary`, {
         params: params,
       });
-      console.log("API Response for Summary:", response.data);
       return response.data; // Directly return the data as it matches your expected structure
     } catch (error) {
       // Handle errors

@@ -68,7 +68,7 @@ const AddNewUserDrawer = ({
 
   useEffect(() => {
     if (editMode) {
-      console.log("initialData.roles:", initialData.roles);
+      //console.log("initialData.roles:", initialData.roles);
       const roleIds = initialData.roles.map((role) =>
         typeof role === "object" ? String(role._id) : String(role)
       );
@@ -182,14 +182,14 @@ const AddNewUserDrawer = ({
         }
       : formData;
 
-    console.log(
-      `Attempting to ${editMode ? "update" : "signup"} with data:`,
-      payload
-    );
-    console.log(
-      "Roles array type check:",
-      payload.roles.map((r) => typeof r)
-    );
+    // console.log(
+    //   `Attempting to ${editMode ? "update" : "signup"} with data:`,
+    //   payload
+    // );
+    // console.log(
+    //   "Roles array type check:",
+    //   payload.roles.map((r) => typeof r)
+    // );
 
     dispatch(action(editMode ? { _id: initialData._id, ...payload } : payload))
       .unwrap()

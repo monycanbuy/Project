@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { apiClient } from "./authSlice";
+import { apiClient } from "../../utils/apiClient";
 
 // Base URL for the API
 const ORDER_ITEMS_URL = "/order-items";

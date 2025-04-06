@@ -1,6 +1,6 @@
 // hallTypesSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { apiClient } from "./authSlice";
+import { apiClient } from "../../utils/apiClient";
 
 // API Base URL
 const BASE_URL = "/hall-types";
@@ -11,10 +11,10 @@ const BASE_URL = "/hall-types";
 export const fetchHallTypes = createAsyncThunk(
   "hallTypes/fetchHallTypes",
   async (_, { rejectWithValue }) => {
-    console.log("Fetching hall types...");
+    //console.log("Fetching hall types...");
     try {
       const response = await apiClient.get(BASE_URL);
-      console.log("Hall types fetched:", response.data.halls); // Changed to 'halls'
+      //console.log("Hall types fetched:", response.data.halls); // Changed to 'halls'
       return response.data.halls; // Return 'halls' instead of 'hallTypes'
     } catch (error) {
       console.error("Error fetching hall types:", error);

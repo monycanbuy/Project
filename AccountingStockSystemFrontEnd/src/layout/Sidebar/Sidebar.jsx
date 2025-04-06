@@ -1,329 +1,39 @@
-// // import React, { useEffect, useState, useContext } from "react";
-// // import { defaultImgs } from "../../utils/images";
-// // import { navigationLinks } from "../../data/data";
-// // import "./Sidebar.css";
-// // import { SidebarContext } from "../../context/sidebarContext";
-// // import { useSelector, useDispatch } from "react-redux";
-// // import { fetchUserDetails } from "../../redux/slices/authSlice";
-
-// // const Sidebar = () => {
-// //   const [activeLinkIdx, setActiveLinkIdx] = useState(1);
-// //   const [sidebarClass, setSidebarClass] = useState("");
-// //   const { isSidebarOpen, toggleDrawer } = useContext(SidebarContext) || {};
-// //   const { user } = useSelector((state) => state.auth);
-// //   const dispatch = useDispatch();
-
-// //   useEffect(() => {
-// //     if (!user) {
-// //       dispatch(fetchUserDetails());
-// //     }
-// //   }, [dispatch, user]);
-
-// //   // useEffect(() => {
-// //   //   if (isSidebarOpen) {
-// //   //     setSidebarClass("sidebar-change");
-// //   //   } else {
-// //   //     setSidebarClass("");
-// //   //   }
-// //   // }, [isSidebarOpen]);
-
-// //   const handleLinkClick = (id) => {
-// //     setActiveLinkIdx(id);
-// //   };
-
-// //   // Hypothetical function to update user data
-// //   const handleUserUpdate = (updatedUserData) => {
-// //     dispatch(updateUser(updatedUserData)).then(() => {
-// //       console.log(
-// //         "After update:",
-// //         useSelector((state) => state.auth.user)
-// //       );
-// //       // Optionally, if updateUser doesn't return full user details:
-// //       // dispatch(fetchUserDetails());
-// //     });
-// //   };
-
-// //   // Example usage: Trigger update when clicking on user info
-// //   const handleProfileUpdate = () => {
-// //     // This is where you'd pass new user data
-// //     const updatedUserData = {
-// //       _id: user._id, // Make sure to include the user's ID for updating
-// //       fullName: "New Name",
-// //       // Other fields to update, including profileImage if needed
-// //     };
-// //     handleUserUpdate(updatedUserData);
-// //   };
-
-// //   const getProfileImage = () => {
-// //     const baseURL = "http://localhost:8000";
-// //     if (user && user.profileImage) {
-// //       return `${baseURL}${user.profileImage}?v=${Date.now()}`;
-// //     }
-// //     return defaultImgs.bg_img;
-// //   };
-// //   console.log("Constructed Image URL:", getProfileImage());
-
-// //   return (
-// //     <div className={`sidebar ${sidebarClass}`}>
-// //       <div className="user-info" onClick={handleProfileUpdate}>
-// //         {" "}
-// //         <div className="info-img img-fit-cover">
-// //           <img
-// //             src={getProfileImage()}
-// //             alt="profile image"
-// //             style={{ cursor: "pointer" }}
-// //           />
-// //         </div>
-// //         <span className="info-name">{user?.fullName || "alice-doe"}</span>
-// //       </div>
-
-// //       <nav className="navigation">
-// //         <ul className="nav-list">
-// //           {navigationLinks.map((navigationLink) => (
-// //             <li className="nav-item" key={navigationLink.id}>
-// //               <a
-// //                 href={navigationLink.route}
-// //                 className={`nav-link ${
-// //                   navigationLink.id === activeLinkIdx ? "active" : ""
-// //                 }`}
-// //                 onClick={(e) => {
-// //                   e.preventDefault();
-// //                   handleLinkClick(navigationLink.id);
-// //                 }}
-// //               >
-// //                 <img
-// //                   src={navigationLink.image}
-// //                   className="nav-link-icon"
-// //                   alt={navigationLink.title}
-// //                 />
-// //                 <span className="nav-link-text">{navigationLink.title}</span>
-// //               </a>
-// //             </li>
-// //           ))}
-// //         </ul>
-// //       </nav>
-// //     </div>
-// //   );
-// // };
-
-// // export default Sidebar;
-
-// // import React, { useEffect, useState, useContext } from "react";
-// // import { defaultImgs } from "../../utils/images";
-// // import { navigationLinks } from "../../data/data";
-// // import "./Sidebar.css";
-// // import { SidebarContext } from "../../context/sidebarContext";
-// // import { useSelector, useDispatch } from "react-redux";
-// // import { fetchUserDetails } from "../../redux/slices/authSlice";
-// // import { NavLink } from "react-router-dom";
-
-// // const Sidebar = () => {
-// //   const [sidebarClass, setSidebarClass] = useState("");
-// //   const { isSidebarOpen, toggleDrawer } = useContext(SidebarContext) || {};
-// //   const { user } = useSelector((state) => state.auth);
-// //   const dispatch = useDispatch();
-
-// //   useEffect(() => {
-// //     if (!user) {
-// //       dispatch(fetchUserDetails());
-// //     }
-// //   }, [dispatch, user]);
-
-// //   useEffect(() => {
-// //     setSidebarClass(isSidebarOpen ? "sidebar-change" : "");
-// //   }, [isSidebarOpen]);
-
-// //   // Hypothetical function to update user data
-// //   const handleUserUpdate = (updatedUserData) => {
-// //     dispatch(updateUser(updatedUserData)).then(() => {
-// //       console.log(
-// //         "After update:",
-// //         useSelector((state) => state.auth.user)
-// //       );
-// //       // Optionally, if updateUser doesn't return full user details:
-// //       // dispatch(fetchUserDetails());
-// //     });
-// //   };
-
-// //   // Example usage: Trigger update when clicking on user info
-// //   const handleProfileUpdate = () => {
-// //     // This is where you'd pass new user data
-// //     const updatedUserData = {
-// //       _id: user._id, // Make sure to include the user's ID for updating
-// //       fullName: "New Name",
-// //       // Other fields to update, including profileImage if needed
-// //     };
-// //     handleUserUpdate(updatedUserData);
-// //   };
-
-// //   const getProfileImage = () => {
-// //     const baseURL = "http://localhost:8000";
-// //     if (user && user.profileImage) {
-// //       return `${baseURL}${user.profileImage}?v=${Date.now()}`;
-// //     }
-// //     return defaultImgs.bg_img;
-// //   };
-// //   console.log("Constructed Image URL:", getProfileImage());
-
-// //   return (
-// //     <div className={`sidebar ${sidebarClass}`}>
-// //       <div className="user-info" onClick={handleProfileUpdate}>
-// //         <div className="info-img img-fit-cover">
-// //           <img
-// //             src={getProfileImage()}
-// //             alt="profile image"
-// //             style={{ cursor: "pointer" }}
-// //           />
-// //         </div>
-// //         <span className="info-name">{user?.fullName || "alice-doe"}</span>
-// //       </div>
-
-// //       <nav className="navigation">
-// //         <ul className="nav-list">
-// //           {navigationLinks.map((navigationLink) => (
-// //             <li className="nav-item" key={navigationLink.id}>
-// //               <NavLink
-// //                 to={navigationLink.route}
-// //                 className={({ isActive }) =>
-// //                   `nav-link ${isActive ? "active" : ""}`
-// //                 }
-// //               >
-// //                 <img
-// //                   src={navigationLink.image}
-// //                   className="nav-link-icon"
-// //                   alt={navigationLink.title}
-// //                 />
-// //                 <span className="nav-link-text">{navigationLink.title}</span>
-// //               </NavLink>
-// //             </li>
-// //           ))}
-// //         </ul>
-// //       </nav>
-// //     </div>
-// //   );
-// // };
-
-// // export default Sidebar;
-
-// // import React, { useEffect, useState, useContext } from "react";
-// // import { defaultImgs } from "../../utils/images";
-// // import { navigationLinks } from "../../data/data";
-// // import "./Sidebar.css";
-// // import { SidebarContext } from "../../context/sidebarContext";
-// // import { useSelector, useDispatch } from "react-redux";
-// // import { fetchUserDetails } from "../../redux/slices/authSlice";
-// // import { NavLink } from "react-router-dom";
-// // import { hasPermission } from "../../utils/authUtils"; // Import hasPermission
-
-// // const Sidebar = () => {
-// //   const [sidebarClass, setSidebarClass] = useState("");
-// //   const { isSidebarOpen, toggleDrawer } = useContext(SidebarContext) || {};
-// //   const { user } = useSelector((state) => state.auth);
-// //   const dispatch = useDispatch();
-
-// //   useEffect(() => {
-// //     if (!user) {
-// //       dispatch(fetchUserDetails());
-// //     }
-// //   }, [dispatch, user]);
-
-// //   useEffect(() => {
-// //     setSidebarClass(isSidebarOpen ? "sidebar-change" : "");
-// //   }, [isSidebarOpen]);
-
-// //   const getProfileImage = () => {
-// //     const baseURL = "http://localhost:8000";
-// //     if (user && user.profileImage) {
-// //       return `${baseURL}${user.profileImage}?v=${Date.now()}`;
-// //     }
-// //     return defaultImgs.bg_img;
-// //   };
-
-// //   return (
-// //     <div className={`sidebar ${sidebarClass}`}>
-// //       <div className="user-info">
-// //         <div className="info-img img-fit-cover">
-// //           <img
-// //             src={getProfileImage()}
-// //             alt="profile image"
-// //             style={{ cursor: "pointer" }}
-// //           />
-// //         </div>
-// //         <span className="info-name">{user?.fullName || "alice-doe"}</span>
-// //       </div>
-
-// //       <nav className="navigation">
-// //         <ul className="nav-list">
-// //           {navigationLinks.map(
-// //             (navigationLink) =>
-// //               hasPermission(
-// //                 user,
-// //                 `read:${navigationLink.title
-// //                   .toLowerCase()
-// //                   .replace(/\s+/g, "-")}`
-// //               ) && (
-// //                 <li className="nav-item" key={navigationLink.id}>
-// //                   <NavLink
-// //                     to={navigationLink.route}
-// //                     className={({ isActive }) =>
-// //                       `nav-link ${isActive ? "active" : ""}`
-// //                     }
-// //                   >
-// //                     <img
-// //                       src={navigationLink.image}
-// //                       className="nav-link-icon"
-// //                       alt={navigationLink.title}
-// //                     />
-// //                     <span className="nav-link-text">
-// //                       {navigationLink.title}
-// //                     </span>
-// //                   </NavLink>
-// //                 </li>
-// //               )
-// //           )}
-// //         </ul>
-// //       </nav>
-// //     </div>
-// //   );
-// // };
-
-// // export default Sidebar;
-
 // import React, { useEffect, useState, useContext } from "react";
 // import { defaultImgs } from "../../utils/images";
 // import { navigationLinks } from "../../data/data";
 // import "./Sidebar.css";
 // import { SidebarContext } from "../../context/sidebarContext";
-// import { useSelector, useDispatch } from "react-redux";
-// import { fetchUserDetails } from "../../redux/slices/authSlice";
+// import { useSelector } from "react-redux";
 // import { NavLink } from "react-router-dom";
-// import { hasPermission } from "../../utils/authUtils"; // Import hasPermission
+// import { hasPermission } from "../../utils/authUtils";
 
 // const Sidebar = () => {
 //   const [sidebarClass, setSidebarClass] = useState("");
-//   const { isSidebarOpen, toggleDrawer } = useContext(SidebarContext) || {};
-//   const { user } = useSelector((state) => state.auth);
-//   const dispatch = useDispatch();
-
-//   useEffect(() => {
-//     if (!user) {
-//       dispatch(fetchUserDetails());
-//     }
-//   }, [dispatch, user]);
+//   const { isSidebarOpen } = useContext(SidebarContext) || {};
+//   const { user, isLoading } = useSelector((state) => state.auth);
 
 //   useEffect(() => {
 //     setSidebarClass(isSidebarOpen ? "sidebar-change" : "");
 //   }, [isSidebarOpen]);
 
 //   const getProfileImage = () => {
-//     const baseURL = "http://localhost:8000";
-//     if (user && user.profileImage) {
-//       return `${baseURL}${user.profileImage}?v=${Date.now()}`;
-//     }
-//     return defaultImgs.bg_img;
+//     const url = user?.profileImage || defaultImgs.bg_img; // Use persisted URL
+//     console.log("Sidebar profile image URL:", url);
+//     return url;
 //   };
 
-//   console.log("User object:", user); // Log user object to verify roles and permissions
+//   if (isLoading || !user) {
+//     return (
+//       <div className={`sidebar ${sidebarClass}`}>
+//         <div className="user-info">
+//           <div className="info-img img-fit-cover">
+//             <img src={defaultImgs.bg_img} alt="loading" />
+//           </div>
+//           <span className="info-name">Loading...</span>
+//         </div>
+//       </div>
+//     );
+//   }
 
 //   return (
 //     <div className={`sidebar ${sidebarClass}`}>
@@ -333,9 +43,13 @@
 //             src={getProfileImage()}
 //             alt="profile image"
 //             style={{ cursor: "pointer" }}
+//             onError={(e) => {
+//               console.error("Sidebar image load error:", e.target.src);
+//               e.target.src = defaultImgs.bg_img;
+//             }}
 //           />
 //         </div>
-//         <span className="info-name">{user?.fullName || "alice-doe"}</span>
+//         <span className="info-name">{user.fullName || "User"}</span>
 //       </div>
 
 //       <nav className="navigation">
@@ -345,9 +59,6 @@
 //               .toLowerCase()
 //               .replace(/\s+/g, "-")}`;
 //             const hasPerm = hasPermission(user, permission);
-//             console.log(
-//               `Checking permission for ${navigationLink.title}: ${permission} - ${hasPerm}`
-//             );
 //             return (
 //               hasPerm && (
 //                 <li className="nav-item" key={navigationLink.id}>
@@ -363,7 +74,7 @@
 //                       alt={navigationLink.title}
 //                     />
 //                     <span className="nav-link-text">
-//                       {navigationLink.title}
+//                       {navigationLink.displayTitle || navigationLink.title}
 //                     </span>
 //                   </NavLink>
 //                 </li>
@@ -390,23 +101,38 @@ import { hasPermission } from "../../utils/authUtils";
 const Sidebar = () => {
   const [sidebarClass, setSidebarClass] = useState("");
   const { isSidebarOpen } = useContext(SidebarContext) || {};
-  const { user } = useSelector((state) => state.auth);
+  const { user, isLoading } = useSelector((state) => state.auth);
+  const [openDropdowns, setOpenDropdowns] = useState({}); // State for dropdowns
 
   useEffect(() => {
     setSidebarClass(isSidebarOpen ? "sidebar-change" : "");
   }, [isSidebarOpen]);
 
   const getProfileImage = () => {
-    const baseURL = "http://localhost:8000";
-    if (user && user.profileImage) {
-      return `${baseURL}${user.profileImage}?v=${Date.now()}`;
-    }
-    return defaultImgs.bg_img;
+    const url = user?.profileImage || defaultImgs.bg_img;
+    //console.log("Sidebar profile image URL:", url);
+    return url;
   };
 
-  console.log("Sidebar user:", user);
+  const toggleDropdown = (id) => {
+    setOpenDropdowns((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
 
-  if (!user) return null; // Wait for user to load
+  if (isLoading || !user) {
+    return (
+      <div className={`sidebar ${sidebarClass}`}>
+        <div className="user-info">
+          <div className="info-img img-fit-cover">
+            <img src={defaultImgs.bg_img} alt="loading" />
+          </div>
+          <span className="info-name">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`sidebar ${sidebarClass}`}>
@@ -416,9 +142,13 @@ const Sidebar = () => {
             src={getProfileImage()}
             alt="profile image"
             style={{ cursor: "pointer" }}
+            onError={(e) => {
+              console.error("Sidebar image load error:", e.target.src);
+              e.target.src = defaultImgs.bg_img;
+            }}
           />
         </div>
-        <span className="info-name">{user.fullName || "alice-doe"}</span>
+        <span className="info-name">{user.fullName || "User"}</span>
       </div>
 
       <nav className="navigation">
@@ -427,13 +157,70 @@ const Sidebar = () => {
             const permission = `read:${navigationLink.title
               .toLowerCase()
               .replace(/\s+/g, "-")}`;
-            const hasPerm = hasPermission(user, permission);
-            console.log(
-              `Checking ${navigationLink.title}: ${permission} - ${hasPerm}`
-            );
+            const hasParentPerm = hasPermission(user, permission);
+
+            // Skip if user lacks permission for the parent item
+            if (!hasParentPerm) return null;
+
             return (
-              hasPerm && (
-                <li className="nav-item" key={navigationLink.id}>
+              <li className="nav-item" key={navigationLink.id}>
+                {/* Parent item (with or without children) */}
+                {navigationLink.children ? (
+                  <>
+                    <div
+                      className="nav-link dropdown-toggle"
+                      onClick={() => toggleDropdown(navigationLink.id)}
+                    >
+                      <img
+                        src={navigationLink.image}
+                        className="nav-link-icon"
+                        alt={navigationLink.title}
+                      />
+                      <span className="nav-link-text">
+                        {navigationLink.displayTitle || navigationLink.title}
+                      </span>
+                      <span className="dropdown-arrow">
+                        {openDropdowns[navigationLink.id] ? "▲" : "▼"}
+                      </span>
+                    </div>
+                    {/* Nested items */}
+                    {openDropdowns[navigationLink.id] && (
+                      <ul className="dropdown-list">
+                        {navigationLink.children.map((childLink) => {
+                          const childPermission = `read:${childLink.title
+                            .toLowerCase()
+                            .replace(/\s+/g, "-")}`;
+                          const hasChildPerm = hasPermission(
+                            user,
+                            childPermission
+                          );
+
+                          return (
+                            hasChildPerm && (
+                              <li className="dropdown-item" key={childLink.id}>
+                                <NavLink
+                                  to={childLink.route}
+                                  className={({ isActive }) =>
+                                    `nav-link ${isActive ? "active" : ""}`
+                                  }
+                                >
+                                  <img
+                                    src={childLink.image}
+                                    className="nav-link-icon"
+                                    alt={childLink.title}
+                                  />
+                                  <span className="nav-link-text">
+                                    {childLink.displayTitle || childLink.title}
+                                  </span>
+                                </NavLink>
+                              </li>
+                            )
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </>
+                ) : (
                   <NavLink
                     to={navigationLink.route}
                     className={({ isActive }) =>
@@ -446,11 +233,11 @@ const Sidebar = () => {
                       alt={navigationLink.title}
                     />
                     <span className="nav-link-text">
-                      {navigationLink.title}
+                      {navigationLink.displayTitle || navigationLink.title}
                     </span>
                   </NavLink>
-                </li>
-              )
+                )}
+              </li>
             );
           })}
         </ul>

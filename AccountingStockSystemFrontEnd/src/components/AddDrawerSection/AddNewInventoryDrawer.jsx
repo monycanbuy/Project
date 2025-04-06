@@ -121,7 +121,7 @@ const AddNewInventoryDrawer = ({
         name: initialData.imageUrl ? "Existing Image" : "",
         url: initialData.imageUrl || "",
       });
-      console.log("Form data set on open:", getInitialFormData());
+      //console.log("Form data set on open:", getInitialFormData());
       setFormErrors({});
     }
   }, [open, getInitialFormData]);
@@ -264,7 +264,7 @@ const AddNewInventoryDrawer = ({
 
   const handleSave = async () => {
     if (!validateForm()) {
-      console.log("Form validation failed:", formErrors);
+      //console.log("Form validation failed:", formErrors);
       return;
     }
 
@@ -296,8 +296,6 @@ const AddNewInventoryDrawer = ({
     } else {
       delete dataToSend.batches;
     }
-
-    console.log("dataToSend", dataToSend);
 
     try {
       if (editMode) {

@@ -18,6 +18,17 @@ import wallet from "../assets/icons/wallet.svg";
 import wealth from "../assets/icons/wealth.svg";
 import volumup from "../assets/icons/volumUp.svg";
 import volumemute from "../assets/icons/volumeMute.svg";
+import location from "../assets/icons/location.svg";
+import alarm from "../assets/icons/alarm.svg";
+import truck from "../assets/icons/truck.svg";
+import shopping from "../assets/icons/shopping.svg";
+import dish from "../assets/icons/dish.svg";
+import washer from "../assets/icons/washer.svg";
+import userdetail from "../assets/icons/userdetail.svg";
+import dashboard from "../assets/icons/dashboard.svg";
+import foodmenu from "../assets/icons/foodmenu.svg";
+import store from "../assets/icons/store.svg";
+import category from "../assets/icons/category.svg";
 
 // person images
 import person_one from "../assets/images/person_one.jpg";
@@ -51,6 +62,17 @@ export const iconsImgs = {
   wealth,
   volumup,
   volumemute,
+  location,
+  alarm,
+  truck,
+  shopping,
+  dish,
+  washer,
+  foodmenu,
+  dashboard,
+  userdetail,
+  store,
+  category,
 };
 
 export const personsImgs = {

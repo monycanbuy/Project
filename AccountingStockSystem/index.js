@@ -5,6 +5,7 @@ const helmet = require("helmet");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
+const path = require("path");
 require("dotenv").config();
 const cloudinary = require("cloudinary").v2;
 const { startCronJob } = require("./middlewares/cronJobs");
@@ -37,6 +38,13 @@ require("./models/inventoryAdjustmentModel");
 require("./models/purchaseOrderModel");
 require("./models/stockMovementModel");
 require("./models/salesTransactionModel");
+require("./models/customerModel");
+require("./models/debtorModel");
+require("./models/accountSaleModel");
+require("./models/ledgerTransactionModel");
+require("./models/accountModel");
+require("./models/pettyCashModel");
+require("./models/expenseCategoryModel");
 require("./models/permissionModel");
 
 const unifiedSleaRouter = require("./routers/unifiedSaleRouter");
@@ -66,6 +74,13 @@ const inventoryAdjustmentRouter = require("./routers/inventoryAdjustmentRouter")
 const purchaseOrderRouter = require("./routers/purchaseOrderRouter");
 const stockMovementRouter = require("./routers/stockMovementRouter");
 const salesTransactionRouter = require("./routers/salesTransactionRouter");
+const customerRouter = require("./routers/customerRouter");
+const debtorRouter = require("./routers/debtorRouter");
+const accountSaleRouter = require("./routers/accountSaleRoutes");
+const ledgerTransactionRouter = require("./routers/ledgerTransactionRouter");
+const accountRouter = require("./routers/accountRouter");
+const pettyCashRouter = require("./routers/pettyCashRouter");
+const expenseCategoryRouter = require("./routers/expenseCategoryRouter");
 const permissionRouter = require("./routers/permissionRouter");
 const swaggerDocs = require("./utils/swaggerConfig"); // Import the Swagger configuration
 
@@ -133,30 +148,42 @@ const verifyToken = (req, res, next) => {
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// app.use(
-//   cors({
-//     origin: (origin, callback) => {
-//       if (!origin || allowedOrigins.includes(origin)) {
-//         callback(null, true);
-//       } else {
-//         callback(new Error("Not allowed by CORS"));
-//       }
-//     },
-//     credentials: true,
-//     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-//     allowedHeaders: ["Content-Type", "Authorization"],
-//     exposedHeaders: ["Set-Cookie"],
-//   })
-// );
 app.use(
   cors({
-    origin: "*", // Allow all origins for testing
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     exposedHeaders: ["Set-Cookie"],
   })
 );
+
+// Ensure static files also respect CORS
+app.use(
+  "/uploads",
+  (req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "http://localhost:5173"); // Match frontend origin
+    res.header("Access-Control-Allow-Credentials", "true");
+    next();
+  },
+  express.static(path.join(__dirname, "uploads"))
+);
+
+// app.use(
+//   cors({
+//     origin: "*", // Allow all origins for testing
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//     exposedHeaders: ["Set-Cookie"],
+//   })
+// );
 
 io.use((socket, next) => {
   const origin = socket.handshake.headers.origin;
@@ -171,6 +198,9 @@ app.use(helmet());
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from the 'uploads' directory
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Connect to MongoDB
 mongoose
@@ -264,6 +294,27 @@ app.use("/api/stockmovements", stockMovementRouter);
 
 // Sales Transaction routes
 app.use("/api/trackinventories", salesTransactionRouter);
+
+// Customer routes
+app.use("/api/customers", customerRouter);
+
+// Debtor routes
+app.use("/api/debtors", debtorRouter);
+
+// AccountSale routes
+app.use("/api/account-sales", accountSaleRouter);
+
+// Ledger Transaction routes
+app.use("/api/ledger-transactions", ledgerTransactionRouter);
+
+// Account routes
+app.use("/api/accounts", accountRouter);
+
+// Ledger Transaction routes
+app.use("/api/petty-cashes", pettyCashRouter);
+
+// Expense Category routes
+app.use("/api/expense-categories", expenseCategoryRouter);
 
 // Sales Transaction routes
 app.use("/api/permissions", permissionRouter);

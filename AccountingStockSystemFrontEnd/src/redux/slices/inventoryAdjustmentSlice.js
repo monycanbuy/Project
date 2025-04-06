@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { apiClient } from "./authSlice";
+import { apiClient } from "../../utils/apiClient";
 
 const BASE_URL = "/inventoryadjustments";
 
@@ -65,8 +65,8 @@ export const fetchDailyProfitAndLoss = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await apiClient.get(`${BASE_URL}/daily-profit-loss`);
-      console.log("Raw API Response:", response); // Log full response object
-      console.log("Extracted Data:", response.data.data); // Log what we return
+      // console.log("Raw API Response:", response); // Log full response object
+      // console.log("Extracted Data:", response.data.data); // Log what we return
       return response.data.data; // Should be { date, revenue, cogs, inventoryLosses, profit }
     } catch (error) {
       console.error("API Error:", error.response?.data || error.message);
@@ -128,18 +128,18 @@ const inventoryAdjustmentsSlice = createSlice({
       .addCase(fetchDailyProfitAndLoss.pending, (state) => {
         state.status = "loading";
         state.error = null;
-        console.log("P&L Fetch Started - Status: loading");
+        //console.log("P&L Fetch Started - Status: loading");
       })
       .addCase(fetchDailyProfitAndLoss.fulfilled, (state, action) => {
         state.status = "succeeded";
-        console.log("P&L Payload Received:", action.payload);
+        //console.log("P&L Payload Received:", action.payload);
         state.dailyProfitAndLoss = { ...action.payload }; // Explicitly spread payload
-        console.log("Updated dailyProfitAndLoss:", state.dailyProfitAndLoss);
+        //console.log("Updated dailyProfitAndLoss:", state.dailyProfitAndLoss);
       })
       .addCase(fetchDailyProfitAndLoss.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
-        console.log("P&L Fetch Failed - Error:", action.payload);
+        //console.log("P&L Fetch Failed - Error:", action.payload);
       });
   },
 });

@@ -2,6 +2,7 @@
 const Laundry = require("../models/laundryModel");
 const LaundryService = require("../models/laundryServiceModel");
 const PaymentMethod = require("../models/PaymentMethodModel");
+const moment = require("moment-timezone");
 const {
   createLaundrySchema,
   updateLaundrySchema,
@@ -12,7 +13,8 @@ exports.getAllLaundry = async (req, res) => {
     const laundryRecords = await Laundry.find()
       .populate("services.serviceType")
       .populate("paymentMethod", "name")
-      .populate("salesBy", "fullName");
+      .populate("salesBy", "fullName")
+      .sort({ transactionDate: -1 });
     res.status(200).json({
       success: true,
       data: laundryRecords,
@@ -26,53 +28,99 @@ exports.getAllLaundry = async (req, res) => {
   }
 };
 
-exports.createLaundry = async (req, res) => {
-  try {
-    const {
-      customer,
-      receiptNo,
-      discount,
-      services,
-      paymentMethod,
-      phoneNo,
-      status, // Include status in the request body
-    } = req.body;
+// exports.createLaundry = async (req, res) => {
+//   try {
+//     const {
+//       customer,
+//       receiptNo,
+//       discount,
+//       services,
+//       paymentMethod,
+//       phoneNo,
+//       status, // Include status in the request body
+//     } = req.body;
 
-    const totalAmount = services.reduce((sum, service) => {
-      return sum + service.qty * service.unitPrice;
-    }, 0);
+//     const totalAmount = services.reduce((sum, service) => {
+//       return sum + service.qty * service.unitPrice;
+//     }, 0);
 
-    const discountedTotal = totalAmount - totalAmount * (discount / 100);
+//     const discountedTotal = totalAmount - totalAmount * (discount / 100);
 
-    const newLaundry = await Laundry.create({
-      customer,
-      receiptNo,
-      discount,
-      services,
-      paymentMethod,
-      phoneNo,
-      totalAmount: discountedTotal,
-      salesBy: req.user.userId, // Example: logged-in user's ID
-      status, // Include status in the new laundry record
-    });
+//     const newLaundry = await Laundry.create({
+//       customer,
+//       receiptNo,
+//       discount,
+//       services,
+//       paymentMethod,
+//       phoneNo,
+//       totalAmount: discountedTotal,
+//       salesBy: req.user.userId, // Example: logged-in user's ID
+//       status, // Include status in the new laundry record
+//     });
 
-    res.status(201).json({
-      success: true,
-      message: "Laundry record created successfully",
-      data: newLaundry,
-    });
-  } catch (error) {
-    console.error("Error creating laundry record:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error creating laundry record",
-    });
-  }
-};
+//     res.status(201).json({
+//       success: true,
+//       message: "Laundry record created successfully",
+//       data: newLaundry,
+//     });
+//   } catch (error) {
+//     console.error("Error creating laundry record:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Error creating laundry record",
+//     });
+//   }
+// };
 
+// // exports.updateLaundry = async (req, res) => {
+// //   try {
+// //     // Validate request body
+// //     const { error, value } = updateLaundrySchema.validate(req.body);
+// //     if (error) {
+// //       return res
+// //         .status(400)
+// //         .json({ success: false, message: error.details[0].message });
+// //     }
+
+// //     const { discount, services } = value;
+
+// //     // Fetch existing laundry record
+// //     const laundry = await Laundry.findById(req.params.id);
+// //     if (!laundry) {
+// //       return res.status(404).json({
+// //         success: false,
+// //         message: "Laundry record not found",
+// //       });
+// //     }
+
+// //     // Calculate total amount if services are updated
+// //     if (services) {
+// //       const totalAmount = services.reduce((sum, service) => {
+// //         return sum + service.qty * service.unitPrice;
+// //       }, 0);
+
+// //       value.totalAmount = totalAmount - totalAmount * (discount / 100);
+// //     }
+
+// //     // Update record
+// //     Object.assign(laundry, value);
+// //     await laundry.save();
+
+// //     res.status(200).json({
+// //       success: true,
+// //       message: "Laundry record updated successfully",
+// //       data: laundry,
+// //     });
+// //   } catch (error) {
+// //     console.error("Error updating laundry record:", error);
+// //     res.status(500).json({
+// //       success: false,
+// //       message: "Error updating laundry record",
+// //     });
+// //   }
+// // };
 // exports.updateLaundry = async (req, res) => {
 //   try {
-//     // Validate request body
 //     const { error, value } = updateLaundrySchema.validate(req.body);
 //     if (error) {
 //       return res
@@ -82,7 +130,6 @@ exports.createLaundry = async (req, res) => {
 
 //     const { discount, services } = value;
 
-//     // Fetch existing laundry record
 //     const laundry = await Laundry.findById(req.params.id);
 //     if (!laundry) {
 //       return res.status(404).json({
@@ -91,17 +138,19 @@ exports.createLaundry = async (req, res) => {
 //       });
 //     }
 
-//     // Calculate total amount if services are updated
 //     if (services) {
 //       const totalAmount = services.reduce((sum, service) => {
 //         return sum + service.qty * service.unitPrice;
 //       }, 0);
-
 //       value.totalAmount = totalAmount - totalAmount * (discount / 100);
 //     }
 
-//     // Update record
-//     Object.assign(laundry, value);
+//     console.log("Updating laundry with req.user:", req.user, "body:", req.body); // Debugging
+//     const updateFields = { ...value };
+//     if (updateFields.salesBy === undefined) {
+//       delete updateFields.salesBy; // Preserve existing salesBy
+//     }
+//     Object.assign(laundry, updateFields);
 //     await laundry.save();
 
 //     res.status(200).json({
@@ -117,6 +166,64 @@ exports.createLaundry = async (req, res) => {
 //     });
 //   }
 // };
+
+exports.createLaundry = async (req, res) => {
+  try {
+    const {
+      customer,
+      receiptNo,
+      transactionDate, // Added transactionDate
+      discount,
+      services,
+      paymentMethod,
+      phoneNo,
+      status,
+    } = req.body;
+
+    // Convert transactionDate to WAT timezone
+    const watTransactionDate = transactionDate
+      ? moment.tz(transactionDate, "Africa/Lagos").toDate()
+      : moment.tz("Africa/Lagos").toDate(); // Default to now if not provided
+
+    const totalAmount = services.reduce((sum, service) => {
+      return sum + service.qty * service.unitPrice;
+    }, 0);
+
+    const discountedTotal = totalAmount - totalAmount * (discount / 100);
+
+    const newLaundry = await Laundry.create({
+      customer,
+      receiptNo,
+      transactionDate: watTransactionDate, // Include transactionDate
+      discount,
+      services,
+      paymentMethod,
+      phoneNo,
+      totalAmount: discountedTotal,
+      salesBy: req.user.userId,
+      status,
+    });
+
+    // Optionally populate related fields for the response
+    const populatedLaundry = await Laundry.findById(newLaundry._id)
+      .populate("services.serviceType", "name unitPrice")
+      .populate("paymentMethod", "name")
+      .populate("salesBy", "fullName");
+
+    res.status(201).json({
+      success: true,
+      message: "Laundry record created successfully",
+      data: populatedLaundry || newLaundry, // Use populated data if available
+    });
+  } catch (error) {
+    console.error("Error creating laundry record:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error creating laundry record: " + error.message,
+    });
+  }
+};
+
 exports.updateLaundry = async (req, res) => {
   try {
     const { error, value } = updateLaundrySchema.validate(req.body);
@@ -126,7 +233,16 @@ exports.updateLaundry = async (req, res) => {
         .json({ success: false, message: error.details[0].message });
     }
 
-    const { discount, services } = value;
+    const {
+      customer,
+      receiptNo,
+      transactionDate, // Added transactionDate
+      discount,
+      services,
+      paymentMethod,
+      phoneNo,
+      status,
+    } = value;
 
     const laundry = await Laundry.findById(req.params.id);
     if (!laundry) {
@@ -136,6 +252,11 @@ exports.updateLaundry = async (req, res) => {
       });
     }
 
+    // Convert transactionDate to WAT timezone if provided
+    const watTransactionDate = transactionDate
+      ? moment.tz(transactionDate, "Africa/Lagos").toDate()
+      : laundry.transactionDate; // Keep existing if not updated
+
     if (services) {
       const totalAmount = services.reduce((sum, service) => {
         return sum + service.qty * service.unitPrice;
@@ -143,24 +264,33 @@ exports.updateLaundry = async (req, res) => {
       value.totalAmount = totalAmount - totalAmount * (discount / 100);
     }
 
-    console.log("Updating laundry with req.user:", req.user, "body:", req.body); // Debugging
-    const updateFields = { ...value };
+    const updateFields = {
+      ...value,
+      transactionDate: watTransactionDate, // Include transactionDate in update
+    };
     if (updateFields.salesBy === undefined) {
       delete updateFields.salesBy; // Preserve existing salesBy
     }
+
     Object.assign(laundry, updateFields);
     await laundry.save();
+
+    // Optionally populate related fields for the response
+    const populatedLaundry = await Laundry.findById(laundry._id)
+      .populate("services.serviceType", "name unitPrice")
+      .populate("paymentMethod", "name")
+      .populate("salesBy", "fullName");
 
     res.status(200).json({
       success: true,
       message: "Laundry record updated successfully",
-      data: laundry,
+      data: populatedLaundry || laundry, // Use populated data if available
     });
   } catch (error) {
     console.error("Error updating laundry record:", error);
     res.status(500).json({
       success: false,
-      message: "Error updating laundry record",
+      message: "Error updating laundry record: " + error.message,
     });
   }
 };
@@ -319,16 +449,16 @@ exports.getLaundryComprehensiveSummary = async (req, res) => {
 // New method: Get daily laundry sales and payment method breakdown
 exports.getDailyLaundrySales = async (req, res) => {
   try {
-    console.log("Entering getDailyLaundrySales with query:", req.query);
+    //console.log("Entering getDailyLaundrySales with query:", req.query);
 
     const dateParam = req.query.date || new Date().toISOString().split("T")[0];
-    console.log("Date parameter:", dateParam);
+    //console.log("Date parameter:", dateParam);
 
     const startOfDay = new Date(dateParam);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(dateParam);
     endOfDay.setHours(23, 59, 59, 999);
-    console.log("Date range:", startOfDay, "to", endOfDay);
+    //console.log("Date range:", startOfDay, "to", endOfDay);
 
     const salesData = await Laundry.aggregate([
       {
@@ -361,24 +491,24 @@ exports.getDailyLaundrySales = async (req, res) => {
         },
       },
     ]);
-    console.log("Aggregation result:", salesData);
+    //console.log("Aggregation result:", salesData);
 
     const totalSales = salesData.reduce(
       (sum, item) => sum + item.totalPerMethod,
       0
     );
-    console.log("Total sales calculated:", totalSales);
+    //console.log("Total sales calculated:", totalSales);
 
     const paymentMethodSales = {};
     const allPaymentMethods = await PaymentMethod.find({});
-    console.log("All payment methods:", allPaymentMethods);
+    //console.log("All payment methods:", allPaymentMethods);
     allPaymentMethods.forEach((method) => {
       paymentMethodSales[method.name] = 0;
     });
     salesData.forEach((sale) => {
       paymentMethodSales[sale.paymentMethod] = sale.totalPerMethod;
     });
-    console.log("Payment method sales:", paymentMethodSales);
+    //console.log("Payment method sales:", paymentMethodSales);
 
     res.status(200).json({
       success: true,

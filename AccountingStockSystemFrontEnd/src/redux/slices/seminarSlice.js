@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { apiClient } from "./authSlice";
+import { apiClient } from "../../utils/apiClient";
 
 const SEMINAR_URL = "/seminars";
 
@@ -84,7 +84,6 @@ export const fetchSeminarsSummary = createAsyncThunk(
       const response = await apiClient.get(`${SEMINAR_URL}/summary`, {
         params: params,
       });
-      console.log("API Response:", response.data);
       return response.data; // Directly return the data as it matches your expected structure
     } catch (error) {
       // Handle errors
@@ -213,11 +212,12 @@ const seminarSlice = createSlice({
     builder
       .addCase(fetchSeminars.pending, (state) => {
         state.status = "loading";
+        state.error = null;
       })
       .addCase(fetchSeminars.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.seminars = action.payload.data;
-        state.error = null;
+        //state.error = null;
       })
       .addCase(fetchSeminars.rejected, (state, action) => {
         state.status = "failed";

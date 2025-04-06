@@ -192,7 +192,7 @@ const AdminReports = () => {
   } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    console.log("Fetching auth data...");
+    //console.log("Fetching auth data...");
     dispatch(getCurrentlyLoggedInUsers());
     dispatch(getLoggedInToday());
     dispatch(getStaffTaskAchievements());
@@ -200,14 +200,14 @@ const AdminReports = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    console.log("Redux state updated:", {
-      currentlyLoggedInUsers,
-      loggedInToday,
-      staffTaskAchievements,
-      userStats,
-      isLoading,
-      error,
-    });
+    // console.log("Redux state updated:", {
+    //   currentlyLoggedInUsers,
+    //   loggedInToday,
+    //   staffTaskAchievements,
+    //   userStats,
+    //   isLoading,
+    //   error,
+    // });
   }, [
     currentlyLoggedInUsers,
     loggedInToday,

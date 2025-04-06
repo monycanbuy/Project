@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { apiClient } from "./authSlice";
+import { apiClient } from "../../utils/apiClient";
 
 const BASE_URL = "/payment-methods"; // Relative path, apiClient adds /api
 
@@ -7,10 +7,10 @@ export const fetchPaymentMethods = createAsyncThunk(
   "paymentMethods/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
-      console.log("apiClient baseURL:", apiClient.defaults.baseURL);
-      console.log("BASE_URL:", BASE_URL);
+      // console.log("apiClient baseURL:", apiClient.defaults.baseURL);
+      // console.log("BASE_URL:", BASE_URL);
       const response = await apiClient.get(BASE_URL);
-      console.log("API response:", response.data);
+      //console.log("API response:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error fetching payment method:", error);

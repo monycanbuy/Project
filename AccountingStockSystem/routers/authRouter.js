@@ -1,5 +1,6 @@
 const express = require("express");
 const authController = require("../controllers/authController");
+const upload = require("../middlewares/fileUpload");
 const {
   authenticateUser,
   authorize,
@@ -645,7 +646,9 @@ router.patch(
 router.post(
   "/update-profile-image",
   authenticateUser,
-  imageUpload,
+  //imageUpload,
+  upload.single("image"),
+  authorize("read:profile"),
   authController.updateProfileImage
 );
 
@@ -702,6 +705,7 @@ router.post(
 router.get(
   "/currently-logged-in",
   authenticateUser,
+  authorize("read:profile"),
   authController.getCurrentlyLoggedInUsers
 );
 
@@ -758,6 +762,7 @@ router.get(
 router.get(
   "/logged-in-today",
   authenticateUser,
+  authorize("read:profile"),
   authController.getLoggedInToday
 );
 

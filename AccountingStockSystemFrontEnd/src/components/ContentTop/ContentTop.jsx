@@ -608,7 +608,7 @@ const ContentTop = () => {
         // 1. Get the SSE token
         const token = localStorage.getItem("accessToken"); // Get main token
         if (!token) {
-          console.log("No access token.  Not connecting to SSE.");
+          //console.log("No access token.  Not connecting to SSE.");
           return; // Don't connect if not logged in
         }
         const config = {

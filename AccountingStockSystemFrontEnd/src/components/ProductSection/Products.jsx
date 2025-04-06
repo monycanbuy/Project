@@ -530,7 +530,7 @@ const Products = () => {
   };
 
   const handleDeleteClick = (id) => {
-    console.log("Setting delete ID to:", id);
+    //console.log("Setting delete ID to:", id);
     if (id) {
       setDeleteId(id);
       setDeleteDialogOpen(true);
@@ -540,11 +540,11 @@ const Products = () => {
   };
 
   const confirmDelete = () => {
-    console.log("Attempting to delete product with ID:", deleteId);
+    //console.log("Attempting to delete product with ID:", deleteId);
     if (deleteId) {
       dispatch(deleteProduct(deleteId))
         .then((response) => {
-          console.log("Delete response:", response);
+          //console.log("Delete response:", response);
           setDeleteDialogOpen(false);
           setDeleteId(null);
           dispatch(fetchProducts({ page: pagination.currentPage, limit: 10 }));

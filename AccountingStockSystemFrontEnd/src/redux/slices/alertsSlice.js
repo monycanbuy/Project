@@ -169,8 +169,7 @@
 // export default alertsSlice.reducer;
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { apiClient } from "./authSlice";
-// Import apiClient from authSlice (adjust path)
+import { apiClient } from "../../utils/apiClient"; // Import apiClient from authSlice (adjust path)
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";

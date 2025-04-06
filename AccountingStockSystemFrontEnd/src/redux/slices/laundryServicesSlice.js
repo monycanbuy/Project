@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { apiClient } from "./authSlice"; // Adjust path if needed (e.g., "../slices/authSlice")
+import { apiClient } from "../../utils/apiClient"; // Adjust path if needed (e.g., "../slices/authSlice")
 
 const BASE_URL = "/laundry-services";
 //const LAUNDRY_SERVICES_URL = "/api/laundry-services";

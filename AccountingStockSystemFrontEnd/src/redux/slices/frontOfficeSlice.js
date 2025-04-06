@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { apiClient } from "./authSlice";
+import { apiClient } from "../../utils/apiClient";
 // API Base URL
 const BASE_URL = "/front-office-sales";
 
@@ -55,9 +55,9 @@ export const updateFrontOfficeSale = createAsyncThunk(
   "frontOffice/updateSale",
   async ({ id, saleData }, { rejectWithValue }) => {
     try {
-      console.log("Updating sale:", { id, saleData });
+      //console.log("Updating sale:", { id, saleData });
       const response = await apiClient.put(`${BASE_URL}/${id}`, saleData);
-      console.log("Update response:", response.data); //
+      //console.log("Update response:", response.data); //
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -78,14 +78,17 @@ const frontOfficeSlice = createSlice({
     builder
       // Fetch all sales
       .addCase(fetchFrontOfficeSales.pending, (state) => {
+        state.status = "loading";
         state.isLoading = true;
         state.error = null;
       })
       .addCase(fetchFrontOfficeSales.fulfilled, (state, action) => {
+        state.status = "succeeded";
         state.isLoading = false;
         state.sales = action.payload;
       })
       .addCase(fetchFrontOfficeSales.rejected, (state, action) => {
+        state.status = "failed";
         state.isLoading = false;
         state.error = action.payload;
       })

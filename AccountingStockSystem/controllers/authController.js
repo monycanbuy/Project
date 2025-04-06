@@ -26,6 +26,13 @@ const {
   FORGOT_PASSWORD_EMAIL_TEMPLATE,
   FORGOT_PASSWORD_HTML_TEMPLATE,
 } = require("../mailtrap/emailTemplates");
+const cloudinary = require("cloudinary").v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 exports.signup = async (req, res) => {
   const { email, password, phoneNumber, fullName, roles = ["user"] } = req.body;
@@ -166,104 +173,8 @@ const sendCodeToUser = async (user) => {
 
 // exports.signin = async (req, res) => {
 //   const { emailOrPhone, password } = req.body;
-//   try {
-//     const { error } = signinSchema.validate({ emailOrPhone, password });
-//     if (error) {
-//       return res
-//         .status(401)
-//         .json({ success: false, message: error.details[0].message });
-//     }
-
-//     const existingUser = await User.findOne({
-//       $or: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }],
-//     })
-//       .select("+password +loginAttempts +isLocked +status +verified")
-//       .populate("roles", "name");
-
-//     if (!existingUser) {
-//       return res
-//         .status(401)
-//         .json({ success: false, message: "User does not exist!" });
-//     }
-
-//     if (existingUser.status !== "active") {
-//       return res
-//         .status(403)
-//         .json({ success: false, message: "Account is suspended or deleted" });
-//     }
-//     if (existingUser.isLocked) {
-//       return res
-//         .status(403)
-//         .json({ success: false, message: "Account locked" });
-//     }
-
-//     const isPasswordValid = await bcrypt.compare(
-//       password,
-//       existingUser.password
-//     );
-//     if (!isPasswordValid) {
-//       existingUser.loginAttempts += 1;
-//       if (existingUser.loginAttempts >= 4) {
-//         existingUser.isLocked = true;
-//         await existingUser.save();
-//         return res
-//           .status(403)
-//           .json({ success: false, message: "Account locked" });
-//       }
-//       await existingUser.save();
-//       return res.status(401).json({
-//         success: false,
-//         message: `Invalid credentials! ${
-//           4 - existingUser.loginAttempts
-//         } attempt(s) left`,
-//       });
-//     }
-
-//     existingUser.loginAttempts = 0;
-//     await existingUser.save();
-
-//     const userRoles = existingUser.roles.map((role) => role.name);
-//     const accessToken = jwt.sign(
-//       {
-//         userId: existingUser._id,
-//         email: existingUser.email,
-//         fullName: existingUser.fullName,
-//         verified: existingUser.verified,
-//         status: existingUser.status,
-//         roles: userRoles,
-//       },
-//       process.env.TOKEN_SECRET,
-//       { expiresIn: "1h" }
-//     );
-
-//     res.cookie("Authorization", "Bearer " + accessToken, {
-//       expires: new Date(Date.now() + 15 * 60 * 1000),
-//       httpOnly: true,
-//       secure: false, // Set to false for local dev (HTTP)
-//       sameSite: "Lax",
-//       path: "/",
-//     });
-
-//     return res.json({
-//       success: true,
-//       email: existingUser.email,
-//       fullName: existingUser.fullName,
-//       verified: existingUser.verified,
-//       status: existingUser.status,
-//       roles: userRoles,
-//     });
-//   } catch (error) {
-//     console.error("Signin error:", error);
-//     return res
-//       .status(500)
-//       .json({ success: false, message: "Internal server error" });
-//   }
-// };
-// exports.signin = async (req, res) => {
-//   const { emailOrPhone, password } = req.body;
 
 //   try {
-//     // Input validation
 //     const { error } = signinSchema.validate({ emailOrPhone, password });
 //     if (error) {
 //       return res
@@ -271,14 +182,13 @@ const sendCodeToUser = async (user) => {
 //         .json({ success: false, message: error.details[0].message });
 //     }
 
-//     // Find user
 //     const existingUser = await User.findOne({
 //       $or: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }],
 //     })
 //       .select(
 //         "+password +loginAttempts +isLocked +status +verified +verificationCode +verificationCodeValidation"
 //       )
-//       .populate("roles", "name");
+//       .populate("roles", "name permissions"); // FIX: Added "permissions"
 
 //     if (!existingUser) {
 //       return res
@@ -286,7 +196,11 @@ const sendCodeToUser = async (user) => {
 //         .json({ success: false, message: "User does not exist!" });
 //     }
 
-//     // Check account status
+//     console.log(
+//       "Existing user from DB:",
+//       JSON.stringify(existingUser, null, 2)
+//     ); // Log raw user
+
 //     if (existingUser.status !== "active") {
 //       return res.status(403).json({
 //         success: false,
@@ -298,14 +212,12 @@ const sendCodeToUser = async (user) => {
 //       });
 //     }
 
-//     // Check if account is locked
 //     if (existingUser.isLocked) {
 //       return res
 //         .status(403)
 //         .json({ success: false, message: "Account locked" });
 //     }
 
-//     // Validate password
 //     const isPasswordValid = await bcrypt.compare(
 //       password,
 //       existingUser.password
@@ -328,11 +240,9 @@ const sendCodeToUser = async (user) => {
 //       });
 //     }
 
-//     // Reset login attempts on successful login
 //     existingUser.loginAttempts = 0;
 //     await existingUser.save();
 
-//     // Check verification status
 //     if (!existingUser.verified) {
 //       console.log(
 //         "User not verified, triggering code send:",
@@ -357,18 +267,15 @@ const sendCodeToUser = async (user) => {
 //       });
 //     }
 
-//     // Map roles with names and permissions
 //     const userRoles = existingUser.roles.map((role) => ({
 //       name: role.name,
-//       permissions: role.permissions || [], // Fallback to empty array if no permissions
+//       permissions: role.permissions || [],
 //     }));
 //     console.log(
 //       "User roles with permissions:",
 //       JSON.stringify(userRoles, null, 2)
 //     );
 
-//     // Generate JWT
-//     //const userRoles = existingUser.roles.map((role) => role.name);
 //     const accessToken = jwt.sign(
 //       {
 //         userId: existingUser._id,
@@ -376,13 +283,12 @@ const sendCodeToUser = async (user) => {
 //         fullName: existingUser.fullName,
 //         verified: existingUser.verified,
 //         status: existingUser.status,
-//         roles: userRoles, // Include full role objects with permissions
+//         roles: userRoles,
 //       },
 //       process.env.TOKEN_SECRET,
 //       { expiresIn: "1h" }
 //     );
 
-//     // Set cookie
 //     res.cookie("Authorization", "Bearer " + accessToken, {
 //       expires: new Date(Date.now() + 15 * 60 * 1000),
 //       httpOnly: true,
@@ -390,7 +296,7 @@ const sendCodeToUser = async (user) => {
 //       sameSite: "Lax",
 //       path: "/",
 //     });
-//     console.log("User roles with permissions:", existingUser.roles);
+
 //     return res.json({
 //       success: true,
 //       email: existingUser.email,
@@ -425,18 +331,13 @@ exports.signin = async (req, res) => {
       .select(
         "+password +loginAttempts +isLocked +status +verified +verificationCode +verificationCodeValidation"
       )
-      .populate("roles", "name permissions"); // FIX: Added "permissions"
+      .populate("roles", "name permissions");
 
     if (!existingUser) {
       return res
         .status(401)
         .json({ success: false, message: "User does not exist!" });
     }
-
-    console.log(
-      "Existing user from DB:",
-      JSON.stringify(existingUser, null, 2)
-    ); // Log raw user
 
     if (existingUser.status !== "active") {
       return res.status(403).json({
@@ -477,14 +378,17 @@ exports.signin = async (req, res) => {
       });
     }
 
+    // Update lastLogin and loginHistory on successful login
     existingUser.loginAttempts = 0;
+    existingUser.lastLogin = new Date(); // Set to current time
+    existingUser.loginHistory.push({
+      timestamp: new Date(),
+      ip: req.ip || "Unknown", // Get IP from request
+      device: req.headers["user-agent"] || "Unknown", // Get device from User-Agent header
+    });
     await existingUser.save();
 
     if (!existingUser.verified) {
-      console.log(
-        "User not verified, triggering code send:",
-        existingUser.email
-      );
       const codeResult = await sendCodeToUser(existingUser);
       if (!codeResult.success) {
         return res.status(500).json({
@@ -508,10 +412,6 @@ exports.signin = async (req, res) => {
       name: role.name,
       permissions: role.permissions || [],
     }));
-    console.log(
-      "User roles with permissions:",
-      JSON.stringify(userRoles, null, 2)
-    );
 
     const accessToken = jwt.sign(
       {
@@ -552,6 +452,16 @@ exports.signin = async (req, res) => {
   }
 };
 
+// exports.signout = async (req, res) => {
+//   try {
+//     res
+//       .clearCookie("Authorization") // Clear the cookie
+//       .status(200)
+//       .json({ success: true, message: "Logged out successfully" });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: "Internal server error" });
+//   }
+// };
 exports.signout = async (req, res) => {
   try {
     res
@@ -1248,67 +1158,133 @@ exports.updateProfileInfo = async (req, res) => {
   }
 };
 
+// exports.updateProfileImage = async (req, res) => {
+//   console.log("User from middleware:", req.user); // Log to check if user data is set
+//   const { userId } = req.user || {};
+//   const file = req.file;
+
+//   try {
+//     if (!file) {
+//       console.log("No file was uploaded.");
+//       return res.status(400).json({
+//         success: false,
+//         message: "No file was uploaded.",
+//       });
+//     }
+
+//     console.log("File details:", file);
+//     console.log("User ID:", userId);
+
+//     if (!userId) {
+//       console.log("User ID is undefined, cannot proceed with update.");
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "User not found or update failed." });
+//     }
+
+//     // Use allowUnknown to ignore properties not in schema
+//     const { error } = updateImageSchema.validate(
+//       { profileImage: file },
+//       { allowUnknown: true }
+//     );
+//     if (error) {
+//       console.log("Validation error:", error.details);
+//       return res.status(400).json({
+//         success: false,
+//         message: error.details.map((detail) => detail.message).join(", "),
+//       });
+//     }
+
+//     // Here you might handle image storage, like uploading to S3 and returning a URL
+//     const imageUrl = `/uploads/${file.filename}`; // Placeholder for where the image would be stored
+//     console.log("Image URL to be saved:", imageUrl);
+
+//     const updatedUser = await User.findByIdAndUpdate(
+//       userId,
+//       { profileImage: imageUrl },
+//       { new: true, runValidators: true }
+//     );
+//     if (!updatedUser) {
+//       console.log("User not updated:", userId);
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "User not found or update failed." });
+//     }
+
+//     console.log("User updated successfully:", updatedUser);
+//     res.json({ success: true, user: updatedUser });
+//   } catch (error) {
+//     console.error("Error updating profile image:", error);
+//     console.error("Error stack:", error.stack);
+//     res
+//       .status(500)
+//       .json({ success: false, message: "Error updating profile image." });
+//   }
+// };
+
 exports.updateProfileImage = async (req, res) => {
-  console.log("User from middleware:", req.user); // Log to check if user data is set
-  const { userId } = req.user || {};
-  const file = req.file;
-
   try {
-    if (!file) {
-      console.log("No file was uploaded.");
-      return res.status(400).json({
-        success: false,
-        message: "No file was uploaded.",
-      });
-    }
-
-    console.log("File details:", file);
-    console.log("User ID:", userId);
-
-    if (!userId) {
-      console.log("User ID is undefined, cannot proceed with update.");
+    // Check for authenticated user
+    if (!req.user?.userId) {
       return res
-        .status(404)
-        .json({ success: false, message: "User not found or update failed." });
+        .status(401)
+        .json({ success: false, message: "No authenticated user found" });
     }
 
-    // Use allowUnknown to ignore properties not in schema
-    const { error } = updateImageSchema.validate(
-      { profileImage: file },
-      { allowUnknown: true }
-    );
-    if (error) {
-      console.log("Validation error:", error.details);
-      return res.status(400).json({
+    // Check if file is provided by multer
+    const file = req.file;
+    if (!file) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No image file provided" });
+    }
+
+    // Upload to Cloudinary
+    let photoUrl;
+    try {
+      photoUrl = await cloudinary.uploader.upload(file.path, {
+        folder: "profile_images", // Store in a specific Cloudinary folder
+        width: 500, // Optional: resize image
+        height: 500,
+        crop: "limit",
+        quality: "auto", // Optimize quality
+      });
+    } catch (cloudinaryError) {
+      console.error("Cloudinary upload error:", cloudinaryError);
+      return res.status(500).json({
         success: false,
-        message: error.details.map((detail) => detail.message).join(", "),
+        message: "Error uploading image to Cloudinary",
+        error: cloudinaryError.message,
       });
     }
 
-    // Here you might handle image storage, like uploading to S3 and returning a URL
-    const imageUrl = `/uploads/${file.filename}`; // Placeholder for where the image would be stored
-    console.log("Image URL to be saved:", imageUrl);
-
+    // Update user with Cloudinary URL
+    const userId = req.user.userId;
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { profileImage: imageUrl },
-      { new: true, runValidators: true }
-    );
+      { profileImage: photoUrl.secure_url }, // Use secure_url from Cloudinary
+      { new: true } // Return updated document
+    ).select("-password"); // Exclude password from response
+
     if (!updatedUser) {
-      console.log("User not updated:", userId);
       return res
         .status(404)
-        .json({ success: false, message: "User not found or update failed." });
+        .json({ success: false, message: "User not found" });
     }
 
-    console.log("User updated successfully:", updatedUser);
-    res.json({ success: true, user: updatedUser });
+    // Respond with updated user data
+    res.status(200).json({
+      success: true,
+      message: "Profile image updated successfully",
+      user: updatedUser,
+    });
   } catch (error) {
     console.error("Error updating profile image:", error);
-    console.error("Error stack:", error.stack);
-    res
-      .status(500)
-      .json({ success: false, message: "Error updating profile image." });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
 
@@ -1339,115 +1315,73 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
+// exports.fetchUserDetails = async (req, res) => {
+//   try {
+//     console.log("req.user:", req.user); // Debug middleware output
+//     const userId = req.user?.id || req.user?.userId; // Handle both possibilities
+//     if (!userId) {
+//       return res
+//         .status(401)
+//         .json({ success: false, message: "Unauthorized: No user ID found" });
+//     }
+
+//     const user = await User.findById(userId)
+//       .select(
+//         "fullName email phoneNumber roles createdAt profileImage lastLogin loginHistory verified status workMetrics"
+//       )
+//       .populate({
+//         path: "roles",
+//         select: "name -_id",
+//       });
+
+//     if (!user) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "User not found" });
+//     }
+
+//     res.status(200).json({ success: true, data: user });
+//   } catch (error) {
+//     console.error("Error fetching user details:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Error fetching user details",
+//       details: error.message,
+//     });
+//   }
+// };
 exports.fetchUserDetails = async (req, res) => {
   try {
-    // Fetch user from database using the userId from middleware
-    const user = await User.findById(
-      req.user.id,
-      //req.user.userId,
-      "fullName email phoneNumber roles createdAt isActive verified"
-    ).populate({
-      path: "roles",
-      select: "name -_id",
-    });
+    console.log("req.user:", req.user);
+    const userId = req.user?.id || req.user?.userId;
+    if (!userId) {
+      return res.redirect(302, "/login"); // Direct redirect
+    }
+
+    const user = await User.findById(userId)
+      .select(
+        "fullName email phoneNumber roles createdAt profileImage lastLogin loginHistory verified status workMetrics"
+      )
+      .populate({
+        path: "roles",
+        select: "name -_id",
+      });
 
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+      return res.redirect(302, "/login");
     }
 
     res.status(200).json({ success: true, data: user });
   } catch (error) {
     console.error("Error fetching user details:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Error fetching user details" });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching user details",
+      details: error.message,
+    });
   }
 };
 
-// exports.updateUser = async (req, res) => {
-//   try {
-//     const { userId } = req.params;
-//     const { fullName, email, phoneNumber, status, roles } = req.body;
-
-//     // Validate request body
-//     console.log("Request Body Before Validation:", req.body);
-//     const { error } = updateUserSchema.validate(req.body);
-//     if (error) {
-//       return res
-//         .status(400)
-//         .json({ success: false, message: error.details[0].message });
-//     }
-
-//     // Fetch existing user record
-//     const user = await User.findById(userId);
-//     if (!user) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "User record not found" });
-//     }
-
-//     // Convert roles to ObjectIds
-//     const roleIds = await Promise.all(
-//       roles.map(async (role) => {
-//         if (typeof role === "string") {
-//           const foundRole = await Role.findOne({ name: role });
-//           if (!foundRole) throw new Error(`Role '${role}' does not exist.`);
-//           return foundRole._id;
-//         } else if (role.id && role.name) {
-//           const foundRole = await Role.findOne({
-//             _id: role.id,
-//             name: role.name,
-//           });
-//           if (!foundRole)
-//             throw new Error(
-//               `Role with ID '${role.id}' and name '${role.name}' does not exist.`
-//             );
-//           return foundRole._id;
-//         } else if (mongoose.Types.ObjectId.isValid(role)) {
-//           return role;
-//         } else {
-//           throw new Error(`Invalid role ID ${role}.`);
-//         }
-//       })
-//     );
-
-//     // Update user record
-//     const updateData = {
-//       fullName,
-//       email,
-//       phoneNumber,
-//       status: status || user.status, // Preserve existing status if not provided
-//       roles: roleIds,
-//     };
-
-//     console.log("Update Data:", updateData);
-//     const updatedUser = await User.findByIdAndUpdate(
-//       userId,
-//       { $set: updateData },
-//       { new: true, runValidators: true }
-//     ).populate("roles", "name");
-
-//     if (!updatedUser) {
-//       return res
-//         .status(500)
-//         .json({ success: false, message: "Failed to update user" });
-//     }
-
-//     res.status(200).json({
-//       success: true,
-//       message: "User record updated successfully",
-//       data: updatedUser,
-//     });
-//   } catch (error) {
-//     console.error("Error updating user record:", error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Error updating user record: " + error.message,
-//     });
-//   }
-// };
 exports.updateUser = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -1592,12 +1526,16 @@ exports.refreshToken = async (req, res) => {
 
 exports.getCurrentlyLoggedInUsers = async (req, res) => {
   try {
-    const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000); // Match access token expiry
+    const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+    console.log("Fifteen minutes ago:", fifteenMinutesAgo);
+
     const currentlyLoggedInUsers = await User.countDocuments({
       lastLogin: { $gte: fifteenMinutesAgo },
       status: "active",
       isLocked: false,
     });
+
+    console.log("Currently logged-in users count:", currentlyLoggedInUsers);
 
     res.status(200).json({
       success: true,
@@ -1617,12 +1555,45 @@ exports.getCurrentlyLoggedInUsers = async (req, res) => {
 exports.getLoggedInToday = async (req, res) => {
   try {
     const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
+    startOfDay.setUTCHours(0, 0, 0, 0); // Use UTC to avoid local time zone issues
+    console.log("Start of day (UTC):", startOfDay);
+
     const loggedInToday = await User.countDocuments({
       lastLogin: { $gte: startOfDay },
       status: "active",
       isLocked: false,
     });
+
+    console.log("Users logged in today count:", loggedInToday);
+
+    res.status(200).json({
+      success: true,
+      data: { loggedInToday },
+      message: "Total number of users logged in today fetched successfully",
+    });
+  } catch (error) {
+    console.error("Error fetching users logged in today:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      details: error.message,
+    });
+  }
+};
+
+exports.getLoggedInToday = async (req, res) => {
+  try {
+    const startOfDay = new Date();
+    startOfDay.setUTCHours(0, 0, 0, 0); // Use UTC to avoid local time zone issues
+    console.log("Start of day (UTC):", startOfDay);
+
+    const loggedInToday = await User.countDocuments({
+      lastLogin: { $gte: startOfDay },
+      status: "active",
+      isLocked: false,
+    });
+
+    console.log("Users logged in today count:", loggedInToday);
 
     res.status(200).json({
       success: true,

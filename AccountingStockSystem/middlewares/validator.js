@@ -276,46 +276,9 @@ exports.updateSaleSchema = Joi.object({
   discount: Joi.number().min(0).max(100),
 }).or("paymentMethod", "totalAmount"); // At least one field must be present for an update
 
-// exports.createHallTransactionSchema = Joi.object({
-//   // transactionId is auto-generated, so don't validate it here
-//   hall: Joi.array()
-//     .items(
-//       Joi.object({
-//         name: Joi.string().required(),
-//         qty: Joi.number().integer().positive().required(),
-//         price: Joi.number().positive().required(),
-//       })
-//     )
-//     .required(),
-//   // hall: Joi.object({
-//   //   _id: Joi.string()
-//   //     .regex(/^[0-9a-fA-F]{24}$/)
-//   //     .required(),
-//   //   name: Joi.string().required(),
-//   //   price: Joi.number().positive().required(),
-//   // }).required(),
-//   customerName: Joi.string().required(),
-//   contactPhone: Joi.string(),
-//   eventType: Joi.string()
-//     .valid("conference", "workshop", "webinar", "Wedding")
-//     .required(),
-//   startTime: Joi.date().required(),
-//   endTime: Joi.date().greater(Joi.ref("startTime")).required(),
-//   price: Joi.number().positive().required(),
-//   discount: Joi.number().min(0).max(100),
-//   totalAmount: Joi.number().positive().required(),
-//   paymentMethod: Joi.string()
-//     .regex(/^[0-9a-fA-F]{24}$/)
-//     .required(),
-//   paymentStatus: Joi.string()
-//     .valid("Paid", "Pending", "Cancelled", "Refund")
-//     .required(),
-//   notes: Joi.string(),
-//   totalAmount: Joi.number().min(0),
-//   staffInvolved: Joi.string().allow(""),
-// });
 exports.createHallTransactionSchema = Joi.object({
   // transactionId is auto-generated, so don't validate it here
+  date: Joi.date().iso().optional(),
   halls: Joi.array() // Changed from 'hall' to 'halls' to indicate multiple halls
     .items(
       Joi.object({
@@ -351,6 +314,7 @@ exports.createHallTransactionSchema = Joi.object({
 });
 
 exports.updateHallTransactionSchema = Joi.object({
+  date: Joi.date().iso().optional(),
   customerName: Joi.string(),
   contactPhone: Joi.string(),
   eventType: Joi.string().valid("conference", "workshop", "webinar", "Wedding"),
@@ -450,6 +414,7 @@ exports.updateUnifiedSaleSchema = Joi.object({
 exports.createLaundrySchema = Joi.object({
   customer: Joi.string().required(),
   receiptNo: Joi.string().required(),
+  transactionDate: Joi.date().iso().optional(), // Optional, defaults in Mongoose
   discount: Joi.number().min(0).default(0),
   status: Joi.string()
     .valid("Paid", "Pending", "Cancelled")
@@ -475,6 +440,7 @@ exports.createLaundrySchema = Joi.object({
 exports.updateLaundrySchema = Joi.object({
   customer: Joi.string(),
   receiptNo: Joi.string(),
+  transactionDate: Joi.date().iso().optional(), // Optional for partial updates
   phoneNo: Joi.string(),
   paymentMethod: Joi.string(),
   discount: Joi.number().min(0).max(100), // Discount in percentage
@@ -528,10 +494,39 @@ exports.updateOrderItemSchema = Joi.object({
   unitPrice: Joi.number().min(0).optional(), // Price should be a non-negative number (optional)
 }).min(1);
 
+// exports.createSeminarSchema = Joi.object({
+//   organizationName: Joi.string().required(),
+//   contactPhone: Joi.string().required(),
+//   seminarDate: Joi.date().required(),
+//   orderItems: Joi.array()
+//     .items(
+//       Joi.object({
+//         itemName: Joi.string().required(),
+//         qty: Joi.number().integer().positive().required(),
+//         unitPrice: Joi.number().positive().required(),
+//       })
+//     )
+//     .required(),
+//   address: Joi.string().required(),
+//   eventType: Joi.string()
+//     .valid("conference", "workshop", "webinar", "Wedding", "Outdoor Catering")
+//     .default("conference"), // Updated to match schema
+//   paymentMethod: Joi.string()
+//     .regex(/^[0-9a-fA-F]{24}$/)
+//     .required(),
+//   status: Joi.string()
+//     .valid("Pending", "Paid", "Cancelled", "Refund")
+//     .default("Pending"), // Updated to match schema
+//   additionalNotes: Joi.string(),
+//   totalAmount: Joi.number().min(0), // If you want to enforce or validate this field
+//   discount: Joi.number().min(0).default(0),
+//   salesBy: Joi.string().allow(""), // Updated to allow empty string as per schema
+// });
 exports.createSeminarSchema = Joi.object({
   organizationName: Joi.string().required(),
   contactPhone: Joi.string().required(),
-  seminarDate: Joi.date().required(),
+  seminarDate: Joi.date().iso().required(),
+  transactionDate: Joi.date().iso().optional(), // Default handled in schema/controller
   orderItems: Joi.array()
     .items(
       Joi.object({
@@ -543,18 +538,18 @@ exports.createSeminarSchema = Joi.object({
     .required(),
   address: Joi.string().required(),
   eventType: Joi.string()
-    .valid("conference", "workshop", "webinar", "Wedding")
-    .default("conference"), // Updated to match schema
+    .valid("conference", "workshop", "webinar", "Wedding", "Outdoor Catering")
+    .default("conference"),
   paymentMethod: Joi.string()
     .regex(/^[0-9a-fA-F]{24}$/)
     .required(),
   status: Joi.string()
     .valid("Pending", "Paid", "Cancelled", "Refund")
-    .default("Pending"), // Updated to match schema
+    .default("Pending"),
   additionalNotes: Joi.string(),
-  totalAmount: Joi.number().min(0), // If you want to enforce or validate this field
+  totalAmount: Joi.number().min(0),
   discount: Joi.number().min(0).default(0),
-  salesBy: Joi.string().allow(""), // Updated to allow empty string as per schema
+  salesBy: Joi.string().allow(""),
 });
 
 exports.updateSeminarSchema = Joi.object({
@@ -570,7 +565,13 @@ exports.updateSeminarSchema = Joi.object({
   ),
   discount: Joi.number().min(0), // Updated to allow empty string as per schema
   address: Joi.string(),
-  eventType: Joi.string().valid("conference", "workshop", "webinar", "Wedding"),
+  eventType: Joi.string().valid(
+    "conference",
+    "workshop",
+    "webinar",
+    "Wedding",
+    "Outdoor Catering"
+  ),
   //paymentMethod: Joi.string(), // Changed from string enum to ObjectId validation
   paymentMethod: Joi.string()
     .regex(/^[0-9a-fA-F]{24}$/)
@@ -855,39 +856,6 @@ exports.updateProductSchema = Joi.object({
   }),
 });
 
-// exports.updateProductSchema = Joi.object({
-//   name: Joi.string().optional().messages({
-//     "string.base": "Name should be a type of 'text'",
-//   }),
-//   description: Joi.string().optional().allow("").messages({
-//     "string.base": "Description should be a type of 'text'",
-//   }),
-//   price: Joi.number().optional().positive().messages({
-//     "number.base": "Price should be a type of 'number'",
-//     "number.positive": "Price must be a positive number",
-//   }),
-//   category: Joi.string().optional().messages({
-//     "string.base": "Category should be a type of 'string'",
-//   }),
-//   stockQuantity: Joi.number().optional().integer().positive().messages({
-//     "number.base": "Stock Quantity should be a type of 'number'",
-//     "number.integer": "Stock Quantity must be an integer",
-//     "number.positive": "Stock Quantity must be a positive number",
-//   }),
-//   // barcode: Joi.string().optional().allow("").messages({
-//   //   "string.base": "Barcode should be a type of 'text'",
-//   // }),
-//   supplier: Joi.string().optional().allow("").messages({
-//     "string.base": "Supplier should be a type of 'string'",
-//   }),
-//   expiryDate: Joi.date().optional().allow("").messages({
-//     "date.base": "Expiry Date should be a valid date",
-//   }),
-//   imageUrl: Joi.string().optional().allow("").messages({
-//     "string.base": "Image URL should be a type of 'text'",
-//   }),
-// });
-
 exports.createSalesUnifiedSchema = Joi.object({
   saleType: Joi.string().valid("restaurant", "minimart").required(),
   paymentMethod: Joi.string()
@@ -1029,42 +997,6 @@ exports.updateInventoryAdjustmentSchema = Joi.object({
 
 // Ensure at least one field is being updated
 
-// exports.updatePurchaseOrderSchema = Joi.object({
-//   expectedDelivery: Joi.date().iso().allow(null).messages({
-//     "date.base": "Expected delivery date must be a valid date.",
-//   }),
-//   items: Joi.array()
-//     .items(
-//       Joi.object({
-//         inventory: Joi.string()
-//           .pattern(/^[0-9a-fA-F]{24}$/)
-//           .required()
-//           .messages({
-//             "any.required": '"inventory" is required for each item',
-//             "string.pattern.base": '"inventory" must be a valid ObjectId',
-//           }),
-//         quantityOrdered: Joi.number().integer().min(1).required().messages({
-//           "any.required": '"quantityOrdered" is required for each item',
-//           "number.base": '"quantityOrdered" must be a number',
-//           "number.integer": '"quantityOrdered" must be an integer',
-//           "number.min": '"quantityOrdered" must be at least 1',
-//         }),
-//         unitPrice: Joi.number().positive().required().messages({
-//           "any.required": '"unitPrice" is required for each item',
-//           "number.base": '"unitPrice" must be a number',
-//           "number.positive": '"unitPrice" must be a positive number',
-//         }),
-//       })
-//     )
-//     .messages({
-//       "array.base": '"items" must be an array',
-//     }),
-//   status: Joi.string()
-//     .valid(...validStatuses)
-//     .messages({
-//       "string.only": '"status" must be one of ' + validStatuses.join(", "),
-//     }),
-// }).min(1); // Ensure at least one field is being updated
 exports.updatePurchaseOrderSchema = Joi.object({
   supplier: Joi.string()
     .regex(/^[0-9a-fA-F]{24}$/)
@@ -1439,7 +1371,8 @@ exports.updateDishSchema = Joi.object({
 }).min(1);
 
 exports.createSaleTransactionSchema = Joi.object({
-  date: Joi.date().iso().default(new Date()),
+  transactionDate: Joi.date().iso().optional(), // Default handled in controller
+  date: Joi.date().iso().optional(), // Optional, as transactionDate takes precedence
   totalAmount: Joi.number().required().min(0),
   paymentMethod: Joi.string().hex().length(24).required(),
   saleType: Joi.string().valid("restaurant", "minimart", "kabasa").required(),
@@ -1469,15 +1402,15 @@ exports.createSaleTransactionSchema = Joi.object({
 });
 
 exports.updateSaleTransactionSchema = Joi.object({
-  // Most fields are optional on update
-  date: Joi.date().iso(),
+  transactionDate: Joi.date().iso().optional(), // Allow updating transactionDate
+  date: Joi.date().iso().optional(), // Optional for creation timestamp
   totalAmount: Joi.number().min(0),
   paymentMethod: Joi.string().hex().length(24),
-  saleType: Joi.string().valid("restaurant", "minimart", "kabasa"), // Added "kabasa"
+  saleType: Joi.string().valid("restaurant", "minimart", "kabasa"),
   items: Joi.array().items(
     Joi.object({
       item: Joi.string().hex().length(24),
-      itemType: Joi.string().valid("Dish", "Inventory", "OrderItem"), // Ensure this includes OrderItem
+      itemType: Joi.string().valid("Dish", "Inventory", "OrderItem"),
       quantity: Joi.number().min(1),
       priceAtSale: Joi.number().min(0),
     })
@@ -1498,9 +1431,746 @@ exports.forgotPasswordSchema = Joi.object({
   email: Joi.string().email().required(),
 });
 
+exports.createCustomerSchema = Joi.object({
+  name: Joi.string().trim().min(2).max(100).required().messages({
+    "string.base": "Name must be a string",
+    "string.empty": "Name is required",
+    "string.min": "Name must be at least 2 characters",
+    "string.max": "Name cannot exceed 100 characters",
+    "any.required": "Name is required",
+  }),
+  email: Joi.string()
+    .trim()
+    .lowercase()
+    .email({ tlds: { allow: false } }) // Disables TLD check for simplicity
+    .pattern(/^\S+@\S+\.\S+$/)
+    .optional()
+    .messages({
+      "string.email": "Please provide a valid email address",
+      "string.pattern.base": "Please provide a valid email address",
+    }),
+  phoneNumber: Joi.string()
+    .trim()
+    .pattern(/^[0-9]{10,15}$/)
+    .required()
+    .messages({
+      "string.base": "Phone number must be a string",
+      "string.empty": "Phone number is required",
+      "string.pattern.base":
+        "Please provide a valid phone number (10-15 digits)",
+      "any.required": "Phone number is required",
+    }),
+  address: Joi.string().trim().max(200).required().messages({
+    "string.base": "Address must be a string",
+    "string.empty": "Address is required",
+    "string.max": "Address cannot exceed 200 characters",
+    "any.required": "Address is required",
+  }),
+  status: Joi.string()
+    .valid("active", "inactive", "deleted")
+    .default("active")
+    .optional()
+    .messages({
+      "string.base": "Status must be a string",
+      "any.only": "Status must be one of active, inactive, deleted",
+    }),
+});
+
+exports.updateCustomerSchema = Joi.object({
+  name: Joi.string().trim().min(2).max(100).optional().messages({
+    "string.base": "Name must be a string",
+    "string.min": "Name must be at least 2 characters",
+    "string.max": "Name cannot exceed 100 characters",
+  }),
+  email: Joi.string()
+    .trim()
+    .lowercase()
+    .email({ tlds: { allow: false } })
+    .pattern(/^\S+@\S+\.\S+$/)
+    .optional()
+    .messages({
+      "string.email": "Please provide a valid email address",
+      "string.pattern.base": "Please provide a valid email address",
+    }),
+  phoneNumber: Joi.string()
+    .trim()
+    .pattern(/^[0-9]{10,15}$/)
+    .optional()
+    .messages({
+      "string.base": "Phone number must be a string",
+      "string.pattern.base":
+        "Please provide a valid phone number (10-15 digits)",
+    }),
+  address: Joi.string().trim().max(200).optional().messages({
+    "string.base": "Address must be a string",
+    "string.max": "Address cannot exceed 200 characters",
+  }),
+  status: Joi.string()
+    .valid("active", "inactive", "deleted")
+    .optional()
+    .messages({
+      "string.base": "Status must be a string",
+      "any.only": "Status must be one of active, inactive, deleted",
+    }),
+  createdBy: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .optional()
+    .messages({
+      "string.base": "CreatedBy must be a string",
+      "string.pattern.base": "CreatedBy must be a valid ObjectId",
+    }),
+}).min(1); // Ensures at least one field is provided for update
+
+// const paymentSchema = Joi.object({
+//   amount: Joi.number().required().min(0).messages({
+//     "any.required": "Payment amount is required",
+//     "number.min": "Payment amount cannot be negative",
+//   }),
+//   method: Joi.string()
+//     .pattern(/^[0-9a-fA-F]{24}$/)
+//     .required()
+//     .messages({
+//       "string.pattern.base": "Payment method must be a valid ObjectId",
+//       "any.required": "Payment method is required",
+//     }),
+//   date: Joi.date().default(Date.now).required().messages({
+//     "any.required": "Payment date is required",
+//   }),
+//   whtRate: Joi.number().valid(0, 5, 10).default(0),
+//   whtAmount: Joi.number().min(0).default(0).messages({
+//     "number.min": "WHT amount cannot be negative",
+//   }),
+//   ledgerTransactionId: Joi.string()
+//     .pattern(/^[0-9a-fA-F]{24}$/)
+//     .required()
+//     .messages({
+//       "string.pattern.base": "Ledger transaction ID must be a valid ObjectId",
+//       "any.required": "Ledger transaction is required",
+//     }),
+// });
+// const paymentSchema = Joi.object({
+//   invoiceId: Joi.string()
+//     .pattern(/^[0-9a-fA-F]{24}$/)
+//     .optional()
+//     .messages({
+//       "string.pattern.base": "Invoice ID must be a valid ObjectId",
+//     }),
+//   amount: Joi.number().required().min(0).messages({
+//     "any.required": "Payment amount is required",
+//     "number.min": "Payment amount cannot be negative",
+//   }),
+//   method: Joi.string()
+//     .pattern(/^[0-9a-fA-F]{24}$/)
+//     .required()
+//     .messages({
+//       "string.pattern.base": "Payment method must be a valid ObjectId",
+//       "any.required": "Payment method is required",
+//     }),
+//   date: Joi.date().default(Date.now).required().messages({
+//     "any.required": "Payment date is required",
+//   }),
+//   whtRate: Joi.number().valid(0, 5, 10).default(0).messages({
+//     "any.only": "WHT rate must be 0, 5, or 10",
+//   }),
+//   whtAmount: Joi.number().min(0).default(0).messages({
+//     "number.min": "WHT amount cannot be negative",
+//   }),
+//   ledgerTransactionId: Joi.string()
+//     .pattern(/^[0-9a-fA-F]{24}$/)
+//     .optional() // Changed to optional
+//     .messages({
+//       "string.pattern.base": "Ledger transaction ID must be a valid ObjectId",
+//     }),
+// });
+const paymentSchema = Joi.object({
+  invoiceId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .optional()
+    .messages({
+      "string.pattern.base": "Invoice ID must be a valid ObjectId",
+    }),
+  amount: Joi.number().required().min(0).messages({
+    "any.required": "Payment amount is required",
+    "number.min": "Payment amount cannot be negative",
+  }),
+  method: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Payment method must be a valid ObjectId",
+      "any.required": "Payment method is required",
+    }),
+  date: Joi.date().default(Date.now).required().messages({
+    "any.required": "Payment date is required",
+  }),
+  whtRate: Joi.number().valid(0, 5, 10).default(0).messages({
+    "any.only": "WHT rate must be 0, 5, or 10",
+  }),
+  whtAmount: Joi.number().min(0).default(0).messages({
+    "number.min": "WHT amount cannot be negative",
+  }),
+});
+
+const initialPaymentSchema = Joi.object({
+  amount: Joi.number().required().min(0).messages({
+    "any.required": "Initial payment amount is required",
+    "number.min": "Initial payment amount cannot be negative",
+  }),
+  method: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Payment method must be a valid ObjectId",
+      "any.required": "Payment method is required",
+    }),
+  date: Joi.date().default(Date.now).required().messages({
+    "any.required": "Payment date is required",
+  }),
+  whtRate: Joi.number().valid(0, 5, 10).default(0),
+  whtAmount: Joi.number().min(0).default(0).messages({
+    "number.min": "WHT amount cannot be negative",
+  }),
+  ledgerTransactionId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .optional() // Changed from required to optional
+    .messages({
+      "string.pattern.base": "Ledger transaction ID must be a valid ObjectId",
+    }),
+});
+
+const invoiceSchema = Joi.object({
+  invoiceNumber: Joi.string().required().trim().messages({
+    "any.required": "Invoice number is required",
+  }),
+  saleId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .optional()
+    .messages({
+      "string.pattern.base": "Sale ID must be a valid ObjectId",
+    }),
+  amount: Joi.number().required().min(0).messages({
+    "any.required": "Invoice amount is required",
+    "number.min": "Invoice amount cannot be negative",
+  }),
+  issuedDate: Joi.date().default(Date.now).required().messages({
+    "any.required": "Issued date is required",
+  }),
+  dueDate: Joi.date().required().messages({
+    "any.required": "Due date is required",
+  }),
+  initialPayment: initialPaymentSchema.optional(),
+  payments: Joi.array().items(paymentSchema).optional(),
+  cashRefund: Joi.number().min(0).default(0).messages({
+    "number.min": "Cash refund cannot be negative",
+  }),
+  badDebtWriteOff: Joi.number().min(0).default(0).messages({
+    "number.min": "Bad debt write-off cannot be negative",
+  }),
+  status: Joi.string()
+    .valid("Pending", "Partially Paid", "Paid", "Overdue")
+    .default("Pending"),
+});
+
+exports.createDebtorSchema = Joi.object({
+  customer: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Customer ID must be a valid ObjectId",
+      "any.required": "Customer ID is required",
+    }),
+  openingBalance: Joi.number().min(0).default(0).messages({
+    "number.min": "Opening balance cannot be negative",
+  }),
+  totalDebt: Joi.number().min(0).default(0).messages({
+    "number.min": "Total debt cannot be negative",
+  }),
+  totalCreditReceived: Joi.number().min(0).default(0).messages({
+    "number.min": "Total credit received cannot be negative",
+  }),
+  totalDeduction: Joi.number().min(0).default(0).messages({
+    "number.min": "Total deduction cannot be negative",
+  }),
+  // Removed closingBalance since it’s calculated dynamically
+  invoices: Joi.array().items(invoiceSchema).optional(),
+});
+
+exports.updateDebtorSchema = Joi.object({
+  customer: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .optional()
+    .messages({
+      "string.pattern.base": "Customer ID must be a valid ObjectId",
+    }),
+  openingBalance: Joi.number().min(0).optional().messages({
+    "number.min": "Opening balance cannot be negative",
+  }),
+  totalDebt: Joi.number().min(0).optional().messages({
+    "number.min": "Total debt cannot be negative",
+  }),
+  totalCreditReceived: Joi.number().min(0).optional().messages({
+    "number.min": "Total credit received cannot be negative",
+  }),
+  totalDeduction: Joi.number().min(0).optional().messages({
+    "number.min": "Total deduction cannot be negative",
+  }),
+  closingBalance: Joi.number().min(0).optional().messages({
+    "number.min": "Closing balance cannot be negative",
+  }),
+  invoices: Joi.array().items(invoiceSchema).optional(),
+}).min(1);
+// Ensure at least one field is provided for update // Ensure at least one field is provided for update
+
+exports.createAccountSaleSchema = Joi.object({
+  customer: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Customer ID must be a valid ObjectId",
+      "any.required": "Customer ID is required",
+    }),
+  amount: Joi.number().min(0).required().messages({
+    "number.min": "Amount cannot be negative",
+    "any.required": "Amount is required",
+  }),
+  isCreditSale: Joi.boolean().default(false).messages({
+    "boolean.base": "isCreditSale must be a boolean",
+  }),
+  ledgerTransactionId: Joi.string().optional(),
+  // ledgerTransactionId: Joi.string()
+  //   .pattern(/^[0-9a-fA-F]{24}$/)
+  //   .required()
+  //   .messages({
+  //     "string.pattern.base": "Ledger transaction ID must be a valid ObjectId",
+  //     "any.required": "Ledger transaction ID is required",
+  //   }),
+  invoiceNumber: Joi.string().trim().required().messages({
+    "string.empty": "Invoice number is required",
+    "any.required": "Invoice number is required",
+  }),
+  date: Joi.date().iso().default(Date.now).messages({
+    "date.base": "Date must be a valid ISO date",
+  }),
+  status: Joi.string()
+    .valid("Pending", "Completed", "Cancelled")
+    .default("Pending")
+    .messages({
+      "any.only": "Status must be one of Pending, Completed, Cancelled",
+    }),
+});
+
+exports.updateAccountSaleSchema = Joi.object({
+  customer: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .optional()
+    .messages({
+      "string.pattern.base": "Customer ID must be a valid ObjectId",
+    }),
+  amount: Joi.number().min(0).optional().messages({
+    "number.min": "Amount cannot be negative",
+  }),
+  isCreditSale: Joi.boolean().optional().messages({
+    "boolean.base": "isCreditSale must be a boolean",
+  }),
+  ledgerTransactionId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .optional()
+    .messages({
+      "string.pattern.base": "Ledger transaction ID must be a valid ObjectId",
+    }),
+  invoiceNumber: Joi.string().trim().optional().messages({
+    "string.empty": "Invoice number cannot be empty",
+  }),
+  date: Joi.date().iso().optional().messages({
+    "date.base": "Date must be a valid ISO date",
+  }),
+  status: Joi.string()
+    .valid("Pending", "Completed", "Cancelled")
+    .optional()
+    .messages({
+      "any.only": "Status must be one of Pending, Completed, Cancelled",
+    }),
+}).min(1); // Require at least one field for update
+
+// Schema for individual ledger entry (used in entries array)
+const ledgerEntrySchema = Joi.object({
+  account: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Account ID must be a valid ObjectId",
+      "any.required": "Account ID is required for each entry",
+    }),
+  debit: Joi.number().min(0).default(0).messages({
+    "number.min": "Debit cannot be negative",
+    "number.base": "Debit must be a number",
+  }),
+  credit: Joi.number().min(0).default(0).messages({
+    "number.min": "Credit cannot be negative",
+    "number.base": "Credit must be a number",
+  }),
+}).custom((value, helpers) => {
+  // Ensure at least one of debit or credit is non-zero per entry
+  if (value.debit === 0 && value.credit === 0) {
+    return helpers.error("object.invalid", {
+      message: "Each entry must have a non-zero debit or credit",
+    });
+  }
+  return value;
+}, "non-zero check");
+
+// Create LedgerTransaction schema
+exports.createLedgerTransactionSchema = Joi.object({
+  date: Joi.date().iso().default(Date.now).required().messages({
+    "date.base": "Date must be a valid ISO date",
+    "any.required": "Transaction date is required",
+  }),
+  description: Joi.string().trim().max(200).required().messages({
+    "string.empty": "Description is required",
+    "string.max": "Description cannot exceed 200 characters",
+    "any.required": "Description is required",
+  }),
+  referenceType: Joi.string()
+    .valid("AccountSale", "Debtor", "PettyCash", "Other")
+    .required()
+    .messages({
+      "any.only":
+        "Reference type must be one of AccountSale, Debtor, PettyCash, Other",
+      "any.required": "Reference type is required",
+    }),
+  referenceId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Reference ID must be a valid ObjectId",
+      "any.required": "Reference ID is required",
+    }),
+  entries: Joi.array()
+    .items(ledgerEntrySchema)
+    .min(2)
+    .required()
+    .custom((value, helpers) => {
+      // Validate total debit equals total credit
+      const totalDebit = value.reduce(
+        (sum, entry) => sum + (entry.debit || 0),
+        0
+      );
+      const totalCredit = value.reduce(
+        (sum, entry) => sum + (entry.credit || 0),
+        0
+      );
+      if (totalDebit !== totalCredit) {
+        return helpers.error("array.invalid", {
+          message: "Total debits must equal total credits",
+        });
+      }
+      return value;
+    }, "balance check")
+    .messages({
+      "array.min":
+        "At least two entries are required for double-entry bookkeeping",
+      "any.required": "Entries are required",
+    }),
+  status: Joi.string()
+    .valid("Pending", "Posted", "Voided")
+    .default("Pending")
+    .messages({
+      "any.only": "Status must be one of Pending, Posted, Voided",
+    }),
+  comment: Joi.string().trim().max(100).optional().messages({
+    "string.max": "Comment cannot exceed 100 characters",
+    "string.empty": "Comment cannot be an empty string", // Optional but not empty if provided
+  }),
+});
+
+// Update LedgerTransaction schema (partial updates allowed)
+exports.updateLedgerTransactionSchema = Joi.object({
+  date: Joi.date().iso().optional().messages({
+    "date.base": "Date must be a valid ISO date",
+  }),
+  description: Joi.string().trim().max(200).optional().messages({
+    "string.empty": "Description cannot be empty",
+    "string.max": "Description cannot exceed 200 characters",
+  }),
+  referenceType: Joi.string()
+    .valid("AccountSale", "Debtor", "PettyCash", "Other")
+    .optional()
+    .messages({
+      "any.only":
+        "Reference type must be one of AccountSale, Debtor, PettyCash, Other",
+    }),
+  referenceId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .optional()
+    .messages({
+      "string.pattern.base": "Reference ID must be a valid ObjectId",
+    }),
+  entries: Joi.array()
+    .items(ledgerEntrySchema)
+    .min(2)
+    .optional()
+    .custom((value, helpers) => {
+      // Validate total debit equals total credit if entries are provided
+      if (value) {
+        const totalDebit = value.reduce(
+          (sum, entry) => sum + (entry.debit || 0),
+          0
+        );
+        const totalCredit = value.reduce(
+          (sum, entry) => sum + (entry.credit || 0),
+          0
+        );
+        if (totalDebit !== totalCredit) {
+          return helpers.error("array.invalid", {
+            message: "Total debits must equal total credits",
+          });
+        }
+      }
+      return value;
+    }, "balance check")
+    .messages({
+      "array.min":
+        "At least two entries are required for double-entry bookkeeping",
+    }),
+  status: Joi.string()
+    .valid("Pending", "Posted", "Voided")
+    .optional()
+    .messages({
+      "any.only": "Status must be one of Pending, Posted, Voided",
+    }),
+  comment: Joi.string().trim().max(100).optional().messages({
+    "string.max": "Comment cannot exceed 100 characters",
+    "string.empty": "Comment cannot be an empty string", // Optional but not empty if provided
+  }),
+})
+  .min(1)
+  .messages({
+    "object.min": "At least one field must be provided for update",
+  });
+
+exports.createAccountSchema = Joi.object({
+  accountCode: Joi.string()
+    .pattern(/^[A-Za-z0-9-]+$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Account code must be alphanumeric with dashes",
+      "any.required": "Account code is required",
+    }),
+  name: Joi.string().trim().max(50).required().messages({
+    "string.empty": "Account name is required",
+    "string.max": "Name cannot exceed 50 characters",
+    "any.required": "Account name is required",
+  }),
+  type: Joi.string()
+    .valid("Asset", "Liability", "Equity", "Revenue", "Expense")
+    .required()
+    .messages({
+      "any.only":
+        "Type must be one of Asset, Liability, Equity, Revenue, Expense",
+      "any.required": "Account type is required",
+    }),
+  subType: Joi.string().trim().max(50).optional().messages({
+    "string.max": "Sub-type cannot exceed 50 characters",
+  }),
+  description: Joi.string().trim().max(200).optional().messages({
+    "string.max": "Description cannot exceed 200 characters",
+  }),
+  status: Joi.string().valid("active", "inactive").default("active").messages({
+    "any.only": "Status must be one of active, inactive",
+  }),
+});
+
+exports.updateAccountSchema = Joi.object({
+  accountCode: Joi.string()
+    .pattern(/^[A-Za-z0-9-]+$/)
+    .optional()
+    .messages({
+      "string.pattern.base": "Account code must be alphanumeric with dashes",
+    }),
+  name: Joi.string().trim().max(50).optional().messages({
+    "string.empty": "Account name cannot be empty",
+    "string.max": "Name cannot exceed 50 characters",
+  }),
+  type: Joi.string()
+    .valid("Asset", "Liability", "Equity", "Revenue", "Expense")
+    .optional()
+    .messages({
+      "any.only":
+        "Type must be one of Asset, Liability, Equity, Revenue, Expense",
+    }),
+  subType: Joi.string().trim().max(50).optional().messages({
+    "string.max": "Sub-type cannot exceed 50 characters",
+  }),
+  description: Joi.string().trim().max(200).optional().messages({
+    "string.max": "Description cannot exceed 200 characters",
+  }),
+  status: Joi.string().valid("active", "inactive").optional().messages({
+    "any.only": "Status must be one of active, inactive",
+  }),
+})
+  .min(1)
+  .messages({
+    "object.min": "At least one field must be provided for update",
+  });
+
+// Define expenseBreakdownSchema
+// const expenseBreakdownSchema = Joi.object({
+//   name: Joi.string().required().trim().max(50).messages({
+//     "string.base": "Expense breakdown name must be a string",
+//     "string.empty": "Expense breakdown name is required",
+//     "string.max": "Expense breakdown name must not exceed 50 characters",
+//     "any.required": "Expense breakdown name is required",
+//   }),
+//   amount: Joi.number().required().min(0).messages({
+//     "number.base": "Expense breakdown amount must be a number",
+//     "number.min": "Expense breakdown amount cannot be negative",
+//     "any.required": "Expense breakdown amount is required",
+//   }),
+// });
+const expenseBreakdownSchema = Joi.object({
+  category: Joi.string()
+    .optional()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .messages({
+      "string.base": "Category must be a string",
+      "string.empty": "Expense category is required",
+      "string.pattern.base": "Category must be a valid ObjectId",
+      "any.required": "Expense category is required",
+    }),
+  amount: Joi.number().required().min(0).messages({
+    "number.base": "Amount must be a number",
+    "number.min": "Amount cannot be negative",
+    "any.required": "Amount is required",
+  }),
+});
+
+// Define pettyCashTransactionSchema using expenseBreakdownSchema
+const pettyCashTransactionSchema = Joi.object({
+  date: Joi.date().default(Date.now),
+  details: Joi.string().required().trim().max(200),
+  voucherNo: Joi.string().trim().allow("", null),
+  checkNo: Joi.string().trim().allow("", null),
+  totalPayment: Joi.number().required().min(0),
+  expenseBreakdowns: Joi.array()
+    .items(expenseBreakdownSchema)
+    .required()
+    .min(1),
+  ledgerTransactionDescription: Joi.string().trim().max(500).allow("", null),
+})
+  .custom((value, helpers) => {
+    const breakdownSum = value.expenseBreakdowns.reduce(
+      (sum, breakdown) => sum + breakdown.amount,
+      0
+    );
+    if (breakdownSum !== value.totalPayment) {
+      return helpers.error("any.custom", {
+        message:
+          "Total payment must equal the sum of expense breakdown amounts",
+      });
+    }
+    return value;
+  }, "Total payment validation")
+  .options({ abortEarly: false, stripUnknown: true });
+
+// Define createPettyCashSchema
+const createPettyCashSchema = Joi.object({
+  balance: Joi.number().required().min(0).messages({
+    "number.base": "Balance must be a number",
+    "number.min": "Balance cannot be negative",
+    "any.required": "Balance is required",
+  }),
+  initialAmount: Joi.number().required().min(0).messages({
+    "number.base": "Initial amount must be a number",
+    "number.min": "Initial amount cannot be negative",
+    "any.required": "Initial amount is required",
+  }),
+  status: Joi.string().valid("active", "inactive").optional().messages({
+    "string.base": "Status must be a string",
+    "any.only": "Status must be either 'active' or 'inactive'",
+  }),
+}).custom((value, helpers) => {
+  if (value.balance !== value.initialAmount) {
+    return helpers.error("any.custom", {
+      message: "Initial balance must equal initial amount on creation",
+    });
+  }
+  return value;
+}, "Balance validation");
+
+// Define updatePettyCashSchema
+const updatePettyCashSchema = Joi.object({
+  balance: Joi.number().min(0).messages({
+    "number.base": "Balance must be a number",
+    "number.min": "Balance cannot be negative",
+  }),
+  initialAmount: Joi.number().min(0).messages({
+    "number.base": "Initial amount must be a number",
+    "number.min": "Initial amount cannot be negative",
+  }),
+  status: Joi.string().valid("active", "inactive").optional().messages({
+    "string.base": "Status must be a string",
+    "any.only": "Status must be either 'active' or 'inactive'",
+  }),
+  lastReplenished: Joi.date().messages({
+    "date.base": "Last replenished must be a valid date",
+  }),
+})
+  .min(1)
+  .messages({
+    "object.min": "At least one field is required for update",
+  });
+
+// Create Expense Schema Validator
+exports.createExpenseSchema = Joi.object({
+  name: Joi.string().trim().max(50).required().messages({
+    "string.base": "Name must be a string",
+    "string.empty": "Name is required",
+    "string.max": "Name cannot exceed 50 characters",
+    "any.required": "Name is required",
+  }),
+  code: Joi.string().trim().max(50).lowercase().required().messages({
+    "string.base": "Code must be a string",
+    "string.empty": "Code is required",
+    "string.max": "Code cannot exceed 50 characters",
+    "any.required": "Code is required",
+  }),
+  active: Joi.boolean().optional().messages({
+    "boolean.base": "Active must be true or false",
+  }),
+}).options({ abortEarly: false, stripUnknown: true });
+
+// Update Expense Schema Validator
+exports.updateExpenseSchema = Joi.object({
+  name: Joi.string().trim().max(50).optional().messages({
+    "string.base": "Name must be a string",
+    "string.max": "Name cannot exceed 50 characters",
+  }),
+  code: Joi.string().trim().max(50).lowercase().optional().messages({
+    "string.base": "Code must be a string",
+    "string.max": "Code cannot exceed 50 characters",
+  }),
+  active: Joi.boolean().optional().messages({
+    "boolean.base": "Active must be true or false",
+  }),
+})
+  .or("name", "code", "active") // At least one field must be provided
+  .options({ abortEarly: false, stripUnknown: true });
+
+// Export schemas
+
+// Export all schemas using your convention
+
 function hmacProcess(value, secret) {
   return require("crypto")
     .createHmac("sha256", secret)
     .update(value)
     .digest("hex");
 }
+
+exports.paymentSchema = paymentSchema;
+exports.initialPaymentSchema = initialPaymentSchema;
+exports.invoiceSchema = invoiceSchema;
+exports.expenseBreakdownSchema = expenseBreakdownSchema;
+exports.pettyCashTransactionSchema = pettyCashTransactionSchema;
+exports.createPettyCashSchema = createPettyCashSchema;
+exports.updatePettyCashSchema = updatePettyCashSchema;

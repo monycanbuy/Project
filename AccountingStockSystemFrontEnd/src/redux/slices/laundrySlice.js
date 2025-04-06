@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { apiClient } from "./authSlice"; // Adjust path (e.g., "../slices/authSlice")
+import { apiClient } from "../../utils/apiClient";
 
 // const API_BASE_URL =
 //   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
@@ -83,17 +83,46 @@ export const fetchLaundrySummary = createAsyncThunk(
   }
 );
 
+// export const fetchDailyLaundrySales = createAsyncThunk(
+//   "laundry/fetchDailySales",
+//   async ({ date }, { rejectWithValue }) => {
+//     try {
+//       const params = { date };
+//       const response = await apiClient.get(`${BASE_URL}/daily-sales`, {
+//         params,
+//       });
+//       return response.data.data;
+//     } catch (error) {
+//       console.error("Error fetching daily laundry sales:", error);
+//       return rejectWithValue({
+//         status: error.response?.status || 500,
+//         message: error.response?.data?.message || "Failed to fetch daily sales",
+//       });
+//     }
+//   }
+// );
 export const fetchDailyLaundrySales = createAsyncThunk(
   "laundry/fetchDailySales",
-  async ({ date }, { rejectWithValue }) => {
+  async (args = {}, { rejectWithValue }) => {
+    // Default to empty object
     try {
-      const params = { date };
+      const { date } = args; // Destructure, date can be undefined
+      const params = date ? { date } : {}; // Only include date if provided
+      // console.log("Thunk started, params:", params);
+      // console.log(
+      //   "Request URL:",
+      //   `${apiClient.defaults.baseURL}${BASE_URL}/daily-sales${
+      //     date ? `?date=${date}` : ""
+      //   }`
+      // );
       const response = await apiClient.get(`${BASE_URL}/daily-sales`, {
         params,
       });
+      // console.log("Raw API Response:", response);
+      // console.log("Extracted Data:", response.data.data);
       return response.data.data;
     } catch (error) {
-      console.error("Error fetching daily laundry sales:", error);
+      console.error("Thunk error:", error);
       return rejectWithValue({
         status: error.response?.status || 500,
         message: error.response?.data?.message || "Failed to fetch daily sales",
@@ -228,15 +257,22 @@ const laundrySlice = createSlice({
       })
       .addCase(fetchDailyLaundrySales.pending, (state) => {
         state.dailySalesStatus = "loading";
+        //console.log("fetchDailyLaundrySales pending");
       })
       .addCase(fetchDailyLaundrySales.fulfilled, (state, action) => {
         state.dailySalesStatus = "succeeded";
         state.dailySales = action.payload;
         state.dailySalesError = null;
+        // console.log(
+        //   "fetchDailyLaundrySales fulfilled, payload:",
+        //   action.payload
+        // );
+        // console.log("Updated dailySales state:", state.dailySales);
       })
       .addCase(fetchDailyLaundrySales.rejected, (state, action) => {
         state.dailySalesStatus = "failed";
         state.dailySalesError = action.payload;
+        //console.log("fetchDailyLaundrySales rejected, error:", action.payload);
       })
       .addCase(fetchAllTimeLaundrySales.pending, (state) => {
         state.allTimeSalesStatus = "loading";

@@ -29,6 +29,7 @@
 // const STAFF_TASK_ACHIEVEMENTS_URL = "/auth/staff-task-achievements";
 // const TOTAL_USERS_URL = "/auth/total-users";
 
+// // Thunks
 // // export const signupUser = createAsyncThunk(
 // //   "auth/signupUser",
 // //   async (userData, { rejectWithValue }) => {
@@ -38,7 +39,7 @@
 // //         email: userData.email,
 // //         password: userData.password,
 // //         phoneNumber: userData.phoneNumber,
-// //         roles: userData.roles || ["user"], // Array of role names or IDs
+// //         roles: userData.roles || ["user"],
 // //       });
 // //       return response.data;
 // //     } catch (error) {
@@ -50,26 +51,6 @@
 // //   }
 // // );
 
-// // export const loginUser = createAsyncThunk(
-// //   "auth/login",
-// //   async (userData, { rejectWithValue }) => {
-// //     try {
-// //       const response = await apiClient.post(AUTH_URL, userData);
-// //       if (!response.data.verified) {
-// //         return rejectWithValue({
-// //           message: "User is not verified. Please verify your account.",
-// //           verified: false,
-// //         });
-// //       }
-// //       return response.data;
-// //     } catch (error) {
-// //       return rejectWithValue({
-// //         message: error.response?.data?.message || "Failed to login",
-// //         status: error.response?.status || 500,
-// //       });
-// //     }
-// //   }
-// // );
 // export const signupUser = createAsyncThunk(
 //   "auth/signupUser",
 //   async (userData, { rejectWithValue }) => {
@@ -91,32 +72,6 @@
 //   }
 // );
 
-// // export const loginUser = createAsyncThunk(
-// //   "auth/login",
-// //   async (userData, { rejectWithValue }) => {
-// //     try {
-// //       const requestData = {
-// //         emailOrPhone: userData.email,
-// //         password: userData.password,
-// //       };
-// //       const response = await apiClient.post(AUTH_URL, requestData);
-// //       if (response.status === 202) {
-// //         return {
-// //           needsVerification: true,
-// //           email: response.data.email,
-// //           codeSent: response.data.codeSent,
-// //           message: response.data.message,
-// //         };
-// //       }
-// //       return response.data;
-// //     } catch (error) {
-// //       return rejectWithValue({
-// //         message: error.response?.data?.message || "Failed to login",
-// //         status: error.response?.status || 500,
-// //       });
-// //     }
-// //   }
-// // );
 // export const loginUser = createAsyncThunk(
 //   "auth/login",
 //   async (userData, { rejectWithValue }) => {
@@ -126,6 +81,8 @@
 //         password: userData.password,
 //       };
 //       const response = await apiClient.post(AUTH_URL, requestData);
+//       console.log("Login response headers:", response.headers); // Check for Set-Cookie
+//       console.log("Login response data:", response.data);
 //       if (response.status === 202) {
 //         return {
 //           needsVerification: true,
@@ -134,8 +91,11 @@
 //           message: response.data.message,
 //         };
 //       }
-//       console.log("Login response data:", response.data);
-//       return response.data;
+//       console.log(
+//         "Login response data:",
+//         JSON.stringify(response.data, null, 2)
+//       );
+//       return response.data; // Now includes roles: [{ name, permissions }]
 //     } catch (error) {
 //       return rejectWithValue({
 //         message: error.response?.data?.message || "Failed to login",
@@ -177,40 +137,6 @@
 //   }
 // );
 
-// // export const verifyOTP = createAsyncThunk(
-// //   "auth/verifyOTP",
-// //   async ({ email, providedCode }, { rejectWithValue }) => {
-// //     try {
-// //       const response = await apiClient.patch(VERIFY_OTP_URL, {
-// //         email,
-// //         providedCode,
-// //       });
-// //       return response.data;
-// //     } catch (error) {
-// //       return rejectWithValue({
-// //         message: error.response?.data?.message || "Failed to verify OTP",
-// //         status: error.response?.status || 500,
-// //       });
-// //     }
-// //   }
-// // );
-// // export const verifyOTP = createAsyncThunk(
-// //   "auth/verifyOTP",
-// //   async ({ email, providedCode }, { rejectWithValue }) => {
-// //     try {
-// //       const response = await apiClient.patch(VERIFY_OTP_URL, {
-// //         email,
-// //         providedCode,
-// //       });
-// //       return response.data;
-// //     } catch (error) {
-// //       return rejectWithValue({
-// //         message: error.response?.data?.message || "Failed to verify OTP",
-// //         status: error.response?.status || 500,
-// //       });
-// //     }
-// //   }
-// // );
 // export const verifyOTP = createAsyncThunk(
 //   "auth/verifyOTP",
 //   async ({ email, providedCode }, { rejectWithValue }) => {
@@ -250,49 +176,10 @@
 //   }
 // );
 
-// // export const updateUser = createAsyncThunk(
-// //   "auth/updateUser",
-// //   async (userData, { rejectWithValue }) => {
-// //     try {
-// //       const response = await apiClient.patch(`${USERS_URL}/${userData._id}`, {
-// //         fullName: userData.fullName,
-// //         email: userData.email,
-// //         phoneNumber: userData.phoneNumber,
-// //         status: userData.status, // Send status instead of isActive
-// //         roles: userData.roles.map((r) => r.name),
-// //       });
-// //       return response.data.data;
-// //     } catch (error) {
-// //       return rejectWithValue(
-// //         error.response?.data || { message: "Failed to update user" }
-// //       );
-// //     }
-// //   }
-// // );
-// // export const updateUser = createAsyncThunk(
-// //   "auth/updateUser",
-// //   async (userData, { rejectWithValue }) => {
-// //     try {
-// //       const response = await apiClient.patch(`${USERS_URL}/${userData._id}`, {
-// //         fullName: userData.fullName,
-// //         email: userData.email,
-// //         phoneNumber: userData.phoneNumber,
-// //         status: userData.status,
-// //         roles: userData.roles.map((r) => r.name), // Assuming roles come as objects
-// //       });
-// //       return response.data.data;
-// //     } catch (error) {
-// //       return rejectWithValue(
-// //         error.response?.data || { message: "Failed to update user" }
-// //       );
-// //     }
-// //   }
-// // );
 // export const updateUser = createAsyncThunk(
 //   "auth/updateUser",
 //   async (userData, { rejectWithValue }) => {
 //     try {
-//       // Ensure roles is an array of strings
 //       const safeUserData = {
 //         ...userData,
 //         roles: userData.roles.map(String),
@@ -323,21 +210,69 @@
 //   }
 // );
 
+// // export const uploadProfileImage = createAsyncThunk(
+// //   "auth/uploadProfileImage",
+// //   async (file, { rejectWithValue }) => {
+// //     try {
+// //       const formData = new FormData();
+// //       formData.append("profileImage", file);
+// //       const response = await apiClient.post(
+// //         UPDATE_PROFILE_IMAGE_URL,
+// //         formData,
+// //         {
+// //           headers: { "Content-Type": "multipart/form-data" },
+// //         }
+// //       );
+// //       return response.data;
+// //     } catch (error) {
+// //       return rejectWithValue({
+// //         message:
+// //           error.response?.data?.message || "Failed to upload profile image",
+// //         status: error.response?.status || 500,
+// //       });
+// //     }
+// //   }
+// // );
+// export const logoutUser = createAsyncThunk(
+//   "auth/logoutUser",
+//   async (_, { dispatch, rejectWithValue }) => {
+//     try {
+//       const response = await apiClient.post("/auth/signout"); // Match backend POST route
+//       console.log("Logout API response:", response.data);
+
+//       // Clear Redux state
+//       dispatch(logout());
+
+//       return response.data;
+//     } catch (error) {
+//       console.error("Logout error:", error.response?.data || error.message);
+//       // Clear state even if API fails
+//       dispatch(logout());
+//       return rejectWithValue({
+//         message: error.response?.data?.message || "Logout failed",
+//         status: error.response?.status || 500,
+//       });
+//     }
+//   }
+// );
+
 // export const uploadProfileImage = createAsyncThunk(
 //   "auth/uploadProfileImage",
 //   async (file, { rejectWithValue }) => {
 //     try {
 //       const formData = new FormData();
-//       formData.append("profileImage", file);
+//       formData.append("image", file); // Match backend field name "image"
 //       const response = await apiClient.post(
-//         UPDATE_PROFILE_IMAGE_URL,
+//         UPDATE_PROFILE_IMAGE_URL, // "/auth/update-profile-image"
 //         formData,
 //         {
 //           headers: { "Content-Type": "multipart/form-data" },
 //         }
 //       );
+//       console.log("Upload response:", response.data); // Debug log
 //       return response.data;
 //     } catch (error) {
+//       console.error("Upload error:", error);
 //       return rejectWithValue({
 //         message:
 //           error.response?.data?.message || "Failed to upload profile image",
@@ -365,24 +300,6 @@
 //   }
 // );
 
-// // export const sendForgotPasswordCodeAsync = createAsyncThunk(
-// //   "auth/sendForgotPasswordCode",
-// //   async (email, { rejectWithValue }) => {
-// //     try {
-// //       const response = await apiClient.patch(FORGOT_PASSWORD_API_URL, {
-// //         email,
-// //       });
-// //       return response.data;
-// //     } catch (error) {
-// //       return rejectWithValue({
-// //         message:
-// //           error.response?.data?.message ||
-// //           "Failed to send forgot password code",
-// //         status: error.response?.status || 500,
-// //       });
-// //     }
-// //   }
-// // );
 // export const sendForgotPasswordCodeAsync = createAsyncThunk(
 //   "auth/sendForgotPasswordCode",
 //   async (email, { rejectWithValue }) => {
@@ -390,7 +307,7 @@
 //       const response = await apiClient.patch(FORGOT_PASSWORD_API_URL, {
 //         email,
 //       });
-//       return response.data; // Return the ENTIRE response.data
+//       return response.data;
 //     } catch (error) {
 //       return rejectWithValue({
 //         message:
@@ -401,30 +318,6 @@
 //     }
 //   }
 // );
-
-// // export const verifyForgotPasswordCodeAsync = createAsyncThunk(
-// //   "auth/verifyForgotPasswordCode",
-// //   async ({ email, providedCode, newPassword }, { rejectWithValue }) => {
-// //     try {
-// //       const response = await apiClient.patch(
-// //         VERIFY_FORGOT_PASSWORD_CODE_API_URL,
-// //         {
-// //           email,
-// //           providedCode,
-// //           newPassword,
-// //         }
-// //       );
-// //       return response.data;
-// //     } catch (error) {
-// //       return rejectWithValue({
-// //         message:
-// //           error.response?.data?.message ||
-// //           "Failed to verify forgot password code",
-// //         status: error.response?.status || 500,
-// //       });
-// //     }
-// //   }
-// // );
 
 // export const verifyForgotPasswordCodeAsync = createAsyncThunk(
 //   "auth/verifyForgotPasswordCode",
@@ -449,18 +342,30 @@
 //   }
 // );
 
-// export const logoutUser = createAsyncThunk(
-//   "auth/logoutUser",
-//   async (_, { dispatch }) => {
-//     try {
-//       await apiClient.get("/auth/signout"); // Assumes backend clears cookie
-//       dispatch(logout()); // Reset local state
-//     } catch (error) {
-//       console.error("Logout error:", error);
-//       dispatch(logout()); // Reset state even if backend fails
-//     }
-//   }
-// );
+// // export const logoutUser = createAsyncThunk(
+// //   "auth/logoutUser",
+// //   async (_, { dispatch }) => {
+// //     try {
+// //       await apiClient.get("/auth/signout");
+// //       dispatch(logout());
+// //     } catch (error) {
+// //       console.error("Logout error:", error);
+// //       dispatch(logout());
+// //     }
+// //   }
+// // );
+// // export const logoutUser = createAsyncThunk(
+// //   "auth/logoutUser",
+// //   async (_, { dispatch }) => {
+// //     try {
+// //       await apiClient.get("/auth/signout");
+// //       dispatch(logout());
+// //     } catch (error) {
+// //       console.error("Logout error:", error);
+// //       dispatch(logout());
+// //     }
+// //   }
+// // );
 
 // // export const checkAuthStatus = createAsyncThunk(
 // //   "auth/checkAuthStatus",
@@ -475,6 +380,49 @@
 // //     }
 // //   }
 // // );
+// // export const checkAuthStatus = createAsyncThunk(
+// //   "auth/checkAuthStatus",
+// //   async (_, { rejectWithValue }) => {
+// //     try {
+// //       const response = await apiClient.get(USER_DETAILS);
+// //       console.log("checkAuthStatus response:", response.data);
+// //       return response.data;
+// //     } catch (error) {
+// //       console.error("checkAuthStatus error:", error);
+// //       return rejectWithValue(error.message || "Failed to check auth status");
+// //     }
+// //   }
+// // );
+// // export const checkAuthStatus = createAsyncThunk(
+// //   "auth/checkAuthStatus",
+// //   async (_, { rejectWithValue }) => {
+// //     try {
+// //       const response = await apiClient.get(USER_DETAILS);
+// //       console.log("checkAuthStatus response:", response.data);
+// //       return response.data;
+// //     } catch (error) {
+// //       console.error("checkAuthStatus error:", error);
+// //       return rejectWithValue(error.message || "Failed to check auth status");
+// //     }
+// //   }
+// // );
+// // export const logoutUser = createAsyncThunk(
+// //   "auth/logoutUser",
+// //   async (_, { rejectWithValue }) => {
+// //     try {
+// //       const response = await apiClient.post("/auth/signout"); // Use POST to match backend
+// //       console.log("Logout response:", response.data);
+// //       return response.data;
+// //     } catch (error) {
+// //       console.error("Logout error:", error.response?.data || error.message);
+// //       return rejectWithValue({
+// //         message: error.response?.data?.message || "Logout failed",
+// //         status: error.response?.status || 500,
+// //       });
+// //     }
+// //   }
+// // );
+
 // export const checkAuthStatus = createAsyncThunk(
 //   "auth/checkAuthStatus",
 //   async (_, { rejectWithValue }) => {
@@ -483,8 +431,14 @@
 //       console.log("checkAuthStatus response:", response.data);
 //       return response.data;
 //     } catch (error) {
-//       console.error("checkAuthStatus error:", error);
-//       return rejectWithValue(error.message || "Failed to check auth status");
+//       console.error(
+//         "checkAuthStatus error:",
+//         error.response?.data || error.message
+//       );
+//       return rejectWithValue({
+//         message: error.response?.data?.message || "Failed to check auth status",
+//         status: error.response?.status || 500,
+//       });
 //     }
 //   }
 // );
@@ -504,7 +458,6 @@
 //   }
 // );
 
-// // New thunks for the latest endpoints
 // export const getCurrentlyLoggedInUsers = createAsyncThunk(
 //   "auth/getCurrentlyLoggedInUsers",
 //   async (_, { rejectWithValue }) => {
@@ -577,17 +530,17 @@
 //   initialState: {
 //     users: [],
 //     user: null,
-//     token: null, // Add token to state
-//     roles: [], // Added back for consistency
+//     token: null,
+//     roles: [],
 //     email: "",
 //     isLoading: false,
-//     error: null, // Consolidated error field
+//     error: null,
 //     verificationSuccess: false,
 //     isVerified: false,
 //     isAuthenticated: false,
-//     needsVerification: false, // New field for 202 redirect
-//     codeSent: null, // New field to track if a code was sent
-//     verificationMessage: null, // Optional: for UI feedback
+//     needsVerification: false,
+//     codeSent: null,
+//     verificationMessage: null,
 //     forgotPasswordEmail: null,
 //     isImageUploading: false,
 //     imageUploadError: null,
@@ -597,23 +550,42 @@
 //     sendCodeMessage: null,
 //     sendCodeError: null,
 //     isVerifyingCode: false,
-//     verificationMessage: null,
 //     verificationError: null,
-//     currentlyLoggedInUsers: 0, // New state for currently logged-in users
-//     loggedInToday: 0, // New state for users logged in today
-//     staffTaskAchievements: [], // New state for staff task achievements
-//     userStats: { totalUsers: 0, activeUsers: 0, inactiveUsers: 0 }, // New state for total users
+//     currentlyLoggedInUsers: 0,
+//     loggedInToday: 0,
+//     staffTaskAchievements: [],
+//     userStats: { totalUsers: 0, activeUsers: 0, inactiveUsers: 0 },
+//     status: "idle", // Added for checkAuthStatus
+//     lastActivity: Date.now(),
 //   },
 //   reducers: {
 //     logout: (state) => {
+//       // state.user = null;
+//       // state.token = null;
+//       // state.isAuthenticated = false;
+//       // state.isVerified = false;
+//       // state.error = null;
+//       // state.needsVerification = false;
+//       // state.codeSent = null;
+//       // state.verificationMessage = null;
+//       // state.status = "idle";
+//       // state.lastActivity = Date.now();
 //       state.user = null;
-//       state.isAuthenticated = false;
 //       state.token = null;
+//       state.isAuthenticated = false;
 //       state.isVerified = false;
 //       state.error = null;
 //       state.needsVerification = false;
 //       state.codeSent = null;
 //       state.verificationMessage = null;
+//       state.status = "idle";
+//       state.email = "";
+//       state.verificationSuccess = false;
+//       state.currentlyLoggedInUsers = 0;
+//       state.loggedInToday = 0;
+//       state.staffTaskAchievements = [];
+//       state.userStats = { totalUsers: 0, activeUsers: 0, inactiveUsers: 0 };
+//       state.lastActivity = Date.now();
 //     },
 //     clearError: (state) => {
 //       state.error = null;
@@ -647,11 +619,7 @@
 //       })
 //       .addCase(signupUser.fulfilled, (state, action) => {
 //         state.isLoading = false;
-//         state.user = action.payload.result;
-//         // state.email = action.payload.result.email;
-//         // state.isVerified = action.payload.result.verified || false;
-//         // state.isAuthenticated = true;
-//         // state.error = null;
+//         //state.user = action.payload.result;
 //       })
 //       .addCase(signupUser.rejected, (state, action) => {
 //         state.isLoading = false;
@@ -671,15 +639,28 @@
 //           state.codeSent = action.payload.codeSent;
 //           state.verificationMessage = action.payload.message;
 //         } else {
-//           state.token = action.payload.token;
-//           state.user = action.payload;
+//           //state.user = action.payload; // Store full user object with roles
+//           state.user = {
+//             ...action.payload,
+//             lastLogin: action.payload.lastLogin || null, // Ensure lastLogin is included
+//             loginHistory: action.payload.loginHistory || [], // Ensure loginHistory is included
+//           };
+//           //state.token = null;
+//           state.token = action.payload.token || null; // Still null with cookies
 //           state.email = action.payload.email;
 //           state.isVerified = action.payload.verified || false;
 //           state.isAuthenticated = true;
+//           console.log(
+//             "User logged in with roles:",
+//             JSON.stringify(state.user.roles, null, 2)
+//           );
 //           state.error = null;
 //           state.needsVerification = false;
 //           state.codeSent = null;
-//           console.log("User logged in:", state.user);
+//           console.log(
+//             "User logged in with roles:",
+//             JSON.stringify(state.user.roles, null, 2)
+//           );
 //         }
 //       })
 //       .addCase(loginUser.rejected, (state, action) => {
@@ -730,12 +711,16 @@
 //       .addCase(verifyOTP.fulfilled, (state, action) => {
 //         state.isLoading = false;
 //         state.verificationSuccess = true;
-//         state.user = action.payload; // Full user object from /verify-verification-code
 //         state.isVerified = true;
+//         state.isAuthenticated = true;
+//         state.user = action.payload.user;
+//         //state.user = action.payload.user;
+//         state.email = action.payload.email;
+//         //state.isAuthenticated = true;
 //         state.error = null;
 //         state.verificationMessage = action.payload.message;
-//         state.needsVerification = false; // Clear after verification
-//         state.codeSent = null; // Clear code sent flag
+//         state.needsVerification = false;
+//         state.codeSent = null;
 //       })
 //       .addCase(verifyOTP.rejected, (state, action) => {
 //         state.isLoading = false;
@@ -804,10 +789,22 @@
 //         state.isImageUploading = true;
 //         state.imageUploadError = null;
 //       })
+//       // .addCase(uploadProfileImage.fulfilled, (state, action) => {
+//       //   state.isImageUploading = false;
+//       //   if (action.payload.user) {
+//       //     state.user = action.payload.user;
+//       //   }
+//       // })
 //       .addCase(uploadProfileImage.fulfilled, (state, action) => {
 //         state.isImageUploading = false;
-//         if (action.payload.user) {
-//           state.user = action.payload.user;
+//         if (action.payload.success && action.payload.user) {
+//           state.user = action.payload.user; // Update with full user object including Cloudinary URL
+//           console.log(
+//             "Updated user with Cloudinary URL:",
+//             state.user.profileImage
+//           );
+//         } else {
+//           console.warn("Upload succeeded but no user data:", action.payload);
 //         }
 //       })
 //       .addCase(uploadProfileImage.rejected, (state, action) => {
@@ -827,17 +824,17 @@
 //         state.changePasswordError = action.payload.message;
 //       })
 //       .addCase(sendForgotPasswordCodeAsync.pending, (state) => {
-//         state.isSendingCode = true; // Set loading state
-//         state.sendCodeError = null; // Clear previous errors
-//         state.sendCodeMessage = null; // Clear previous messages
+//         state.isSendingCode = true;
+//         state.sendCodeError = null;
+//         state.sendCodeMessage = null;
 //       })
 //       .addCase(sendForgotPasswordCodeAsync.fulfilled, (state, action) => {
-//         state.isSendingCode = false; // Clear loading state
-//         state.sendCodeMessage = action.payload.message; // Store success message
+//         state.isSendingCode = false;
+//         state.sendCodeMessage = action.payload.message;
 //       })
 //       .addCase(sendForgotPasswordCodeAsync.rejected, (state, action) => {
-//         state.isSendingCode = false; // Clear loading state
-//         state.sendCodeError = action.payload.message; // Store error message
+//         state.isSendingCode = false;
+//         state.sendCodeError = action.payload.message;
 //       })
 //       .addCase(verifyForgotPasswordCodeAsync.pending, (state) => {
 //         state.isVerifyingCode = true;
@@ -847,38 +844,47 @@
 //       .addCase(verifyForgotPasswordCodeAsync.fulfilled, (state, action) => {
 //         state.isVerifyingCode = false;
 //         state.verificationMessage = action.payload.message;
-//         state.verificationSuccess = true; // Optional: flag for success handling
+//         state.verificationSuccess = true;
 //       })
 //       .addCase(verifyForgotPasswordCodeAsync.rejected, (state, action) => {
 //         state.isVerifyingCode = false;
 //         state.verificationError = action.payload.message;
 //       })
 //       .addCase(checkAuthStatus.pending, (state) => {
+//         console.log("checkAuthStatus pending:", { ...state });
 //         state.isLoading = true;
 //         state.error = null;
 //         state.needsVerification = false;
 //         state.codeSent = null;
+//         state.status = "loading";
 //       })
 //       .addCase(checkAuthStatus.fulfilled, (state, action) => {
+//         console.log("checkAuthStatus fulfilled:", action.payload);
 //         state.isLoading = false;
-//         state.user = action.payload.data;
+//         //state.user = action.payload.data;
+//         state.user = action.payload.data || action.payload;
 //         state.email = action.payload.data.email;
-//         state.isVerified = action.payload.data.verified || false;
+//         //state.isVerified = action.payload.data.verified || false;
+//         state.isVerified =
+//           action.payload.data?.verified || action.payload.verified || false;
 //         state.isAuthenticated = true;
+//         state.status = "succeeded";
 //         state.error = null;
 //         state.needsVerification = false;
 //         state.codeSent = null;
-//         console.log("Auth status checked:", state.user);
 //       })
 //       .addCase(checkAuthStatus.rejected, (state, action) => {
+//         console.log("checkAuthStatus rejected:", action.payload);
 //         state.isLoading = false;
-//         state.error = action.payload;
+//         //state.error = action.payload;
+//         state.error = action.payload?.message || "Auth check failed";
 //         state.isAuthenticated = false;
 //         state.user = null;
 //         state.email = "";
 //         state.isVerified = false;
 //         state.needsVerification = false;
 //         state.codeSent = null;
+//         state.status = "failed";
 //       })
 //       .addCase(logoutUser.pending, (state) => {
 //         state.isLoading = true;
@@ -890,10 +896,14 @@
 //         state.user = null;
 //         state.roles = [];
 //         state.email = "";
+//         state.isAuthenticated = false;
+//         state.token = null;
 //         state.isVerified = false;
 //         state.isAuthenticated = false;
 //         state.error = null;
 //         state.verificationSuccess = false;
+//         state.currentlyLoggedInUsers = 0;
+//         state.needsVerification = false;
 //         state.isImageUploading = false;
 //         state.imageUploadError = null;
 //         state.changePasswordStatus = null;
@@ -912,6 +922,7 @@
 //         state.user = null;
 //         state.roles = [];
 //         state.email = "";
+//         state.token = null;
 //         state.isVerified = false;
 //         state.isAuthenticated = false;
 //         state.verificationSuccess = false;
@@ -926,7 +937,6 @@
 //         state.verificationMessage = null;
 //         state.verificationError = null;
 //       })
-//       // New cases for the latest endpoints
 //       .addCase(getCurrentlyLoggedInUsers.pending, (state) => {
 //         state.isLoading = true;
 //         state.error = null;
@@ -1009,18 +1019,28 @@
 // export default authSlice.reducer;
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import { apiClient } from "../../utils/apiClient";
+// import axios from "axios";
+// import store from "../store";
 
-// Dedicated Axios instance for cookie-based auth
-export const apiClient = axios.create({
-  baseURL: "/api",
-  withCredentials: true,
-});
+//Dedicated Axios instance for cookie-based auth
+// export const apiClient = axios.create({
+//   baseURL: "/api",
+//   withCredentials: true,
+// });
 
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => Promise.reject(error.response?.data || error.message)
-);
+// // Axios Interceptor for session expiration
+// apiClient.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     const status = error.response?.status;
+//     console.log("Interceptor caught error:", { status, error });
+//     if (status === 401 || status === 403) {
+//       store.dispatch(setSessionExpired(true)); // Trigger session expired dialog
+//     }
+//     return Promise.reject(error.response?.data || error.message);
+//   }
+// );
 
 // Constants (relative to baseURL)
 const AUTH_URL = "/auth/signin";
@@ -1039,28 +1059,7 @@ const LOGGED_IN_TODAY_URL = "/auth/logged-in-today";
 const STAFF_TASK_ACHIEVEMENTS_URL = "/auth/staff-task-achievements";
 const TOTAL_USERS_URL = "/auth/total-users";
 
-// Thunks
-// export const signupUser = createAsyncThunk(
-//   "auth/signupUser",
-//   async (userData, { rejectWithValue }) => {
-//     try {
-//       const response = await apiClient.post(SIGNUP_URL, {
-//         fullName: userData.fullName,
-//         email: userData.email,
-//         password: userData.password,
-//         phoneNumber: userData.phoneNumber,
-//         roles: userData.roles || ["user"],
-//       });
-//       return response.data;
-//     } catch (error) {
-//       return rejectWithValue({
-//         message: error.response?.data?.message || "Failed to sign up",
-//         status: error.response?.status || 500,
-//       });
-//     }
-//   }
-// );
-
+// Thunks (keeping your latest versions)
 export const signupUser = createAsyncThunk(
   "auth/signupUser",
   async (userData, { rejectWithValue }) => {
@@ -1082,6 +1081,38 @@ export const signupUser = createAsyncThunk(
   }
 );
 
+// export const loginUser = createAsyncThunk(
+//   "auth/login",
+//   async (userData, { rejectWithValue }) => {
+//     try {
+//       const requestData = {
+//         emailOrPhone: userData.email,
+//         password: userData.password,
+//       };
+//       const response = await apiClient.post(AUTH_URL, requestData);
+//       console.log("Login response headers:", response.headers); // Check for Set-Cookie
+//       console.log("Login response data:", response.data);
+//       if (response.status === 202) {
+//         return {
+//           needsVerification: true,
+//           email: response.data.email,
+//           codeSent: response.data.codeSent,
+//           message: response.data.message,
+//         };
+//       }
+//       console.log(
+//         "Login response data:",
+//         JSON.stringify(response.data, null, 2)
+//       );
+//       return response.data; // Now includes roles: [{ name, permissions }]
+//     } catch (error) {
+//       return rejectWithValue({
+//         message: error.response?.data?.message || "Failed to login",
+//         status: error.response?.status || 500,
+//       });
+//     }
+//   }
+// );
 export const loginUser = createAsyncThunk(
   "auth/login",
   async (userData, { rejectWithValue }) => {
@@ -1091,26 +1122,13 @@ export const loginUser = createAsyncThunk(
         password: userData.password,
       };
       const response = await apiClient.post(AUTH_URL, requestData);
-      console.log("Login response headers:", response.headers); // Check for Set-Cookie
-      console.log("Login response data:", response.data);
-      if (response.status === 202) {
-        return {
-          needsVerification: true,
-          email: response.data.email,
-          codeSent: response.data.codeSent,
-          message: response.data.message,
-        };
-      }
-      console.log(
-        "Login response data:",
-        JSON.stringify(response.data, null, 2)
-      );
-      return response.data; // Now includes roles: [{ name, permissions }]
+      //console.log("Login response data:", response.data);
+      return response.data; // Expect { token, user, ... }
     } catch (error) {
-      return rejectWithValue({
-        message: error.response?.data?.message || "Failed to login",
-        status: error.response?.status || 500,
-      });
+      console.error("Login error:", error.response?.data || error.message);
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to login"
+      );
     }
   }
 );
@@ -1155,7 +1173,7 @@ export const verifyOTP = createAsyncThunk(
         email,
         providedCode,
       });
-      console.log("Verify OTP response data:", response.data);
+      //console.log("Verify OTP response data:", response.data);
       return response.data;
     } catch (error) {
       return rejectWithValue({
@@ -1171,7 +1189,7 @@ export const fetchAllUsers = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await apiClient.get(USERS_URL);
-      console.log("fetchAllUsers API response:", response.data);
+      //console.log("fetchAllUsers API response:", response.data);
       return response.data;
     } catch (error) {
       console.error(
@@ -1225,7 +1243,7 @@ export const uploadProfileImage = createAsyncThunk(
   async (file, { rejectWithValue }) => {
     try {
       const formData = new FormData();
-      formData.append("profileImage", file);
+      formData.append("image", file); // Match backend field name "image"
       const response = await apiClient.post(
         UPDATE_PROFILE_IMAGE_URL,
         formData,
@@ -1233,8 +1251,10 @@ export const uploadProfileImage = createAsyncThunk(
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
+      //console.log("Upload response:", response.data); // Debug log
       return response.data;
     } catch (error) {
+      console.error("Upload error:", error);
       return rejectWithValue({
         message:
           error.response?.data?.message || "Failed to upload profile image",
@@ -1306,28 +1326,22 @@ export const verifyForgotPasswordCodeAsync = createAsyncThunk(
 
 // export const logoutUser = createAsyncThunk(
 //   "auth/logoutUser",
-//   async (_, { dispatch }) => {
+//   async (_, { dispatch, rejectWithValue }) => {
 //     try {
-//       await apiClient.get("/auth/signout");
-//       dispatch(logout());
+//       const response = await apiClient.post("/auth/signout"); // Match backend POST route
+//       console.log("Logout API response:", response.data);
+//       dispatch(logout()); // Clear Redux state
+//       return response.data;
 //     } catch (error) {
-//       console.error("Logout error:", error);
-//       dispatch(logout());
+//       console.error("Logout error:", error.response?.data || error.message);
+//       dispatch(logout()); // Clear state even if API fails
+//       return rejectWithValue({
+//         message: error.response?.data?.message || "Logout failed",
+//         status: error.response?.status || 500,
+//       });
 //     }
 //   }
 // );
-export const logoutUser = createAsyncThunk(
-  "auth/logoutUser",
-  async (_, { dispatch }) => {
-    try {
-      await apiClient.get("/auth/signout");
-      dispatch(logout());
-    } catch (error) {
-      console.error("Logout error:", error);
-      dispatch(logout());
-    }
-  }
-);
 
 // export const checkAuthStatus = createAsyncThunk(
 //   "auth/checkAuthStatus",
@@ -1337,8 +1351,14 @@ export const logoutUser = createAsyncThunk(
 //       console.log("checkAuthStatus response:", response.data);
 //       return response.data;
 //     } catch (error) {
-//       console.error("checkAuthStatus error:", error);
-//       return rejectWithValue(error.message || "Failed to check auth status");
+//       console.error(
+//         "checkAuthStatus error:",
+//         error.response?.data || error.message
+//       );
+//       return rejectWithValue({
+//         message: error.response?.data?.message || "Failed to check auth status",
+//         status: error.response?.status || 500,
+//       });
 //     }
 //   }
 // );
@@ -1350,21 +1370,13 @@ export const logoutUser = createAsyncThunk(
 //       console.log("checkAuthStatus response:", response.data);
 //       return response.data;
 //     } catch (error) {
-//       console.error("checkAuthStatus error:", error);
-//       return rejectWithValue(error.message || "Failed to check auth status");
-//     }
-//   }
-// );
-// export const checkAuthStatus = createAsyncThunk(
-//   "auth/checkAuthStatus",
-//   async (_, { rejectWithValue }) => {
-//     try {
-//       const response = await apiClient.get(USER_DETAILS);
-//       console.log("checkAuthStatus response:", response.data);
-//       return response.data;
-//     } catch (error) {
-//       console.error("checkAuthStatus error:", error);
-//       return rejectWithValue(error.message || "Failed to check auth status");
+//       console.error(
+//         "checkAuthStatus error:",
+//         error.response?.data || error.message
+//       );
+//       return rejectWithValue(
+//         error.response?.data?.message || "Auth check failed"
+//       );
 //     }
 //   }
 // );
@@ -1372,18 +1384,37 @@ export const checkAuthStatus = createAsyncThunk(
   "auth/checkAuthStatus",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get(USER_DETAILS);
-      console.log("checkAuthStatus response:", response.data);
+      const response = await apiClient.get("/auth/fetchuserdetails");
+      //console.log("checkAuthStatus response:", response.data);
       return response.data;
     } catch (error) {
-      console.error(
-        "checkAuthStatus error:",
-        error.response?.data || error.message
+      // console.error(
+      //   "checkAuthStatus error:",
+      //   error.response?.data || error.message
+      // );
+      const redirectTo = error.response?.data?.redirectTo;
+      if (redirectTo) {
+        window.location.href = redirectTo; // Redirect if instructed
+      }
+      return rejectWithValue(
+        error.response?.data?.message || "Auth check failed"
       );
-      return rejectWithValue({
-        message: error.response?.data?.message || "Failed to check auth status",
-        status: error.response?.status || 500,
-      });
+    }
+  }
+);
+
+export const logoutUser = createAsyncThunk(
+  "auth/logoutUser",
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await apiClient.post("/auth/signout");
+      //console.log("Logout API response:", response.data);
+      dispatch(logout());
+      return response.data;
+    } catch (error) {
+      console.error("Logout error:", error.response?.data || error.message);
+      dispatch(logout());
+      return rejectWithValue(error.response?.data?.message || "Logout failed");
     }
   }
 );
@@ -1500,13 +1531,15 @@ const authSlice = createSlice({
     loggedInToday: 0,
     staffTaskAchievements: [],
     userStats: { totalUsers: 0, activeUsers: 0, inactiveUsers: 0 },
-    status: "idle", // Added for checkAuthStatus
+    status: "idle",
     lastActivity: Date.now(),
+    sessionExpired: false, // New state for session expiration dialog
   },
   reducers: {
     logout: (state) => {
       state.user = null;
       state.token = null;
+      state.sessionExpired = false; // Reset on logout
       state.isAuthenticated = false;
       state.isVerified = false;
       state.error = null;
@@ -1514,6 +1547,12 @@ const authSlice = createSlice({
       state.codeSent = null;
       state.verificationMessage = null;
       state.status = "idle";
+      state.email = "";
+      state.verificationSuccess = false;
+      state.currentlyLoggedInUsers = 0;
+      state.loggedInToday = 0;
+      state.staffTaskAchievements = [];
+      state.userStats = { totalUsers: 0, activeUsers: 0, inactiveUsers: 0 };
       state.lastActivity = Date.now();
     },
     clearError: (state) => {
@@ -1539,6 +1578,10 @@ const authSlice = createSlice({
     setRoles: (state, action) => {
       state.roles = action.payload;
     },
+    setSessionExpired: (state, action) => {
+      //console.log("setSessionExpired called with:", action.payload);
+      state.sessionExpired = action.payload; // Toggle session expired state
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -1546,9 +1589,8 @@ const authSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(signupUser.fulfilled, (state, action) => {
+      .addCase(signupUser.fulfilled, (state) => {
         state.isLoading = false;
-        //state.user = action.payload.result;
       })
       .addCase(signupUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -1568,22 +1610,23 @@ const authSlice = createSlice({
           state.codeSent = action.payload.codeSent;
           state.verificationMessage = action.payload.message;
         } else {
-          state.user = action.payload; // Store full user object with roles
-          state.token = action.payload.token || null; // Still null with cookies
+          state.user = {
+            ...action.payload,
+            lastLogin: action.payload.lastLogin || null,
+            loginHistory: action.payload.loginHistory || [],
+          };
+          state.token = action.payload.token || null;
           state.email = action.payload.email;
           state.isVerified = action.payload.verified || false;
           state.isAuthenticated = true;
-          console.log(
-            "User logged in with roles:",
-            JSON.stringify(state.user.roles, null, 2)
-          );
           state.error = null;
           state.needsVerification = false;
           state.codeSent = null;
-          console.log(
-            "User logged in with roles:",
-            JSON.stringify(state.user.roles, null, 2)
-          );
+          state.sessionExpired = false; // Reset on successful login
+          // console.log(
+          //   "User logged in with roles:",
+          //   JSON.stringify(state.user.roles, null, 2)
+          // );
         }
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -1620,6 +1663,7 @@ const authSlice = createSlice({
         state.isVerified = action.payload.data.verified || false;
         state.isAuthenticated = true;
         state.error = null;
+        state.sessionExpired = false; // Reset on successful fetch
       })
       .addCase(fetchUserDetails.rejected, (state, action) => {
         state.isLoading = false;
@@ -1637,13 +1681,12 @@ const authSlice = createSlice({
         state.isVerified = true;
         state.isAuthenticated = true;
         state.user = action.payload.user;
-        //state.user = action.payload.user;
         state.email = action.payload.email;
-        //state.isAuthenticated = true;
         state.error = null;
         state.verificationMessage = action.payload.message;
         state.needsVerification = false;
         state.codeSent = null;
+        state.sessionExpired = false; // Reset on successful verification
       })
       .addCase(verifyOTP.rejected, (state, action) => {
         state.isLoading = false;
@@ -1714,8 +1757,14 @@ const authSlice = createSlice({
       })
       .addCase(uploadProfileImage.fulfilled, (state, action) => {
         state.isImageUploading = false;
-        if (action.payload.user) {
+        if (action.payload.success && action.payload.user) {
           state.user = action.payload.user;
+          // console.log(
+          //   "Updated user with Cloudinary URL:",
+          //   state.user.profileImage
+          // );
+        } else {
+          console.warn("Upload succeeded but no user data:", action.payload);
         }
       })
       .addCase(uploadProfileImage.rejected, (state, action) => {
@@ -1762,7 +1811,7 @@ const authSlice = createSlice({
         state.verificationError = action.payload.message;
       })
       .addCase(checkAuthStatus.pending, (state) => {
-        console.log("checkAuthStatus pending:", { ...state });
+        //console.log("checkAuthStatus pending:", { ...state });
         state.isLoading = true;
         state.error = null;
         state.needsVerification = false;
@@ -1770,12 +1819,10 @@ const authSlice = createSlice({
         state.status = "loading";
       })
       .addCase(checkAuthStatus.fulfilled, (state, action) => {
-        console.log("checkAuthStatus fulfilled:", action.payload);
+        // console.log("checkAuthStatus fulfilled:", action.payload);
         state.isLoading = false;
-        //state.user = action.payload.data;
         state.user = action.payload.data || action.payload;
         state.email = action.payload.data.email;
-        //state.isVerified = action.payload.data.verified || false;
         state.isVerified =
           action.payload.data?.verified || action.payload.verified || false;
         state.isAuthenticated = true;
@@ -1783,12 +1830,12 @@ const authSlice = createSlice({
         state.error = null;
         state.needsVerification = false;
         state.codeSent = null;
+        state.sessionExpired = false; // Reset on successful check
       })
       .addCase(checkAuthStatus.rejected, (state, action) => {
-        console.log("checkAuthStatus rejected:", action.payload);
+        //console.log("checkAuthStatus rejected:", action.payload);
         state.isLoading = false;
-        //state.error = action.payload;
-        state.error = action.payload?.message || "Auth check failed";
+        state.error = action.payload.message || "Auth check failed";
         state.isAuthenticated = false;
         state.user = null;
         state.email = "";
@@ -1807,11 +1854,12 @@ const authSlice = createSlice({
         state.user = null;
         state.roles = [];
         state.email = "";
-        state.isAuthenticated = false;
+        state.token = null;
         state.isVerified = false;
         state.isAuthenticated = false;
         state.error = null;
         state.verificationSuccess = false;
+        state.needsVerification = false;
         state.isImageUploading = false;
         state.imageUploadError = null;
         state.changePasswordStatus = null;
@@ -1822,6 +1870,7 @@ const authSlice = createSlice({
         state.isVerifyingCode = false;
         state.verificationMessage = null;
         state.verificationError = null;
+        state.sessionExpired = false; // Reset on logout
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -1830,6 +1879,7 @@ const authSlice = createSlice({
         state.user = null;
         state.roles = [];
         state.email = "";
+        state.token = null;
         state.isVerified = false;
         state.isAuthenticated = false;
         state.verificationSuccess = false;
@@ -1843,6 +1893,7 @@ const authSlice = createSlice({
         state.isVerifyingCode = false;
         state.verificationMessage = null;
         state.verificationError = null;
+        state.sessionExpired = false; // Reset even on failure
       })
       .addCase(getCurrentlyLoggedInUsers.pending, (state) => {
         state.isLoading = true;
@@ -1918,9 +1969,10 @@ export const {
   clearError,
   setEmail,
   setUserDetails,
-  resetAuthState,
   setSendingCodeFlag,
+  resetAuthState,
   setRoles,
+  setSessionExpired, // Export new action
 } = authSlice.actions;
-
+//console.log("Exporting authSlice.reducer:", authSlice.reducer);
 export default authSlice.reducer;

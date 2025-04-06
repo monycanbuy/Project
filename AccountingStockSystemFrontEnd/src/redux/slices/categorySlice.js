@@ -328,7 +328,7 @@
 
 // categorySlice.js
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { apiClient } from "./authSlice";
+import { apiClient } from "../../utils/apiClient";
 
 const CATEGORIES_URL = "/categories";
 
@@ -336,12 +336,12 @@ export const fetchCategories = createAsyncThunk(
   "categories/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
-      console.log(
-        "Fetching categories from:",
-        apiClient.defaults.baseURL + CATEGORIES_URL
-      );
+      // console.log(
+      //   "Fetching categories from:",
+      //   apiClient.defaults.baseURL + CATEGORIES_URL
+      // );
       const response = await apiClient.get(CATEGORIES_URL);
-      console.log("API response:", response.data);
+      //console.log("API response:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error fetching categories:", error);

@@ -277,10 +277,10 @@ const swaggerOptions = {
         },
       },
     },
-    //servers: [{ url: `http://localhost:${process.env.PORT || 5000}` }],
-    url: "https://accounting-stock-system-backend.onrender.com",
-    description: "Production Server",
-    //schemes: ["http", "https"],
+    servers: [{ url: `http://localhost:${process.env.PORT || 5000}` }],
+    // url: "https://accounting-stock-system-backend.onrender.com",
+    // description: "Production Server",
+    schemes: ["http", "https"],
   },
   apis: [
     "./routers/*.js",
@@ -310,7 +310,15 @@ const swaggerOptions = {
     "./routers/purchaseOrderRouter.js",
     "./routers/stockMovementRouter.js",
     "./routers/salesTransactionRouter.js",
-    "./routers/permissionRouter.js", // Ensure the product router file is included
+    "./routers/customerRouter.js",
+    "./routers/debtorRouter.js",
+    "./routers/accountSaleRoutes.js",
+    "./routers/accountSaleRoutes.js",
+    "./routers/ledgerTransactionRouter.js",
+    "./routers/accountRouter.js",
+    "./routers/pettyCashRouter.js",
+    "./routers/permissionRouter.js",
+    "./routers/expenseCategoryRouter.js", // Ensure the product router file is included
   ], // Ensure all relevant router files are included
 };
 

@@ -1,7 +1,7 @@
 // controllers/hallController.js
 const HallTransaction = require("../models/hallModel");
 const PaymentMethod = require("../models/PaymentMethodModel"); // Ensure this path is correct
-
+const moment = require("moment-timezone");
 const Hall = require("../models/hallTypesModel"); // Adjust the path as necessary
 const {
   createHallTransactionSchema,
@@ -52,6 +52,108 @@ exports.getDailyReport = async (req, res) => {
 };
 // create all transactions
 
+// exports.createHallTransaction = async (req, res) => {
+//   try {
+//     console.log("Request Body:", req.body);
+//     console.log("User Info:", req.user);
+
+//     const { error } = createHallTransactionSchema.validate(req.body);
+//     if (error) {
+//       return res.status(400).json({
+//         success: false,
+//         message: error.details.map((detail) => detail.message).join(", "),
+//       });
+//     }
+
+//     const {
+//       customerName,
+//       contactPhone,
+//       startTime,
+//       endTime,
+//       halls,
+//       eventType,
+//       paymentMethod,
+//       paymentStatus,
+//       notes,
+//       discount,
+//     } = req.body;
+
+//     // Updated to use req.user.userId
+//     if (!req.user || !req.user.userId) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "User information is missing.",
+//       });
+//     }
+
+//     const updatedHalls = await Promise.all(
+//       halls.map(async (item) => {
+//         const hall = await Hall.findOne({ name: item.name });
+//         if (!hall) {
+//           throw new Error(`Hall with name ${item.name} not found`);
+//         }
+//         return {
+//           hall: hall._id,
+//           name: item.name,
+//           qty: item.qty,
+//           price: hall.price,
+//         };
+//       })
+//     );
+
+//     const totalAmount = updatedHalls.reduce((sum, item) => {
+//       return sum + item.qty * item.price;
+//     }, 0);
+//     const discountValue = req.body.discount || 0;
+//     const discountedTotal = totalAmount - totalAmount * (discountValue / 100);
+//     const finalDiscountedTotal = Math.round(discountedTotal * 100) / 100;
+
+//     const generateTransactionId = () => {
+//       const randomDigits = Math.floor(Math.random() * 90000 + 10000).toString();
+//       return `TRX-${randomDigits}`;
+//     };
+
+//     const newHallTransaction = await HallTransaction.create({
+//       halls: req.body.halls.map((hall) => ({
+//         hallId: hall._id || hall.hallId,
+//         name: hall.name,
+//         qty: hall.qty || 1,
+//         price: hall.price,
+//       })),
+//       transactionId: generateTransactionId(),
+//       customerName,
+//       contactPhone,
+//       startTime,
+//       endTime,
+//       eventType,
+//       paymentMethod,
+//       paymentStatus,
+//       notes,
+//       discount: discountValue,
+//       totalAmount: finalDiscountedTotal,
+//       staffInvolved: req.user.userId, // Updated here too
+//     });
+
+//     const populatedHallTransaction = await HallTransaction.findById(
+//       newHallTransaction._id
+//     )
+//       .populate("halls.hallId", "name price")
+//       .populate("paymentMethod", "name")
+//       .populate("staffInvolved", "fullName");
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Hall Transaction record created successfully",
+//       data: populatedHallTransaction,
+//     });
+//   } catch (error) {
+//     console.error("Error creating hall transaction record:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Error creating hall transaction record",
+//     });
+//   }
+// };
 exports.createHallTransaction = async (req, res) => {
   try {
     console.log("Request Body:", req.body);
@@ -76,9 +178,9 @@ exports.createHallTransaction = async (req, res) => {
       paymentStatus,
       notes,
       discount,
+      date, // Added date field from request body
     } = req.body;
 
-    // Updated to use req.user.userId
     if (!req.user || !req.user.userId) {
       return res.status(400).json({
         success: false,
@@ -93,7 +195,7 @@ exports.createHallTransaction = async (req, res) => {
           throw new Error(`Hall with name ${item.name} not found`);
         }
         return {
-          hall: hall._id,
+          hallId: hall._id,
           name: item.name,
           qty: item.qty,
           price: hall.price,
@@ -104,7 +206,7 @@ exports.createHallTransaction = async (req, res) => {
     const totalAmount = updatedHalls.reduce((sum, item) => {
       return sum + item.qty * item.price;
     }, 0);
-    const discountValue = req.body.discount || 0;
+    const discountValue = discount || 0;
     const discountedTotal = totalAmount - totalAmount * (discountValue / 100);
     const finalDiscountedTotal = Math.round(discountedTotal * 100) / 100;
 
@@ -113,25 +215,26 @@ exports.createHallTransaction = async (req, res) => {
       return `TRX-${randomDigits}`;
     };
 
+    // Convert date to WAT if provided, otherwise use current WAT time
+    const transactionDate = date
+      ? moment.tz(date, "Africa/Lagos").toDate()
+      : moment().tz("Africa/Lagos").toDate();
+
     const newHallTransaction = await HallTransaction.create({
-      halls: req.body.halls.map((hall) => ({
-        hallId: hall._id || hall.hallId,
-        name: hall.name,
-        qty: hall.qty || 1,
-        price: hall.price,
-      })),
       transactionId: generateTransactionId(),
+      date: transactionDate, // Use processed date
+      halls: updatedHalls,
       customerName,
       contactPhone,
-      startTime,
-      endTime,
+      startTime: moment.tz(startTime, "Africa/Lagos").toDate(), // Convert to WAT
+      endTime: moment.tz(endTime, "Africa/Lagos").toDate(), // Convert to WAT
       eventType,
       paymentMethod,
       paymentStatus,
       notes,
       discount: discountValue,
       totalAmount: finalDiscountedTotal,
-      staffInvolved: req.user.userId, // Updated here too
+      staffInvolved: req.user.userId,
     });
 
     const populatedHallTransaction = await HallTransaction.findById(
@@ -150,27 +253,137 @@ exports.createHallTransaction = async (req, res) => {
     console.error("Error creating hall transaction record:", error);
     res.status(500).json({
       success: false,
-      message: "Error creating hall transaction record",
+      message: "Error creating hall transaction record: " + error.message,
     });
   }
 };
 
-// update all transaction
+// // update all transaction
+// exports.updateHallTransaction = async (req, res) => {
+//   try {
+//     // Validate request body
+//     console.log("Request Body Before Validation:", req.body);
+//     const { error, value } = updateHallTransactionSchema.validate(req.body);
+//     console.log("Validated value:", value);
+//     if (error) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: error.details[0].message });
+//     }
+
+//     const { halls, discount, paymentMethod, paymentStatus, notes } = value;
+
+//     // Check if halls exist and are an array before processing
+//     if (!halls || !Array.isArray(halls)) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Halls data must be an array.",
+//       });
+//     }
+
+//     // Fetch existing hall transaction record
+//     const hallTransaction = await HallTransaction.findById(req.params.id);
+//     if (!hallTransaction) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Hall transaction record not found",
+//       });
+//     }
+
+//     let updatedHalls = halls; // If no halls are provided, we'll use the existing ones
+
+//     // Process halls if they are provided
+//     if (halls.length > 0) {
+//       updatedHalls = await Promise.all(
+//         halls.map(async (item) => {
+//           // Assuming hallId is provided or we need to fetch by name
+//           if (!item.hallId) {
+//             const hall = await Hall.findOne({ name: item.name });
+//             if (!hall) {
+//               throw new Error(`Hall with name ${item.name} not found`);
+//             }
+//             return {
+//               hallId: hall._id,
+//               name: item.name,
+//               qty: item.qty,
+//               price: item.price || hall.price, // Use provided price or hall's price
+//             };
+//           }
+//           return {
+//             hallId: item.hallId,
+//             name: item.name,
+//             qty: item.qty,
+//             price: item.price, // Here, we use the price from the request if provided
+//           };
+//         })
+//       );
+//     }
+
+//     // Calculate total amount based on updated halls
+//     const totalAmount = updatedHalls.reduce((sum, item) => {
+//       return sum + item.qty * (item.price || 0); // Use price if available, else 0
+//     }, 0);
+
+//     const discountedTotal = totalAmount - (totalAmount * (discount || 0)) / 100;
+
+//     // Update hall transaction record
+//     const updateData = {
+//       halls: updatedHalls,
+//       discount: discount || 0, // Ensure discount is defined
+//       paymentMethod,
+//       paymentStatus,
+//       notes,
+//       totalAmount: discountedTotal,
+//     };
+
+//     const updatedHallTransaction = await HallTransaction.findByIdAndUpdate(
+//       req.params.id,
+//       updateData,
+//       { new: true, runValidators: true }
+//     )
+//       .populate("halls.hallId", "name price")
+//       .populate("paymentMethod", "name")
+//       .populate("staffInvolved", "fullName");
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Hall transaction record updated successfully",
+//       data: updatedHallTransaction,
+//     });
+//   } catch (error) {
+//     console.error("Error updating hall transaction record:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Error updating hall transaction record: " + error.message,
+//     });
+//   }
+// };
 exports.updateHallTransaction = async (req, res) => {
   try {
-    // Validate request body
     console.log("Request Body Before Validation:", req.body);
     const { error, value } = updateHallTransactionSchema.validate(req.body);
     console.log("Validated value:", value);
     if (error) {
-      return res
-        .status(400)
-        .json({ success: false, message: error.details[0].message });
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message,
+      });
     }
 
-    const { halls, discount, paymentMethod, paymentStatus, notes } = value;
+    const {
+      halls,
+      discount,
+      paymentMethod,
+      paymentStatus,
+      notes,
+      date, // Added date field from request body
+      startTime, // Allow updating startTime
+      endTime, // Allow updating endTime
+      customerName, // Allow updating customerName
+      contactPhone, // Allow updating contactPhone
+      eventType, // Allow updating eventType
+    } = value;
 
-    // Check if halls exist and are an array before processing
     if (!halls || !Array.isArray(halls)) {
       return res.status(400).json({
         success: false,
@@ -178,7 +391,6 @@ exports.updateHallTransaction = async (req, res) => {
       });
     }
 
-    // Fetch existing hall transaction record
     const hallTransaction = await HallTransaction.findById(req.params.id);
     if (!hallTransaction) {
       return res.status(404).json({
@@ -187,13 +399,10 @@ exports.updateHallTransaction = async (req, res) => {
       });
     }
 
-    let updatedHalls = halls; // If no halls are provided, we'll use the existing ones
-
-    // Process halls if they are provided
+    let updatedHalls = hallTransaction.halls; // Default to existing halls
     if (halls.length > 0) {
       updatedHalls = await Promise.all(
         halls.map(async (item) => {
-          // Assuming hallId is provided or we need to fetch by name
           if (!item.hallId) {
             const hall = await Hall.findOne({ name: item.name });
             if (!hall) {
@@ -203,35 +412,53 @@ exports.updateHallTransaction = async (req, res) => {
               hallId: hall._id,
               name: item.name,
               qty: item.qty,
-              price: item.price || hall.price, // Use provided price or hall's price
+              price: item.price || hall.price,
             };
           }
           return {
             hallId: item.hallId,
             name: item.name,
             qty: item.qty,
-            price: item.price, // Here, we use the price from the request if provided
+            price: item.price,
           };
         })
       );
     }
 
-    // Calculate total amount based on updated halls
     const totalAmount = updatedHalls.reduce((sum, item) => {
-      return sum + item.qty * (item.price || 0); // Use price if available, else 0
+      return sum + item.qty * (item.price || 0);
     }, 0);
-
     const discountedTotal = totalAmount - (totalAmount * (discount || 0)) / 100;
 
-    // Update hall transaction record
+    // Prepare update data, only including fields provided in the request
     const updateData = {
       halls: updatedHalls,
-      discount: discount || 0, // Ensure discount is defined
-      paymentMethod,
-      paymentStatus,
-      notes,
+      discount: discount || hallTransaction.discount,
+      paymentMethod: paymentMethod || hallTransaction.paymentMethod,
+      paymentStatus: paymentStatus || hallTransaction.paymentStatus,
+      notes: notes !== undefined ? notes : hallTransaction.notes,
       totalAmount: discountedTotal,
     };
+
+    // Add date, startTime, endTime, etc., if provided in the request
+    if (date) {
+      updateData.date = moment.tz(date, "Africa/Lagos").toDate();
+    }
+    if (startTime) {
+      updateData.startTime = moment.tz(startTime, "Africa/Lagos").toDate();
+    }
+    if (endTime) {
+      updateData.endTime = moment.tz(endTime, "Africa/Lagos").toDate();
+    }
+    if (customerName) {
+      updateData.customerName = customerName;
+    }
+    if (contactPhone) {
+      updateData.contactPhone = contactPhone;
+    }
+    if (eventType) {
+      updateData.eventType = eventType;
+    }
 
     const updatedHallTransaction = await HallTransaction.findByIdAndUpdate(
       req.params.id,
@@ -255,13 +482,15 @@ exports.updateHallTransaction = async (req, res) => {
     });
   }
 };
+
 //get all transactions
 exports.getAllHallTransactions = async (req, res) => {
   try {
     const hallTransactions = await HallTransaction.find()
       .populate("halls", "name price") // Assuming 'name' and 'unitPrice' are the fields in the Hall model
       .populate("paymentMethod", "name")
-      .populate("staffInvolved", "fullName");
+      .populate("staffInvolved", "fullName")
+      .sort({ date: -1 });
 
     res.status(200).json({
       success: true,

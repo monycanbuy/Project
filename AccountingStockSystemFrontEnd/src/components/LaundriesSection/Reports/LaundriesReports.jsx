@@ -346,6 +346,109 @@
 // };
 
 // export default LaundriesReports;
+
+// import { useEffect } from "react";
+// import { useDispatch, useSelector } from "react-redux";
+// import Typography from "@mui/material/Typography";
+// import Box from "@mui/material/Box";
+// import Stack from "@mui/material/Stack";
+// import LaundriesCharts from "../../../charts/Laundries/LaundryCharts";
+// import LaundriesRevenue from "../../../charts/Laundries/LaundriesRevenue";
+// import { fetchDailyLaundrySales } from "../../../redux/slices/laundrySlice";
+
+// const LaundriesReports = () => {
+//   const dispatch = useDispatch();
+//   const { dailySales, dailySalesStatus, dailySalesError } = useSelector(
+//     (state) => state.laundry
+//   );
+
+//   useEffect(() => {
+//     if (dailySalesStatus === "idle") {
+//       console.log("Fetching daily laundry sales...");
+//       dispatch(fetchDailyLaundrySales({})); // Fetch today's sales
+//     }
+//   }, [dispatch, dailySalesStatus]);
+
+//   // Robust fallbacks
+//   const totalSales =
+//     dailySales && typeof dailySales.totalSales === "number"
+//       ? dailySales.totalSales
+//       : 0;
+//   const paymentMethodSales = dailySales?.paymentMethodSales || {
+//     cash: 0,
+//     pos: 0,
+//     transfer: 0,
+//     "signing credit": 0,
+//     credit: 0,
+//   };
+
+//   const paymentMethods = [
+//     { title: "Cash", value: paymentMethodSales.cash || 0, key: "cash" },
+//     { title: "POS", value: paymentMethodSales.pos || 0, key: "pos" },
+//     {
+//       title: "Transfer",
+//       value: paymentMethodSales.transfer || 0,
+//       key: "transfer",
+//     },
+//     {
+//       title: "Signing Credit",
+//       value: paymentMethodSales["signing credit"] || 0,
+//       key: "signing credit",
+//     },
+//     { title: "Credit", value: paymentMethodSales.credit || 0, key: "credit" },
+//   ];
+
+//   return (
+//     <Box>
+//       <Typography fontSize={25} fontWeight={700} color="#fe6c00">
+//         Dashboard
+//       </Typography>
+
+//       {/* Loading and Error States */}
+//       {dailySalesStatus === "loading" && (
+//         <Typography>Loading daily sales...</Typography>
+//       )}
+//       {dailySalesStatus === "failed" && (
+//         <Typography color="error">
+//           Error: {dailySalesError?.message || "Failed to load daily sales"}
+//         </Typography>
+//       )}
+
+//       {/* Render Charts Only When Data is Valid */}
+//       {dailySalesStatus === "succeeded" && dailySales && (
+//         <Box mt="20px" display="flex" flexWrap="wrap" gap={4}>
+//           <LaundriesCharts
+//             title="Total Sales"
+//             value={`₦${totalSales.toFixed(2)}`}
+//             series={[totalSales]}
+//             colors={["#fe6c00"]}
+//           />
+//           {paymentMethods.map((method) => (
+//             <LaundriesCharts
+//               key={method.key}
+//               title={method.title}
+//               value={`₦${method.value.toFixed(2)}`}
+//               series={[method.value]}
+//               colors={["#275be8"]}
+//             />
+//           ))}
+//         </Box>
+//       )}
+
+//       <Stack
+//         mt="25px"
+//         width="100%"
+//         direction={{ xs: "column", lg: "row" }}
+//         gap={4}
+//       >
+//         <LaundriesRevenue />
+//       </Stack>
+//     </Box>
+//   );
+// };
+
+// export default LaundriesReports;
+
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Typography from "@mui/material/Typography";
@@ -362,23 +465,25 @@ const LaundriesReports = () => {
   );
 
   useEffect(() => {
-    if (dailySalesStatus === "idle") {
-      console.log("Fetching daily laundry sales...");
-      dispatch(fetchDailyLaundrySales({})); // Fetch today's sales
-    }
-  }, [dispatch, dailySalesStatus]);
+    //console.log("Component mounted, dispatching fetchDailyLaundrySales...");
+    //dispatch(fetchDailyLaundrySales({})); // No date, should fetch today
+    // Test with a known date:
+    dispatch(fetchDailyLaundrySales({ date: "2025-03-16" }));
+  }, [dispatch]);
 
-  // Robust fallbacks
-  const totalSales =
-    dailySales && typeof dailySales.totalSales === "number"
-      ? dailySales.totalSales
-      : 0;
+  // console.log("Redux State:", {
+  //   dailySales,
+  //   dailySalesStatus,
+  //   dailySalesError,
+  // });
+
+  const totalSales = dailySales?.totalSales || 0;
   const paymentMethodSales = dailySales?.paymentMethodSales || {
     cash: 0,
     pos: 0,
     transfer: 0,
     "signing credit": 0,
-    credit: 0,
+    credits: 0,
   };
 
   const paymentMethods = [
@@ -394,8 +499,10 @@ const LaundriesReports = () => {
       value: paymentMethodSales["signing credit"] || 0,
       key: "signing credit",
     },
-    { title: "Credit", value: paymentMethodSales.credit || 0, key: "credit" },
+    { title: "Credit", value: paymentMethodSales.credits || 0, key: "credits" },
   ];
+
+  //console.log("Payment Methods:", paymentMethods);
 
   return (
     <Box>
@@ -403,7 +510,6 @@ const LaundriesReports = () => {
         Dashboard
       </Typography>
 
-      {/* Loading and Error States */}
       {dailySalesStatus === "loading" && (
         <Typography>Loading daily sales...</Typography>
       )}
@@ -413,8 +519,7 @@ const LaundriesReports = () => {
         </Typography>
       )}
 
-      {/* Render Charts Only When Data is Valid */}
-      {dailySalesStatus === "succeeded" && dailySales && (
+      {dailySalesStatus === "succeeded" && (
         <Box mt="20px" display="flex" flexWrap="wrap" gap={4}>
           <LaundriesCharts
             title="Total Sales"

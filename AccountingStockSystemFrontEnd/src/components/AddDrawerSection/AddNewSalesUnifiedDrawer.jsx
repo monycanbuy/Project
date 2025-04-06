@@ -91,9 +91,9 @@ const AddNewSalesUnifiedDrawer = ({
 
   useEffect(() => {
     if (editMode && initialData) {
-      console.log("Initial Data for edit:", initialData);
-      console.log("Initial Discount:", initialData.discount);
-      console.log("Initial Total Amount:", initialData.totalAmount);
+      // console.log("Initial Data for edit:", initialData);
+      // console.log("Initial Discount:", initialData.discount);
+      // console.log("Initial Total Amount:", initialData.totalAmount);
       setFormData({
         saleType: initialData.saleType || "",
         paymentMethod: initialData.paymentMethod?._id || "",
@@ -316,7 +316,7 @@ const AddNewSalesUnifiedDrawer = ({
       })),
       discount: Number(formData.discount),
     };
-    console.log("Sale Data Before Dispatch:", saleData);
+    //console.log("Sale Data Before Dispatch:", saleData);
 
     const action =
       editMode && initialData._id

@@ -304,12 +304,115 @@
 
 // export default AggregatePaymentMethod;
 
+// import React, { useEffect } from "react";
+// import { useDispatch, useSelector } from "react-redux";
+// import Box from "@mui/material/Box";
+// import Stack from "@mui/material/Stack";
+// import Typography from "@mui/material/Typography";
+// import { getPaymentMethodsReport } from "../redux/slices/aggregateSalesSlice";
+
+// const ProgressBar = ({ title, totalSales, percentage, color }) => (
+//   <Box width="100%">
+//     <Stack direction="row" alignItems="center" justifyContent="space-between">
+//       <Typography fontSize={16} fontWeight={500} color="#fcfcfc">
+//         {title}
+//       </Typography>
+//       <Typography fontSize={16} fontWeight={500} color="#fe6c00">
+//         {totalSales} ({percentage}%)
+//       </Typography>
+//     </Stack>
+//     <Box
+//       mt={2}
+//       position="relative"
+//       width="100%"
+//       height="8px"
+//       borderRadius={1}
+//       bgcolor="#e4e8ef"
+//     >
+//       <Box
+//         width={`${percentage}%`}
+//         bgcolor={color}
+//         position="absolute"
+//         height="100%"
+//         borderRadius={1}
+//       />
+//     </Box>
+//   </Box>
+// );
+
+// const AggregatePaymentMethod = () => {
+//   const dispatch = useDispatch();
+//   const { paymentMethodsReport, status, error } = useSelector(
+//     (state) => state.aggregateSales
+//   );
+
+//   useEffect(() => {
+//     if (status === "idle") {
+//       dispatch(getPaymentMethodsReport());
+//     }
+//   }, [dispatch, status]);
+
+//   console.log("Current paymentMethodsReport state:", paymentMethodsReport); // Log the state
+
+//   if (status === "loading") {
+//     return <div>Loading...</div>;
+//   }
+
+//   if (status === "failed") {
+//     return <div>Error: {error}</div>;
+//   }
+
+//   const totalSales = Object.values(paymentMethodsReport).reduce(
+//     (sum, method) => sum + method.totalSales,
+//     0
+//   );
+
+//   const propertyReferralsInfo = Object.entries(paymentMethodsReport).map(
+//     ([method, { totalSales: methodSales }]) => ({
+//       title: method,
+//       totalSales: methodSales,
+//       percentage:
+//         totalSales > 0 ? ((methodSales / totalSales) * 100).toFixed(2) : 0,
+//       color: "#275be8",
+//     })
+//   );
+
+//   return (
+//     <Box
+//       p={4}
+//       //bgcolor="#fcfcfc"
+//       id="chart"
+//       minWidth={490}
+//       display="flex"
+//       flexDirection="column"
+//       borderRadius="15px"
+//       sx={{
+//         background:
+//           "linear-gradient(114.07deg, rgba(66, 59, 55, 0.6) 3.49%, rgba(66, 59, 55, 0) 34.7%), linear-gradient(138.58deg, rgba(59, 43, 30, 0.37) 43.56%, #fea767 112.68%)",
+//       }}
+//     >
+//       <Typography fontSize={18} fontWeight={600} color="#fcfcfc">
+//         Aggregate Payment Method
+//       </Typography>
+
+//       <Stack my="20px" direction="column" gap={4}>
+//         {propertyReferralsInfo.map((bar) => (
+//           <ProgressBar key={bar.title} {...bar} />
+//         ))}
+//       </Stack>
+//     </Box>
+//   );
+// };
+
+// export default AggregatePaymentMethod;
+
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { getPaymentMethodsReport } from "../redux/slices/aggregateSalesSlice";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const ProgressBar = ({ title, totalSales, percentage, color }) => (
   <Box width="100%">
@@ -318,7 +421,7 @@ const ProgressBar = ({ title, totalSales, percentage, color }) => (
         {title}
       </Typography>
       <Typography fontSize={16} fontWeight={500} color="#fe6c00">
-        {totalSales} ({percentage}%)
+        ₦{totalSales.toLocaleString("en-NG")} ({percentage}%)
       </Typography>
     </Stack>
     <Box
@@ -347,19 +450,30 @@ const AggregatePaymentMethod = () => {
   );
 
   useEffect(() => {
-    if (status === "idle") {
+    console.log("Fetching AggregatePaymentMethod data...");
+    dispatch(getPaymentMethodsReport());
+    const interval = setInterval(() => {
       dispatch(getPaymentMethodsReport());
-    }
-  }, [dispatch, status]);
-
-  console.log("Current paymentMethodsReport state:", paymentMethodsReport); // Log the state
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [dispatch]);
 
   if (status === "loading") {
-    return <div>Loading...</div>;
+    return (
+      <Box p={4} display="flex" justifyContent="center" alignItems="center">
+        <CircularProgress sx={{ color: "#fe6c00" }} />
+      </Box>
+    );
   }
 
   if (status === "failed") {
-    return <div>Error: {error}</div>;
+    return (
+      <Box p={4}>
+        <Typography fontSize={18} fontWeight={600} color="#fcfcfc">
+          Error: {error || "Failed to load data"}
+        </Typography>
+      </Box>
+    );
   }
 
   const totalSales = Object.values(paymentMethodsReport).reduce(
@@ -380,8 +494,6 @@ const AggregatePaymentMethod = () => {
   return (
     <Box
       p={4}
-      //bgcolor="#fcfcfc"
-      id="chart"
       minWidth={490}
       display="flex"
       flexDirection="column"
@@ -394,7 +506,6 @@ const AggregatePaymentMethod = () => {
       <Typography fontSize={18} fontWeight={600} color="#fcfcfc">
         Aggregate Payment Method
       </Typography>
-
       <Stack my="20px" direction="column" gap={4}>
         {propertyReferralsInfo.map((bar) => (
           <ProgressBar key={bar.title} {...bar} />

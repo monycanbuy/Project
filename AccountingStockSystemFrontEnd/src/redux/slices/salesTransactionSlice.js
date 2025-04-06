@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { apiClient } from "./authSlice";
+import { apiClient } from "../../utils/apiClient";
 
 const BASE_URL = "/trackinventories";
 
@@ -21,9 +21,9 @@ export const createSalesTransaction = createAsyncThunk(
   "salesTransactions/createSalesTransaction",
   async (saleData) => {
     try {
-      console.log("Sending data:", saleData);
+      //console.log("Sending data:", saleData);
       const response = await apiClient.post(BASE_URL, saleData);
-      console.log("Received response:", response.data);
+      //console.log("Received response:", response.data);
       return response.data.data;
     } catch (error) {
       console.error("API Error:", error);
@@ -89,7 +89,7 @@ export const fetchTodaySales = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await apiClient.get(`${BASE_URL}/sales/today`);
-      console.log("Today Sales API Response:", response.data);
+      //console.log("Today Sales API Response:", response.data);
       return response.data.data; // { date, totalSales, breakdown }
     } catch (error) {
       console.error("Error fetching today's sales:", error);
@@ -110,7 +110,7 @@ export const fetchAllTimeTotalSales = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await apiClient.get(`${BASE_URL}/sales/all-time-total`);
-      console.log("All-Time Total Sales API Response:", response.data);
+      //console.log("All-Time Total Sales API Response:", response.data);
       return response.data.data; // { totalSales }
     } catch (error) {
       console.error("Error fetching all-time total sales:", error);
@@ -131,7 +131,7 @@ export const fetchLastSevenDaysSales = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await apiClient.get(`${BASE_URL}/sales/last-seven-days`);
-      console.log("Last Seven Days Sales API Response:", response.data);
+      //console.log("Last Seven Days Sales API Response:", response.data);
       return response.data.data; // Array of { date, totalSales }
     } catch (error) {
       console.error("Error fetching last seven days sales:", error);
@@ -152,7 +152,7 @@ export const fetchSalesForLastTwoWeeks = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await apiClient.get(`${BASE_URL}/sales/last-two-weeks`);
-      console.log("Last Two Weeks Sales API Response:", response.data);
+      //console.log("Last Two Weeks Sales API Response:", response.data);
       return response.data.data; // Array of { date, totalSales }
     } catch (error) {
       console.error("Error fetching last two weeks sales:", error);
@@ -175,7 +175,7 @@ export const fetchDailySalesByPaymentMethod = createAsyncThunk(
       const response = await apiClient.get(
         `${BASE_URL}/sales/daily-sales-by-payment-method`
       );
-      console.log("Daily Sales by Payment Method API Response:", response.data);
+      //console.log("Daily Sales by Payment Method API Response:", response.data);
       return response.data.data; // Array of { paymentMethodId, paymentMethod, totalAmount }
     } catch (error) {
       console.error("Error fetching daily sales by payment method:", error);
@@ -238,6 +238,7 @@ const salesTransactionsSlice = createSlice({
     builder
       .addCase(fetchSalesTransactions.pending, (state) => {
         state.status = "loading";
+        state.error = null;
       })
       .addCase(fetchSalesTransactions.fulfilled, (state, action) => {
         state.status = "succeeded";

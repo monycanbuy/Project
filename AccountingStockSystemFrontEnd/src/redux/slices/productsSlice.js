@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { apiClient } from "./authSlice";
+import { apiClient } from "../../utils/apiClient";
 
 const BASE_URL = "/products";
 
@@ -56,7 +56,7 @@ export const updateProduct = createAsyncThunk(
 export const deleteProduct = createAsyncThunk(
   "products/deleteProduct",
   async (id, { rejectWithValue }) => {
-    console.log("Deleting product with ID:", id);
+    //console.log("Deleting product with ID:", id);
     if (!id) {
       return rejectWithValue("Product ID is required");
     }
