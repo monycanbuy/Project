@@ -98,16 +98,24 @@ cloudinary.config({
 //   `http://localhost:${process.env.PORT || 8000}`, // Backend
 //   `http://localhost:${process.env.FRONT_END_PORT || 5173}`, // Frontend
 // ];
+// const allowedOrigins =
+//   process.env.NODE_ENV === "production"
+//     ? [
+//         "https://accounting-stock-system-front-end.onrender.com", // Replace with your Vercel URL
+//         "https://accounting-stock-system-backend.onrender.com", // Replace with your Render URL
+//       ]
+//     : [
+//         `http://localhost:${process.env.PORT || 8000}`,
+//         `http://localhost:${process.env.FRONT_END_PORT || 5173}`,
+//       ];
+
 const allowedOrigins =
   process.env.NODE_ENV === "production"
     ? [
-        "https://accounting-stock-system-front-end.onrender.com", // Replace with your Vercel URL
-        "https://accounting-stock-system-backend.onrender.com", // Replace with your Render URL
+        "https://accounting-stock-system-front-end.onrender.com",
+        "https://accounting-stock-system-backend.onrender.com",
       ]
-    : [
-        `http://localhost:${process.env.PORT || 8000}`,
-        `http://localhost:${process.env.FRONT_END_PORT || 5173}`,
-      ];
+    : [`http://localhost:${process.env.PORT || 8000}`, "http://localhost:5173"];
 
 // Middleware to verify JWT token in request headers
 const verifyToken = (req, res, next) => {
@@ -148,12 +156,33 @@ const verifyToken = (req, res, next) => {
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
+// app.use(
+//   cors({
+//     origin: (origin, callback) => {
+//       if (!origin || allowedOrigins.includes(origin)) {
+//         callback(null, true);
+//       } else {
+//         callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//     exposedHeaders: ["Set-Cookie"],
+//   })
+// );
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Allow same-origin requests (Swagger UI) and frontend
+      if (
+        !origin ||
+        origin === "https://accounting-stock-system-backend.onrender.com" ||
+        allowedOrigins.includes(origin)
+      ) {
         callback(null, true);
       } else {
+        console.log(`CORS rejected origin: ${origin}`);
         callback(new Error("Not allowed by CORS"));
       }
     },
