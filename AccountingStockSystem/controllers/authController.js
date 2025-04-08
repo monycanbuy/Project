@@ -188,18 +188,13 @@ const sendCodeToUser = async (user) => {
 //       .select(
 //         "+password +loginAttempts +isLocked +status +verified +verificationCode +verificationCodeValidation"
 //       )
-//       .populate("roles", "name permissions"); // FIX: Added "permissions"
+//       .populate("roles", "name permissions");
 
 //     if (!existingUser) {
 //       return res
 //         .status(401)
 //         .json({ success: false, message: "User does not exist!" });
 //     }
-
-//     console.log(
-//       "Existing user from DB:",
-//       JSON.stringify(existingUser, null, 2)
-//     ); // Log raw user
 
 //     if (existingUser.status !== "active") {
 //       return res.status(403).json({
@@ -240,14 +235,17 @@ const sendCodeToUser = async (user) => {
 //       });
 //     }
 
+//     // Update lastLogin and loginHistory on successful login
 //     existingUser.loginAttempts = 0;
+//     existingUser.lastLogin = new Date(); // Set to current time
+//     existingUser.loginHistory.push({
+//       timestamp: new Date(),
+//       ip: req.ip || "Unknown", // Get IP from request
+//       device: req.headers["user-agent"] || "Unknown", // Get device from User-Agent header
+//     });
 //     await existingUser.save();
 
 //     if (!existingUser.verified) {
-//       console.log(
-//         "User not verified, triggering code send:",
-//         existingUser.email
-//       );
 //       const codeResult = await sendCodeToUser(existingUser);
 //       if (!codeResult.success) {
 //         return res.status(500).json({
@@ -271,10 +269,6 @@ const sendCodeToUser = async (user) => {
 //       name: role.name,
 //       permissions: role.permissions || [],
 //     }));
-//     console.log(
-//       "User roles with permissions:",
-//       JSON.stringify(userRoles, null, 2)
-//     );
 
 //     const accessToken = jwt.sign(
 //       {
@@ -378,13 +372,12 @@ exports.signin = async (req, res) => {
       });
     }
 
-    // Update lastLogin and loginHistory on successful login
     existingUser.loginAttempts = 0;
-    existingUser.lastLogin = new Date(); // Set to current time
+    existingUser.lastLogin = new Date();
     existingUser.loginHistory.push({
       timestamp: new Date(),
-      ip: req.ip || "Unknown", // Get IP from request
-      device: req.headers["user-agent"] || "Unknown", // Get device from User-Agent header
+      ip: req.ip || "Unknown",
+      device: req.headers["user-agent"] || "Unknown",
     });
     await existingUser.save();
 
@@ -426,6 +419,7 @@ exports.signin = async (req, res) => {
       { expiresIn: "1h" }
     );
 
+    // Optional: Keep the cookie if you want dual support (header + cookie)
     res.cookie("Authorization", "Bearer " + accessToken, {
       expires: new Date(Date.now() + 15 * 60 * 1000),
       httpOnly: true,
@@ -434,8 +428,10 @@ exports.signin = async (req, res) => {
       path: "/",
     });
 
+    // Return token in response body
     return res.json({
       success: true,
+      token: accessToken, // Add this
       email: existingUser.email,
       fullName: existingUser.fullName,
       verified: existingUser.verified,
@@ -452,16 +448,6 @@ exports.signin = async (req, res) => {
   }
 };
 
-// exports.signout = async (req, res) => {
-//   try {
-//     res
-//       .clearCookie("Authorization") // Clear the cookie
-//       .status(200)
-//       .json({ success: true, message: "Logged out successfully" });
-//   } catch (error) {
-//     res.status(500).json({ success: false, message: "Internal server error" });
-//   }
-// };
 exports.signout = async (req, res) => {
   try {
     res

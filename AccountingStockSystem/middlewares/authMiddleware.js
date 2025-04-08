@@ -1,94 +1,7 @@
-// exports.authenticateUser = async (req, res, next) => {
-//   console.log("Middleware - Path:", req.path);
-//   console.log("Cookies received:", req.cookies);
-//   console.log("Headers:", req.headers);
-//   if (req.cookies && req.cookies.Authorization) {
-//     const token = req.cookies.Authorization.split(" ")[1];
-//     try {
-//       const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
-//       const user = await User.findById(decoded.userId).populate(
-//         "roles",
-//         "name"
-//       );
-//       if (!user || user.status !== "active" || user.isLocked) {
-//         return res
-//           .status(403)
-//           .json({ success: false, message: "Unauthorized: Access denied" });
-//       }
-//       req.user = {
-//         id: user._id.toString(),
-//         fullName: user.fullName,
-//         email: user.email,
-//         verified: user.verified,
-//         status: user.status,
-//         roles: user.roles.map((role) => role.name),
-//       };
-//       console.log("User authenticated:", req.user);
-//       next();
-//     } catch (error) {
-//       console.error("Token verification error:", error);
-//       return res
-//         .status(401)
-//         .json({ success: false, message: "Unauthorized: Invalid token" });
-//     }
-//   } else {
-//     return res.status(401).json({
-//       success: false,
-//       message: "Unauthorized: No token provided in cookies",
-//     });
-//   }
-// };
+// const jwt = require("jsonwebtoken");
+// const User = require("../models/userModel");
+// const Role = require("../models/roleModel");
 
-// authMiddleware.js
-const jwt = require("jsonwebtoken");
-const User = require("../models/userModel");
-const Role = require("../models/roleModel");
-
-// Existing authentication middleware
-// exports.authenticateUser = async (req, res, next) => {
-//   console.log("Middleware - Path:", req.path);
-//   console.log("Cookies received:", req.cookies);
-//   console.log("Headers:", req.headers);
-
-//   const token = req.cookies.token; // Standardize to 'token'
-//   if (!token) {
-//     return res.status(401).json({
-//       success: false,
-//       message: "Unauthorized: No token provided in cookies",
-//     });
-//   }
-
-//   try {
-//     const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
-//     const user = await User.findById(decoded.userId).populate(
-//       "roles",
-//       "name permissions"
-//     );
-//     if (!user || user.status !== "active" || user.isLocked) {
-//       return res
-//         .status(403)
-//         .json({ success: false, message: "Unauthorized: Access denied" });
-//     }
-//     req.user = {
-//       userId: user._id.toString(),
-//       fullName: user.fullName,
-//       email: user.email,
-//       verified: user.verified,
-//       status: user.status,
-//       roles: user.roles.map((role) => ({
-//         name: role.name,
-//         permissions: role.permissions,
-//       })),
-//     };
-//     console.log("User authenticated:", req.user);
-//     next();
-//   } catch (error) {
-//     console.error("Token verification error:", error);
-//     return res
-//       .status(401)
-//       .json({ success: false, message: "Unauthorized: Invalid token" });
-//   }
-// };
 // exports.authenticateUser = async (req, res, next) => {
 //   console.log("Middleware - Path:", req.path);
 //   console.log("Cookies received:", req.cookies);
@@ -100,14 +13,14 @@ const Role = require("../models/roleModel");
 //       const user = await User.findById(decoded.userId).populate(
 //         "roles",
 //         "name permissions"
-//       ); // Include permissions
+//       );
 //       if (!user || user.status !== "active" || user.isLocked) {
 //         return res
 //           .status(403)
 //           .json({ success: false, message: "Unauthorized: Access denied" });
 //       }
 //       req.user = {
-//         userId: user._id.toString(), // Renamed id to userId for clarity
+//         userId: user._id.toString(),
 //         fullName: user.fullName,
 //         email: user.email,
 //         verified: user.verified,
@@ -115,7 +28,7 @@ const Role = require("../models/roleModel");
 //         roles: user.roles.map((role) => ({
 //           name: role.name,
 //           permissions: role.permissions,
-//         })), // Include permissions
+//         })),
 //       };
 //       console.log("User authenticated:", req.user);
 //       next();
@@ -133,16 +46,14 @@ const Role = require("../models/roleModel");
 //   }
 // };
 
-// // Check if user has a specific permission
 // exports.hasPermission = (userRoles, requiredPermission) => {
 //   return userRoles.some(
 //     (role) =>
 //       role.permissions.includes(requiredPermission) ||
-//       role.permissions.includes(`${requiredPermission.split(":")[0]}:*`) // Wildcard support
+//       role.permissions.includes(`${requiredPermission.split(":")[0]}:*`)
 //   );
 // };
 
-// // Authorization middleware
 // exports.authorize = (permission) => async (req, res, next) => {
 //   try {
 //     if (!req.user || !req.user.userId) {
@@ -165,49 +76,106 @@ const Role = require("../models/roleModel");
 //   }
 // };
 
-// // module.exports = { authenticateUser, hasPermission, authorize };
+const jwt = require("jsonwebtoken");
+const User = require("../models/userModel"); // Ensure this is imported
 
+// exports.authenticateUser = async (req, res, next) => {
+//   console.log("Middleware - Path:", req.path);
+//   console.log("Cookies received:", req.cookies);
+//   console.log("Headers:", req.headers);
+
+//   const authHeader = req.headers["authorization"];
+//   if (authHeader && authHeader.startsWith("Bearer ")) {
+//     const token = authHeader.split(" ")[1];
+//     try {
+//       const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
+//       const user = await User.findById(decoded.userId).populate(
+//         "roles",
+//         "name permissions"
+//       );
+//       if (!user || user.status !== "active" || user.isLocked) {
+//         return res
+//           .status(403)
+//           .json({ success: false, message: "Unauthorized: Access denied" });
+//       }
+//       req.user = {
+//         userId: user._id.toString(),
+//         fullName: user.fullName,
+//         email: user.email,
+//         verified: user.verified,
+//         status: user.status,
+//         roles: user.roles.map((role) => ({
+//           name: role.name,
+//           permissions: role.permissions,
+//         })),
+//       };
+//       console.log("User authenticated:", req.user);
+//       next();
+//     } catch (error) {
+//       console.error("Token verification error:", error);
+//       return res
+//         .status(401)
+//         .json({ success: false, message: "Unauthorized: Invalid token" });
+//     }
+//   } else {
+//     return res.status(401).json({
+//       success: false,
+//       message: "Unauthorized: No token provided in Authorization header",
+//     });
+//   }
+// };
 exports.authenticateUser = async (req, res, next) => {
   console.log("Middleware - Path:", req.path);
   console.log("Cookies received:", req.cookies);
   console.log("Headers:", req.headers);
-  if (req.cookies && req.cookies.Authorization) {
-    const token = req.cookies.Authorization.split(" ")[1];
-    try {
-      const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
-      const user = await User.findById(decoded.userId).populate(
-        "roles",
-        "name permissions"
-      );
-      if (!user || user.status !== "active" || user.isLocked) {
-        return res
-          .status(403)
-          .json({ success: false, message: "Unauthorized: Access denied" });
-      }
-      req.user = {
-        userId: user._id.toString(),
-        fullName: user.fullName,
-        email: user.email,
-        verified: user.verified,
-        status: user.status,
-        roles: user.roles.map((role) => ({
-          name: role.name,
-          permissions: role.permissions,
-        })),
-      };
-      console.log("User authenticated:", req.user);
-      next();
-    } catch (error) {
-      console.error("Token verification error:", error);
-      return res
-        .status(401)
-        .json({ success: false, message: "Unauthorized: Invalid token" });
-    }
-  } else {
+
+  let token;
+  const authHeader = req.headers["authorization"];
+  const authCookie = req.cookies?.Authorization;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+  } else if (authCookie && authCookie.startsWith("Bearer ")) {
+    token = authCookie.split(" ")[1];
+  }
+
+  if (!token) {
     return res.status(401).json({
       success: false,
-      message: "Unauthorized: No token provided in cookies",
+      message:
+        "Unauthorized: No token provided in Authorization header or cookie",
     });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
+    const user = await User.findById(decoded.userId).populate(
+      "roles",
+      "name permissions"
+    );
+    if (!user || user.status !== "active" || user.isLocked) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Unauthorized: Access denied" });
+    }
+    req.user = {
+      userId: user._id.toString(),
+      fullName: user.fullName,
+      email: user.email,
+      verified: user.verified,
+      status: user.status,
+      roles: user.roles.map((role) => ({
+        name: role.name,
+        permissions: role.permissions,
+      })),
+    };
+    console.log("User authenticated:", req.user);
+    next();
+  } catch (error) {
+    console.error("Token verification error:", error);
+    return res
+      .status(401)
+      .json({ success: false, message: "Unauthorized: Invalid token" });
   }
 };
 

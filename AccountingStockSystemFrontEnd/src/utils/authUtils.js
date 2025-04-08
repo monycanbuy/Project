@@ -1,185 +1,9 @@
-// // authUtils.js
-// export const hasPermission = (user, permission) => {
-//   if (!user || !user.roles || !Array.isArray(user.roles)) return false;
-//   return user.roles.some((role) => {
-//     if (typeof role === "string") {
-//       return role === "admin"; // Assume 'admin' has all permissions
-//     }
-//     return (
-//       role.permissions &&
-//       Array.isArray(role.permissions) &&
-//       role.permissions.includes(permission)
-//     );
-//   });
-// };
-
-// // Pass isAuthenticated explicitly to avoid relying on user.isAuthenticated
-// export const getAuthorizedRoute = (user, isAuthenticated) => {
-//   if (!user || !isAuthenticated || !user.roles || !Array.isArray(user.roles)) {
-//     return "/login";
-//   }
-//   if (user.roles.includes("admin")) return "/admin/users"; // Direct check for 'admin'
-//   if (hasPermission(user, "read:users")) return "/admin/users";
-//   if (hasPermission(user, "read:roles")) return "/admin/roles";
-//   return "/unauthorized";
-// };
-
-// authUtils.js
-// export const hasPermission = (user, permission) => {
-//   if (!user || !user.roles || !Array.isArray(user.roles)) return false;
-//   return user.roles.some((role) => {
-//     if (typeof role === "string") {
-//       return role === "admin"; // 'admin' has all permissions
-//     }
-//     return (
-//       role.permissions &&
-//       Array.isArray(role.permissions) &&
-//       role.permissions.includes(permission)
-//     );
-//   });
-// };
-// export const hasPermission = (user, permission) => {
-//   if (!user || !user.roles || !Array.isArray(user.roles)) return false;
-//   console.log(
-//     "Can read dashboard?",
-//     user.roles[0].permissions.includes("read:dashboard")
-//   );
-//   return user.roles.some((role) => {
-//     if (typeof role === "string") {
-//       return role === "admin"; // Admin has all permissions
-//     }
-//     // Ensure role.permissions exists and is an array
-//     return (
-//       role.permissions &&
-//       Array.isArray(role.permissions) &&
-//       role.permissions.includes(permission)
-//     );
-//   });
-// };
-
-// export const getAuthorizedRoute = (user, isAuthenticated) => {
-//   if (!user || !isAuthenticated || !user.roles || !Array.isArray(user.roles)) {
-//     console.log("Redirecting to /login: invalid user or auth state", {
-//       user,
-//       isAuthenticated,
-//     });
-//     return "/login";
-//   }
-
-//   // Define permission-to-route mapping
-//   const permissionRoutes = [
-//     { permission: "read:users", route: "/admin/users" },
-//     { permission: "read:roles", route: "/admin/roles" },
-//     { permission: "read:dashboard", route: "/admin/dashboard" }, // Example additional permission
-//     { permission: "read:daily", route: "/admin/dashboard" }, // Default for daily sales
-//     { permission: "read:dailyreport", route: "/admin/dashboard" },
-//     { permission: "read:paymentmethodsreport", route: "/admin/dashboard" },
-//     { permission: "read:totalrevenue", route: "/admin/dashboard" },
-//     { permission: "read:monthlysales", route: "/admin/dashboard" },
-//     { permission: "read:dailysalesalltime", route: "/admin/dashboard" },
-//     { permission: "read:alltimetotal", route: "/admin/dashboard" },
-//     { permission: "read:auditlogs", route: "/admin/audit-logs" },
-//     { permission: "read:purchaseorders", route: "/admin/purchase-order" },
-//     { permission: "write:purchaseorders", route: "/admin/purchase-order" },
-//     { permission: "read:purchaseorders", route: "/admin/purchase-order" },
-//     { permission: "read:inventory", route: "/admin/inventory" },
-//     { permission: "write:purchaseorders", route: "/admin/inventory" },
-//     { permission: "update:purchaseorders", route: "/admin/inventory" },
-//     { permission: "delete:purchaseorders", route: "/admin/inventory" },
-//     { permission: "read:alerts", route: "/admin/alerts" },
-//     { permission: "create:alerts", route: "/admin/alerts" },
-//     { permission: "update:alerts", route: "/admin/alerts" },
-//     { permission: "delete:alerts", route: "/admin/alerts" },
-//     { permission: "read:categories", route: "/admin/category" },
-//     { permission: "write:categories", route: "/admin/category" },
-//     { permission: "update:categories", route: "/admin/category" },
-//     { permission: "delete:categories", route: "/admin/category" },
-//     { permission: "update:frontoffice", route: "/admin/front-office" },
-//     { permission: "read:frontoffice", route: "/admin/front-office" },
-//     { permission: "write:frontoffice", route: "/admin/front-office" },
-//     { permission: "write:hall", route: "/admin/hall" },
-//     { permission: "read:hall", route: "/admin/hall" },
-//     { permission: "update:hall", route: "/admin/hall" },
-//     { permission: "delete:hall", route: "/admin/hall" },
-//     // Add more mappings as needed: { permission: "read:inventory", route: "/admin/inventory" }
-//   ];
-
-//   // Check for 'admin' role first (string or object)
-//   if (user.roles.some((role) => role === "admin" || role.name === "admin")) {
-//     console.log("Redirecting to /admin/users: admin role found");
-//     return "/admin/users"; // Default for admin
-//   }
-
-//   // Find the first matching permission
-//   for (const { permission, route } of permissionRoutes) {
-//     if (hasPermission(user, permission)) {
-//       console.log(`Redirecting to ${route}: ${permission} permission found`);
-//       return route;
-//     }
-//   }
-
-//   console.log("Redirecting to /unauthorized: no matching permissions");
-//   return "/unauthorized";
-// };
-
-// export const getAuthorizedRoute = (user, isAuthenticated) => {
-//   if (!user || !isAuthenticated || !user.roles || !Array.isArray(user.roles)) {
-//     console.log("Redirecting to /login: invalid user or auth state", {
-//       user,
-//       isAuthenticated,
-//     });
-//     return "/login";
-//   }
-
-//   // Define permission-to-route mapping
-//   const permissionRoutes = [
-//     { permission: "read:users", route: "/admin/users" },
-//     { permission: "read:roles", route: "/admin/roles" },
-//     { permission: "read:dashboard", route: "/admin/dashboard" }, // Example additional permission
-//     { permission: "read:daily", route: "/admin/dashboard" }, // Default for daily sales
-//     { permission: "read:dailyreport", route: "/admin/dashboard" },
-//     { permission: "read:paymentmethodsreport", route: "/admin/dashboard" },
-//     { permission: "read:totalrevenue", route: "/admin/dashboard" },
-//     { permission: "read:monthlysales", route: "/admin/dashboard" },
-//     { permission: "read:dailysalesalltime", route: "/admin/dashboard" },
-//     { permission: "read:alltimetotal", route: "/admin/dashboard" },
-//     // Add more mappings as needed: { permission: "read:inventory", route: "/admin/inventory" }
-//   ];
-
-//   // Check for 'admin' role first (string or object)
-//   if (user.roles.some((role) => role === "admin" || role.name === "admin")) {
-//     console.log("Redirecting to /admin/users: admin role found");
-//     return "/admin/users"; // Default for admin
-//   }
-
-//   // Find the first matching permission
-//   for (const { permission, route } of permissionRoutes) {
-//     if (hasPermission(user, permission)) {
-//       console.log(`Redirecting to ${route}: ${permission} permission found`);
-//       return route;
-//     }
-//   }
-
-//   console.log("Redirecting to /unauthorized: no matching permissions");
-//   return "/unauthorized";
-// };
-
 export const hasPermission = (user, permission) => {
   if (!user || !user.roles || !Array.isArray(user.roles)) {
     //console.log("hasPermission: Invalid user or roles", { user });
     return false;
   }
 
-  // const hasPerm = user.roles.some((role) => {
-  //   if (role.name && Array.isArray(role.permissions)) {
-  //     if (role.name === "admin") return true;
-  //     return role.permissions.includes(permission);
-  //   }
-  //   if (typeof role === "string") {
-  //     return role === "admin";
-  //   }
-  //   return false;
-  // });
   const hasPerm = user.roles.some((role) => {
     if (role.name === "admin") return true; // Admin wildcard
     if (Array.isArray(role.permissions)) {
@@ -191,43 +15,11 @@ export const hasPermission = (user, permission) => {
     return false;
   });
 
-  // console.log(`Checking permission '${permission}' for user:`, {
-  //   roles: user.roles,
-  //   result: hasPerm,
-  // });
   return hasPerm;
 };
 
-// export const hasPermission = (user, permission) => {
-//   if (!user || !user.roles || !Array.isArray(user.roles)) {
-//     console.log("hasPermission: Invalid user or roles", { user });
-//     return false;
-//   }
-
-//   const hasPerm = user.roles.some((role) => {
-//     if (role.name && Array.isArray(role.permissions)) {
-//       if (role.name === "admin") return true; // Admin gets all permissions
-//       return role.permissions.includes(permission);
-//     }
-//     if (typeof role === "string") {
-//       return role === "admin";
-//     }
-//     return false;
-//   });
-
-//   console.log(`Checking permission '${permission}' for user:`, {
-//     roles: user.roles,
-//     result: hasPerm,
-//   });
-//   return hasPerm;
-// };
-
 export const getAuthorizedRoute = (user, isAuthenticated) => {
   if (!user || !isAuthenticated || !user.roles || !Array.isArray(user.roles)) {
-    // console.log("Redirecting to /login: invalid user or auth state", {
-    //   user,
-    //   isAuthenticated,
-    // });
     return "/login";
   }
 
@@ -378,18 +170,15 @@ export const getAuthorizedRoute = (user, isAuthenticated) => {
   ];
 
   if (user.roles.some((role) => (role.name || role) === "admin")) {
-    //console.log("Redirecting to /admin/users: admin role found");
     return "/admin/users"; // Default for admin
   }
 
   for (const { permission, route } of permissionRoutes) {
     if (hasPermission(user, permission)) {
-      //console.log(`Redirecting to ${route}: ${permission} permission found`);
       return route;
     }
   }
 
-  //console.log("Redirecting to /unauthorized: no matching permissions");
   return "/admin/profile";
   //return "/unauthorized";
 };
