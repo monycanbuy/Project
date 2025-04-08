@@ -70,38 +70,35 @@
 // // });
 
 //vite.config.js
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-
 // import { defineConfig } from "vite"; // Add this import
 // import react from "@vitejs/plugin-react";
 
-export default defineConfig({
-  plugins: [react()],
-  resolve: {
-    mainFields: ["browser", "module", "main"],
-  },
-  server: {
-    proxy: {
-      "/api": {
-        target:
-          process.env.NODE_ENV === "development"
-            ? "http://localhost:8000" // Changed from 5000 to 8000
-            : "https://accounting-stock-system-backend.onrender.com",
-        changeOrigin: true,
-        secure: process.env.NODE_ENV !== "development",
-      },
-      "/uploads": {
-        target:
-          process.env.NODE_ENV === "development"
-            ? "http://localhost:8000" // Changed from 5000 to 8000
-            : "https://accounting-stock-system-backend.onrender.com",
-        changeOrigin: true,
-        secure: process.env.NODE_ENV !== "development",
-      },
-    },
-  },
-});
+// export default defineConfig({
+//   plugins: [react()],
+//   resolve: {
+//     mainFields: ["browser", "module", "main"],
+//   },
+//   server: {
+//     proxy: {
+//       "/api": {
+//         target:
+//           process.env.NODE_ENV === "development"
+//             ? "http://localhost:8000" // Changed from 5000 to 8000
+//             : "https://accounting-stock-system-backend.onrender.com",
+//         changeOrigin: true,
+//         secure: process.env.NODE_ENV !== "development",
+//       },
+//       "/uploads": {
+//         target:
+//           process.env.NODE_ENV === "development"
+//             ? "http://localhost:8000" // Changed from 5000 to 8000
+//             : "https://accounting-stock-system-backend.onrender.com",
+//         changeOrigin: true,
+//         secure: process.env.NODE_ENV !== "development",
+//       },
+//     },
+//   },
+// });
 
 // import { defineConfig } from "vite";
 // import react from "@vitejs/plugin-react";
@@ -128,3 +125,27 @@ export default defineConfig({
 //     },
 //   },
 // });
+
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    mainFields: ["browser", "module", "main"],
+  },
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/uploads": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
+});
