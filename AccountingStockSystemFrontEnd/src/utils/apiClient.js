@@ -1,4 +1,8 @@
-// import axios from "axios";
+import axios from "axios";
+export const apiClient = axios.create({
+  baseURL: "https://accounting-stock-system-backend.onrender.com/api",
+  withCredentials: true,
+});
 
 // export const apiClient = axios.create({
 //   baseURL: "/api", // Vite proxy handles the full URL
@@ -29,18 +33,18 @@
 
 // export default apiClient;
 
-import axios from "axios";
+// import axios from "axios";
 
-export const apiClient = axios.create({
-  baseURL:
-    process.env.NODE_ENV === "production"
-      ? "https://accounting-stock-system-backend.onrender.com/api"
-      : "http://localhost:8000/api",
-  withCredentials: true, // Required for cookies to be sent/received
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+// export const apiClient = axios.create({
+//   baseURL:
+//     process.env.NODE_ENV === "production"
+//       ? "https://accounting-stock-system-backend.onrender.com/api"
+//       : "http://localhost:8000/api",
+//   withCredentials: true, // Required for cookies to be sent/received
+//   headers: {
+//     "Content-Type": "application/json",
+//   },
+// });
 
 // Remove the token interceptor since you're not using Bearer auth via headers
 // apiClient.interceptors.request.use((config) => {
@@ -52,18 +56,18 @@ export const apiClient = axios.create({
 // });
 
 // Optional: Add logging for debugging
-apiClient.interceptors.request.use((config) => {
-  console.log("Request URL:", config.url);
-  console.log("Sending request with cookies enabled");
-  return config;
-});
+// apiClient.interceptors.request.use((config) => {
+//   console.log("Request URL:", config.url);
+//   console.log("Sending request with cookies enabled");
+//   return config;
+// });
 
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.error("Response error:", error.response?.data || error.message);
-    return Promise.reject(error);
-  }
-);
+// apiClient.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     console.error("Response error:", error.response?.data || error.message);
+//     return Promise.reject(error);
+//   }
+// );
 
 export default apiClient;
