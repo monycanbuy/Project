@@ -1,8 +1,4 @@
-import axios from "axios";
-export const apiClient = axios.create({
-  baseURL: "https://accounting-stock-system-backend.onrender.com/api",
-  withCredentials: true,
-});
+// import axios from "axios";
 
 // export const apiClient = axios.create({
 //   baseURL: "/api", // Vite proxy handles the full URL
@@ -33,41 +29,36 @@ export const apiClient = axios.create({
 
 // export default apiClient;
 
-// import axios from "axios";
+import axios from "axios";
 
-// export const apiClient = axios.create({
-//   baseURL:
-//     process.env.NODE_ENV === "production"
-//       ? "https://accounting-stock-system-backend.onrender.com/api"
-//       : "http://localhost:8000/api",
-//   withCredentials: true, // Required for cookies to be sent/received
-//   headers: {
-//     "Content-Type": "application/json",
-//   },
-// });
+// Determine baseURL based on the environment (hardcoded)
+const isProduction = window.location.hostname.includes("onrender.com");
+const baseURL = isProduction
+  ? "https://accounting-stock-system-backend.onrender.com/api"
+  : "http://localhost:8000/api";
 
-// Remove the token interceptor since you're not using Bearer auth via headers
-// apiClient.interceptors.request.use((config) => {
-//   const token = localStorage.getItem("token");
-//   if (token) {
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-//   return config;
-// });
+export const apiClient = axios.create({
+  baseURL: baseURL,
+  withCredentials: true, // Required for cookie-based auth
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-// Optional: Add logging for debugging
-// apiClient.interceptors.request.use((config) => {
-//   console.log("Request URL:", config.url);
-//   console.log("Sending request with cookies enabled");
-//   return config;
-// });
+// Request interceptor for debugging (no token handling since using cookies)
+apiClient.interceptors.request.use((config) => {
+  console.log("Request URL:", config.url);
+  console.log("withCredentials:", config.withCredentials);
+  return config;
+});
 
-// apiClient.interceptors.response.use(
-//   (response) => response,
-//   (error) => {
-//     console.error("Response error:", error.response?.data || error.message);
-//     return Promise.reject(error);
-//   }
-// );
+// Response interceptor for error logging
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error("Response error:", error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+);
 
 export default apiClient;

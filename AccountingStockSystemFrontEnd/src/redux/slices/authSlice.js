@@ -1019,7 +1019,7 @@
 // export default authSlice.reducer;
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { apiClient } from "../../utils/apiClient";
+import apiClient from "../../utils/apiClient";
 // import axios from "axios";
 // import store from "../store";
 
@@ -1113,19 +1113,35 @@ export const signupUser = createAsyncThunk(
 //     }
 //   }
 // );
+// export const loginUser = createAsyncThunk(
+//   "auth/login",
+//   async (userData, { rejectWithValue }) => {
+//     try {
+//       const requestData = {
+//         emailOrPhone: userData.email,
+//         password: userData.password,
+//       };
+//       const response = await apiClient.post(AUTH_URL, requestData);
+//       //console.log("Login response data:", response.data);
+//       return response.data; // Expect { token, user, ... }
+//     } catch (error) {
+//       console.error("Login error:", error.response?.data || error.message);
+//       return rejectWithValue(
+//         error.response?.data?.message || "Failed to login"
+//       );
+//     }
+//   }
+// );
 export const loginUser = createAsyncThunk(
   "auth/login",
   async (userData, { rejectWithValue }) => {
     try {
-      const requestData = {
+      const response = await apiClient.post("/auth/signin", {
         emailOrPhone: userData.email,
         password: userData.password,
-      };
-      const response = await apiClient.post(AUTH_URL, requestData);
-      //console.log("Login response data:", response.data);
-      return response.data; // Expect { token, user, ... }
+      });
+      return response.data; // No token expected
     } catch (error) {
-      console.error("Login error:", error.response?.data || error.message);
       return rejectWithValue(
         error.response?.data?.message || "Failed to login"
       );

@@ -452,12 +452,14 @@ exports.signin = async (req, res) => {
     );
 
     res.cookie("Authorization", "Bearer " + accessToken, {
-      expires: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
-      httpOnly: true, // Prevent JS access
-      secure: process.env.NODE_ENV === "production", // True in production (HTTPS)
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // Cross-origin in prod
+      expires: new Date(Date.now() + 15 * 60 * 1000),
+      httpOnly: true,
+      secure: true, // HTTPS in production
+      sameSite: "None", // Cross-origin
       path: "/",
     });
+
+    console.log("Cookie set: Authorization=Bearer <token>");
 
     return res.json({
       success: true,
