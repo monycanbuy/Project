@@ -603,16 +603,26 @@ const swaggerOptions = {
         },
       },
     },
+    // servers: [
+    //   {
+    //     url:
+    //       process.env.NODE_ENV === "production"
+    //         ? "https://accounting-stock-system-backend.onrender.com"
+    //         : `http://localhost:${process.env.PORT || 5000}`,
+    //     description:
+    //       process.env.NODE_ENV === "production"
+    //         ? "Production Server"
+    //         : "Local Development Server",
+    //   },
+    // ],
     servers: [
       {
-        url:
-          process.env.NODE_ENV === "production"
-            ? "https://accounting-stock-system-backend.onrender.com"
-            : `http://localhost:${process.env.PORT || 5000}`,
-        description:
-          process.env.NODE_ENV === "production"
-            ? "Production Server"
-            : "Local Development Server",
+        url: process.env.RENDER
+          ? "https://accounting-stock-system-backend.onrender.com"
+          : `http://localhost:${process.env.PORT || 8000}`, // Match your .env PORT
+        description: process.env.RENDER
+          ? "Production Server"
+          : "Local Development Server",
       },
     ],
   },
