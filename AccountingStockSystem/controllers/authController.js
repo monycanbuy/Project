@@ -406,6 +406,38 @@ exports.signin = async (req, res) => {
       permissions: role.permissions || [],
     }));
 
+    // const accessToken = jwt.sign(
+    //   {
+    //     userId: existingUser._id,
+    //     email: existingUser.email,
+    //     fullName: existingUser.fullName,
+    //     verified: existingUser.verified,
+    //     status: existingUser.status,
+    //     roles: userRoles,
+    //   },
+    //   process.env.TOKEN_SECRET,
+    //   { expiresIn: "1h" }
+    // );
+
+    // // Optional: Keep the cookie if you want dual support (header + cookie)
+    // res.cookie("Authorization", "Bearer " + accessToken, {
+    //   expires: new Date(Date.now() + 15 * 60 * 1000),
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: "Lax",
+    //   path: "/",
+    // });
+
+    // // Return token in response body
+    // return res.json({
+    //   success: true,
+    //   token: accessToken, // Add this
+    //   email: existingUser.email,
+    //   fullName: existingUser.fullName,
+    //   verified: existingUser.verified,
+    //   status: existingUser.status,
+    //   roles: userRoles,
+    // });
     const accessToken = jwt.sign(
       {
         userId: existingUser._id,
@@ -419,19 +451,16 @@ exports.signin = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    // Optional: Keep the cookie if you want dual support (header + cookie)
     res.cookie("Authorization", "Bearer " + accessToken, {
-      expires: new Date(Date.now() + 15 * 60 * 1000),
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
+      expires: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
+      httpOnly: true, // Prevent JS access
+      secure: process.env.NODE_ENV === "production", // True in production (HTTPS)
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // Cross-origin in prod
       path: "/",
     });
 
-    // Return token in response body
     return res.json({
       success: true,
-      token: accessToken, // Add this
       email: existingUser.email,
       fullName: existingUser.fullName,
       verified: existingUser.verified,

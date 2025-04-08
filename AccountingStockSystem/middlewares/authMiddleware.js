@@ -130,34 +130,46 @@ exports.authenticateUser = async (req, res, next) => {
   console.log("Headers:", req.headers);
 
   let token;
-  const authHeader = req.headers["authorization"];
-  const authCookie = req.cookies?.Authorization;
+  const authCookie = req.cookies?.Authorization; // Primary source in production
+  const authHeader = req.headers["authorization"]; // Fallback for testing/Swagger
 
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    token = authHeader.split(" ")[1];
-  } else if (authCookie && authCookie.startsWith("Bearer ")) {
+  // Prioritize cookie-based auth (for frontend)
+  if (authCookie && authCookie.startsWith("Bearer ")) {
     token = authCookie.split(" ")[1];
+  } else if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
   }
 
   if (!token) {
     return res.status(401).json({
       success: false,
       message:
-        "Unauthorized: No token provided in Authorization header or cookie",
+        "Unauthorized: No token provided in cookie or Authorization header",
     });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
-    const user = await User.findById(decoded.userId).populate(
-      "roles",
-      "name permissions"
-    );
-    if (!user || user.status !== "active" || user.isLocked) {
-      return res
-        .status(403)
-        .json({ success: false, message: "Unauthorized: Access denied" });
+    const user = await User.findById(decoded.userId)
+      .select("+status +isLocked") // Ensure these fields are included
+      .populate("roles", "name permissions");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
+
+    if (user.status !== "active" || user.isLocked) {
+      return res.status(403).json({
+        success: false,
+        message: `Unauthorized: Account is ${
+          user.isLocked ? "locked" : "inactive"
+        }`,
+      });
+    }
+
     req.user = {
       userId: user._id.toString(),
       fullName: user.fullName,
@@ -166,16 +178,24 @@ exports.authenticateUser = async (req, res, next) => {
       status: user.status,
       roles: user.roles.map((role) => ({
         name: role.name,
-        permissions: role.permissions,
+        permissions: role.permissions || [],
       })),
     };
+
     console.log("User authenticated:", req.user);
     next();
   } catch (error) {
-    console.error("Token verification error:", error);
-    return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized: Invalid token" });
+    console.error("Token verification error:", error.name, error.message);
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: Token has expired",
+      });
+    }
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized: Invalid token",
+    });
   }
 };
 
