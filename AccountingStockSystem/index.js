@@ -534,13 +534,20 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const allowedOrigins =
-  process.env.NODE_ENV === "production"
-    ? [
-        "https://accounting-stock-system-front-end.onrender.com",
-        "https://accounting-stock-system-backend.onrender.com",
-      ]
-    : [`http://localhost:${process.env.PORT || 8000}`, "http://localhost:5173"];
+// const allowedOrigins =
+//   process.env.NODE_ENV === "production"
+//     ? [
+//         "https://accounting-stock-system-front-end.onrender.com",
+//         "https://accounting-stock-system-backend.onrender.com",
+//       ]
+//     : [`http://localhost:${process.env.PORT || 8000}`, "http://localhost:5173"];
+
+const allowedOrigins = [
+  "https://accounting-stock-system-front-end.onrender.com",
+  "https://accounting-stock-system-backend.onrender.com", // For Swagger UI
+  "http://localhost:8000", // Local dev
+  "http://localhost:5173", // Local frontend
+];
 
 // CORS configuration
 const corsOptions = {
