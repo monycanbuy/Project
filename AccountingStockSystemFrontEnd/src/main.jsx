@@ -1,22 +1,3 @@
-// import ReactDOM from "react-dom/client";
-// import { Provider } from "react-redux";
-// import { PersistGate } from "redux-persist/integration/react"; // Import PersistGate
-// import App from "./App.jsx";
-// import { SidebarProvider } from "./context/sidebarContext.jsx";
-// import store, { persistor } from "./redux/store.js"; // Ensure this is the correct path to your Redux store
-
-// ReactDOM.createRoot(document.getElementById("root")).render(
-//   <Provider store={store}>
-//     <PersistGate loading={null} persistor={persistor}>
-//       {" "}
-//       {/* Wrap inside PersistGate */}
-//       <SidebarProvider>
-//         <App />
-//       </SidebarProvider>
-//     </PersistGate>
-//   </Provider>
-// );
-
 // main.jsx
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
