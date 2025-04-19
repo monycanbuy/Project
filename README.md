@@ -2,10 +2,10 @@
 
 ![HotelSync Demo](assets/HotelSync_Demo.gif)
 
-HotelSync is a full-stack web application designed to streamline operations for hotels and small businesses. It tracks sales across departments (front office, restaurant, mini mart), manages inventory with AI-driven alerts, handles expenses, and delivers real-time analytics via dynamic dashboards. Built with the MERN stack, it’s scalable, secure, and ready to empower businesses.
+HotelSync is a full-stack web application designed to streamline operations for hotels and small businesses. It tracks sales across departments (front office, restaurant, mini mart, kabsa, seminars, hall), manages inventory with AI-driven alerts, handles expenses,trade debtors and delivers real-time analytics via dynamic dashboards. Built with the MERN stack, it’s scalable, secure, and ready to empower businesses.
 
 ## 🚀 Demo
-Watch a 1-minute demo of HotelSync in action:
+Watch a 3-minutes demo of HotelSync in action:
 
 [![HotelSync Demo Video](assets/Chart.png)](https://youtu.be/r2bR4q6f4Fg)
 
